@@ -1,0 +1,24 @@
+name: Parcours visuel bleu/vert — Espace Jeunesse
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer Chromium isolé pour les tests
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Vérifier le vrai compositeur sur ordinateur et téléphone
+        run: |
+          python3 -m http.server 8899 --bind 127.0.0.1 >/tmp/ej-http.log 2>&1 &
+          sleep 2
+          node scripts/qa-composer-browser.mjs
