@@ -6,9 +6,11 @@ let failures=[];
 for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smartphone",390,844,true]]){
  const ctx=await browser.newContext({viewport:{width,height},hasTouch,isMobile:hasTouch});
  const page=await ctx.newPage();
- page.on("pageerror",err=>failures.push(label+": "+err.message));
+ page.on("pageerror",err=>{failures.push(label+": "+err.message);console.error("JS ERROR",label,err.stack||err.message)});
+ page.on("console",msg=>{if(msg.type()==="error")console.error("CONSOLE",label,msg.text())});
+ page.on("requestfailed",req=>console.error("REQ FAILED",req.url(),req.failure()?.errorText));
  await page.goto(BASE,{waitUntil:"networkidle"});
- await page.locator(".canvas").waitFor({timeout:20000});
+ try{await page.locator(".canvas").waitFor({timeout:8000})}catch(e){console.error("DOM",label,(await page.locator("body").innerText()).slice(0,1600));console.error("SCRIPTS",await page.locator("script").evaluateAll(nodes=>nodes.map(n=>n.src)));throw e}
  assert.equal(await page.locator('[data-tab="celebrations"],[data-tab="members-spaces"],[data-tab="languages-categories"]').count(),0);
  assert.ok(await page.locator('[data-tab="pages"]').isVisible());
  assert.ok(await page.locator('[data-tab="footer"]').isVisible());
