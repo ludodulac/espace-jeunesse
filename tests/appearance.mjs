@@ -14,7 +14,7 @@ assert.match(index,/class="site-menu-bar"/);
 assert.match(index,/class="general-navigation"/);
 assert.match(index,/class="site-paper"/);
 assert.match(index,/class="footer-pages"/);
-assert.match(index,/celebrations-original-public\.css/);
+assert.match(index,/celebrations-public-verbatim[.]css/);
 assert.match(html,/celebrations-editor-verbatim[.]css/);
 assert.match(html,/class="shell stage-editor"/);
 assert.match(html,/Pages de bas de page/);
