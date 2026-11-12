@@ -13,5 +13,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/smoke.mjs
+      - run: node --test tests/*.mjs
       - run: node --check scripts/deploy-cloudflare.mjs
