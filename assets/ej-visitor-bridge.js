@@ -33,6 +33,7 @@ async function init(){
   window.__PUBLIC_PAGE_IDS__=list.map(p=>p.id);
   window.__PUBLIC_LANGUAGE__={selectedLanguageId:"fr",options:[]};
   window.__PUBLIC_CELEBRATION_VISIBILITY__={};
+  window.__EJ_WORKER_MEDIA_BASE__=remote?API:"";
   const title=document.getElementById("site-title");
   if(title)title.textContent=data.title||"Espace Jeunesse";
   const script=document.createElement("script");script.src="assets/celebrations-public-verbatim.js";
