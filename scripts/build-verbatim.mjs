@@ -27,7 +27,7 @@ if(seedStart<0||seedEnd<0)throw Error("Gabarit d'accueil canonique introuvable")
 const SEED={pages:[{id:"accueil",name:"Accueil",group:"page",placement:"menu",
  visibility:"published",blocks:[]}]};
 client=client.slice(0,seedStart)+"const seed="+JSON.stringify(SEED)+";"+client.slice(seedEnd);
-once("let tab=stageTab,id=","let tab=stageTab||'pages',id=","onglet de démarrage");
+once("let tab=stageTab,id=","let tab=STAGE_SEED?stageTab:'pages',id=","onglet de démarrage");
 const oldKey="'celebrations-demo-editor-v1'";
 if(!client.includes(oldKey))throw Error("Clé source originale absente");
 client=client.replaceAll(oldKey,"'ej-original-editor-v1'");
