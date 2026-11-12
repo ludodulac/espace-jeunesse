@@ -1,7 +1,7 @@
 name: Vérifier Espace Jeunesse
 on:
   push:
-    branches: [main, feat/site-pages-simple-v1]
+    branches: [main, feat/site-pages-simple-v1, feat/activation-cloudflare-independante]
   pull_request:
 permissions:
   contents: read
@@ -14,3 +14,4 @@ jobs:
         with:
           node-version: '22'
       - run: node --test tests/smoke.mjs
+      - run: node --check scripts/deploy-cloudflare.mjs
