@@ -62,6 +62,7 @@ function toSiteBlock(b){
   alt:b.alt||"",caption:b.caption||"",left:b.left||"",right:b.right||"",
   hideOnSite:b.hideOnSite===true,rich:b.rich||"",bold:b.bold===true,
   italic:b.italic===true,color:b.color||"",fontSize:b.fontSize||0,
+  size:b.size||0,rich:String(b.rich||"").slice(0,18000),
   widthPct:b.widthPct||100,thickness:b.thickness||1,
   displayAsButton:b.displayAsButton===true,atTime:b.atTime||""};
 }
