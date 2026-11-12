@@ -1,0 +1,17 @@
+name = "espace-jeunesse-api"
+main = "src/index.js"
+compatibility_date = "2026-11-12"
+
+# Création à part, sur le compte Cloudflare de votre choix.
+# NE REMPLACEZ PAS ces noms par ceux d'un projet Célébrations.
+[vars]
+SITE_ORIGIN = "https://ludodulac.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "espace-jeunesse-db"
+database_id = "REPLACE_WITH_NEW_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "espace-jeunesse-media"

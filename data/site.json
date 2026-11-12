@@ -1,0 +1,44 @@
+{
+  "title": "Espace Jeunesse",
+  "tagline": "Un lieu pour découvrir, créer et partager",
+  "homeId": "accueil",
+  "pages": [
+    {
+      "id": "accueil",
+      "slug": "accueil",
+      "title": "Accueil",
+      "placement": "menu",
+      "status": "published",
+      "blocks": [
+        {
+          "id": "titre-accueil",
+          "type": "heading",
+          "text": "Bienvenue dans l'Espace Jeunesse",
+          "align": "center"
+        },
+        {
+          "id": "texte-accueil",
+          "type": "text",
+          "text": "Cet espace est en préparation. Les prochaines pages pourront accueillir des textes, des images, des vidéos, des documents et des sons.",
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "id": "page-decouvrir",
+      "slug": "decouvrir",
+      "title": "Découvrir",
+      "placement": "menu",
+      "status": "draft",
+      "blocks": []
+    },
+    {
+      "id": "page-contact",
+      "slug": "contact",
+      "title": "Contact",
+      "placement": "footer",
+      "status": "draft",
+      "blocks": []
+    }
+  ]
+}
