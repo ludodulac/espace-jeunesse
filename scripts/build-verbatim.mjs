@@ -173,6 +173,11 @@ publicOnce("library.type='button';library.onclick=()=>go('mediatheque-generale')
 publicOnce("el('back-admin').href='/__editor/demo-preparation?celebration='+encodeURIComponent(celebration)+'&page='+encodeURIComponent(active);",
  "el('back-admin').href='admin.html';","lien admin indépendant");
 publicOnce("next.searchParams.set('celebration',celebration);","next.searchParams.delete('celebration');","pas de célébration dans les URLs");
+// Autoriser uniquement les MP3 provenant du NOUVEAU Worker d'Espace Jeunesse.
+const publicAudioCheck="/^\\/media\\/(?!.*\\.\\.)[^?#]+\\.mp3$/i.test(String(b.src||''))?b.src:''";
+publicOnce(publicAudioCheck,
+ "(window.__EJ_WORKER_MEDIA_BASE__ && String(b.src||'').startsWith(window.__EJ_WORKER_MEDIA_BASE__+'/media/'))?b.src:("+publicAudioCheck+")",
+ "lecture MP3 depuis le nouveau R2");
 // Pas de langues ni de membres à activer côté visiteur, et jamais d'appel à l'API Célébrations.
 visitor+="\n//# sourceURL=ej-original-celebrations-public.js\n";
 writeFileSync("assets/celebrations-public-verbatim.js",visitor);
