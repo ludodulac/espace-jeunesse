@@ -8,5 +8,5 @@
     "migration/cloudflare/app/styles/admin/stage-layout.mjs"
   ],
   "approach": "Exécution du véritable client canonique après isolation pages-only et stockage nouveau site.",
-  "generatedAt": "2026-11-12T23:08:47.299Z"
+  "generatedAt": "2026-11-12T23:10:05.699Z"
 }
