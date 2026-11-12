@@ -3,6 +3,9 @@ on:
   push:
     branches: [feat/verbatim-source-celebrations-pages-only]
   workflow_dispatch:
+concurrency:
+  group: ej-verbatim-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -41,5 +44,7 @@ jobs:
           git add assets/celebrations-editor-verbatim.js assets/celebrations-editor-verbatim.css assets/ej-source-provenance.json admin-identique.html
           if ! git diff --cached --quiet; then
             git commit -m "Importer le vrai moteur Célébrations en mode pages seules"
+            git fetch origin feat/verbatim-source-celebrations-pages-only
+            git rebase origin/feat/verbatim-source-celebrations-pages-only
             git push origin HEAD:feat/verbatim-source-celebrations-pages-only
           fi
