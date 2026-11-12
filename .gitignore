@@ -1,0 +1,8 @@
+node_modules/
+worker/wrangler-ci.toml
+worker/.wrangler/
+.env
+.env.*
+*.sql.bak
+backup*
+.DS_Store
