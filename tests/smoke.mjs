@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import {readFileSync,existsSync} from "node:fs";
 import {execFileSync} from "node:child_process";
 const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
-const required=["index.html","admin.html","config.js","assets/site.css","assets/site.js","assets/shared.js","assets/admin.js","data/site.json","worker/src/index.js","worker/schema.sql","worker/wrangler.toml"];
+const required=["index.html","admin.html","config.js","assets/site.css","assets/site.js","assets/shared.js","assets/admin.js","assets/editor-canvas.js","data/site.json","worker/src/index.js","worker/schema.sql","worker/wrangler.toml"];
 for(const path of required)assert.ok(existsSync(new URL("../"+path,import.meta.url)),path+" existe");
-for(const path of ["config.js","assets/site.js","assets/shared.js","assets/admin.js","worker/src/index.js"]){
+for(const path of ["config.js","assets/site.js","assets/shared.js","assets/admin.js","assets/editor-canvas.js","worker/src/index.js"]){
  execFileSync(process.execPath,["--check",new URL("../"+path,import.meta.url).pathname]);
 }
 const site=JSON.parse(read("data/site.json"));
