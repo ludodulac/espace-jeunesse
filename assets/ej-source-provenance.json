@@ -1,0 +1,12 @@
+{
+  "source": "ludodulac/Celebrations",
+  "sha": "f4cc58653dd68d8a4c3e0fa614a93969987d47da",
+  "files": [
+    "migration/cloudflare/editor-demo-client.mjs",
+    "migration/cloudflare/app/admin/real-editor-member-spaces-inline.mjs",
+    "migration/cloudflare/editor-demo-style.mjs",
+    "migration/cloudflare/app/styles/admin/stage-layout.mjs"
+  ],
+  "approach": "Exécution du véritable client canonique après isolation pages-only et stockage nouveau site.",
+  "generatedAt": "2026-11-12T22:51:38.072Z"
+}
