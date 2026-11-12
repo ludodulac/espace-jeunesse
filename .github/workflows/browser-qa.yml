@@ -1,4 +1,4 @@
-name: Parcours visuel bleu/vert — Espace Jeunesse
+name: Parcours du véritable éditeur Célébrations adapté à Espace Jeunesse
 on:
   pull_request:
   workflow_dispatch:
@@ -21,4 +21,4 @@ jobs:
         run: |
           python3 -m http.server 8899 --bind 127.0.0.1 >/tmp/ej-http.log 2>&1 &
           sleep 2
-          node scripts/qa-composer-browser.mjs
+          node scripts/qa-verbatim.mjs
