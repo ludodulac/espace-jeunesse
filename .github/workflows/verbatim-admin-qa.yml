@@ -25,6 +25,7 @@ jobs:
         run: |
           node --check scripts/build-verbatim.mjs
           node scripts/build-verbatim.mjs
+          node scripts/patch-page-controls.mjs
           node --check assets/celebrations-editor-verbatim.js
           node --check assets/ej-original-bridge.js
       - name: Installer Chromium pour vérifier le même éditeur sur téléphone
