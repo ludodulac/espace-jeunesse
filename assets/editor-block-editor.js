@@ -41,7 +41,7 @@ function mediaInput(element,ctx){
    element.mediaId=m.id;element.url="";update(ctx);
   });
  },"btn sm");
- if(["image","audio","video","document"].includes(element.type))mount.append(choose);
+ if(["image","audio","video","document","button"].includes(element.type))mount.append(choose);
  const label=S.label(text+" — URL",(()=>{const input=document.createElement("input");
   input.type="url";input.className="link-input";input.value=String(element.url||"");
   input.placeholder="https://…";

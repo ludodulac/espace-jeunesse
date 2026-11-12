@@ -75,19 +75,6 @@ function makeSection(sectionValue,page,index,ctx,canvas){
  layout.title="Passer à "+(sectionValue.layout==="columns"?"un bloc seul":"deux colonnes");
  layout.setAttribute("aria-label",layout.title);
  toolbar.append(layout);
- toolbar.append(button("↑",()=>{if(index>0){
-  [page.blocks[index-1],page.blocks[index]]=[page.blocks[index],page.blocks[index-1]];
-  ctx.mark();ctx.refresh();
- }},"btn sm"));
- toolbar.append(button("↓",()=>{if(index<page.blocks.length-1){
-  [page.blocks[index+1],page.blocks[index]]=[page.blocks[index],page.blocks[index+1]];
-  ctx.mark();ctx.refresh();
- }},"btn sm"));
- toolbar.append(button("⧉",()=>{
-  const copy=U.clone(sectionValue);copy.id=U.uuid();
-  copy.columns.flat().forEach(x=>x.id=U.uuid());
-  page.blocks.splice(index+1,0,copy);ctx.mark();ctx.refresh();
- },"btn sm"));
  toolbar.append(button("✕",()=>{
   if(!confirm("Supprimer cette zone et son contenu ?"))return;
   page.blocks.splice(index,1);ctx.mark();ctx.refresh();

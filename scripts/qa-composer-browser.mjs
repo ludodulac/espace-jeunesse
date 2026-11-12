@@ -38,11 +38,11 @@ async function run(label,viewport,mobile){
  // Colonne droite : insertion d'un document PDF, comme sur Célébrations.
  const right=page.locator(".content-section .section-column").nth(1);
  green=right.locator(".section-add-green").first();await green.click({force:true});
- if(mobile)await page.locator("dialog.editor-insert-dialog[open]").getByRole("button",{name:"PDF / document"}).click();
- else await right.locator(".section-element-menu").getByRole("button",{name:"PDF / document"}).click();
- await right.locator('.block[data-kind="document"]').waitFor();
- await right.locator('.block[data-kind="document"]').first().click();
- const urlInput=right.locator('.block[data-kind="document"] input[type="url"]');
+ if(mobile)await page.locator("dialog.editor-insert-dialog[open]").getByRole("button",{name:"Bouton",exact:true}).click();
+ else await right.locator(".section-element-menu").getByRole("button",{name:"Bouton",exact:true}).click();
+ await right.locator('.block[data-kind="button"]').waitFor();
+ await right.locator('.block[data-kind="button"]').first().click();
+ const urlInput=right.locator('.block[data-kind="button"] input[type="url"]');
  await urlInput.fill("https://example.com/test.pdf");await urlInput.press("Tab");
  await page.getByRole("button",{name:"Enregistrer",exact:true}).first().click();
  await page.getByText(/Aperçu enregistré uniquement/).waitFor();
@@ -51,7 +51,7 @@ async function run(label,viewport,mobile){
  await page.locator(".page-list button").filter({hasText:"Découvrir"}).first().click();
  assert.equal(await page.locator(".content-section .section-column").count(),2);
  assert.equal(await page.locator('.block[data-kind="heading"]').count(),1);
- assert.equal(await page.locator('.block[data-kind="document"]').count(),1);
+ assert.equal(await page.locator('.block[data-kind="button"]').count(),1);
  // Vérifier les vrais plus colorés, pas des boutons gris substitués.
  const colors=await page.evaluate(()=>{
    const blue=document.querySelector(".section-add-blue"),green=document.querySelector(".section-add-green");

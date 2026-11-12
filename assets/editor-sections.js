@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 const U=window.EJ;
-const types=[["heading","Titre"],["image","Image"],["text","Texte"],["event","Titre événement"],["button","Bouton / lien"],["video","Vidéo"],["audio","Lecteur audio"],["document","PDF / document"],["divider","Trait de séparation"]];
+const types=[["heading","Titre"],["image","Image"],["text","Texte"],["event","Titre événement"],["button","Bouton"],["video","Vidéo"],["audio","Lecteur audio"],["divider","Trait de séparation"]];
 const btn=(label,fn,css="btn sm")=>{const b=U.make("button",css,label);b.type="button";b.addEventListener("click",fn);return b};
 const element=(kind)=>({id:U.uuid(),type:kind,text:kind==="heading"?"Nouveau titre":kind==="event"?"Titre événement":kind==="text"?"Votre paragraphe":kind==="button"?"Mon bouton":"",align:"left",level:kind==="heading"?"h2":"h2",url:"",mediaId:"",left:"",right:"",hideOnSite:false});
 const section=(layout="single",columns=[[],[]],presentation="")=>({
@@ -13,7 +13,7 @@ const section=(layout="single",columns=[[],[]],presentation="")=>({
 function preset(kind){
  if(kind==="resource"){const s=section("columns",[[element("image")],[element("heading"),element("text"),element("button")]],"resource");s.columnAlignments=["center","center"];return s}
  if(kind==="video")return section("single",[[element("heading"),element("video")],[]],"video");
- if(kind==="documents")return section("single",[[element("heading"),element("document")],[]],"documents");
+ if(kind==="documents")return section("single",[[element("heading"),element("button")],[]],"documents");
  if(kind==="audio")return section("single",[[element("audio")],[]],"");
  if(kind==="divider")return element("divider");
  return section(kind==="columns"?"columns":"single");

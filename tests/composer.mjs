@@ -17,7 +17,7 @@ test("plus bleu : crée des sections avec leurs deux colonnes",()=>{
  assert.equal(resource.columns[0][0].type,"image");
  assert.equal(resource.columns[1].map(x=>x.type).join(","),"heading,text,button");
  const doc=S.preset("documents");
- assert.equal(doc.columns[0].map(x=>x.type).join(","),"heading,document");
+ assert.equal(doc.columns[0].map(x=>x.type).join(","),"heading,button");
 });
 test("plus vert : chaque élément a son identifiant et reste dans la colonne",()=>{
  const s=S.preset("columns");const item=S.element("audio");
