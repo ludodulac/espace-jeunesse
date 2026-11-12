@@ -97,6 +97,18 @@ function cleanBlock(b,i,depth){
  const n=Number(b.fontSize);
  out.fontSize=Number.isSafeInteger(n)&&n>=10&&n<=72?n:0;
  out.color=/^#[0-9a-f]{6}$/i.test(b.color||"")?b.color:"";
+ // Ces champs sont ceux du véritable moteur de blocs Célébrations.
+ // Les conserver dans Espace Jeunesse empêche de perdre la mise en forme au rechargement.
+ out.rich=String(b.rich||"").slice(0,18000);
+ out.displayAsButton=b.displayAsButton===true;
+ out.atTime=/^(?:[01]\\d|2[0-3]):[0-5]\\d$/.test(String(b.atTime||""))?b.atTime:"";
+ const size=Number(b.size);
+ out.size=[14,16,18,20,24,28,32,40].includes(size)?size:0;
+ const width=Number(b.widthPct);
+ out.widthPct=Number.isInteger(width)&&width>=20&&width<=100?width:100;
+ const thickness=Number(b.thickness);
+ out.thickness=Number.isInteger(thickness)&&thickness>=1&&thickness<=8?thickness:1;
+ out.cover=String(b.cover||"").slice(0,500);
  return out;
 }
 function cleanState(raw){

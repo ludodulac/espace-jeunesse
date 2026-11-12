@@ -1,0 +1,5 @@
+/* Le site visible reprend les CSS du site visiteur Célébrations,
+   sans la navigation célébrations/membres/langues. */
+#member-connection,#public-language-control,#stage-navigation,#celebration-shortcuts{display:none!important}
+#site-title{display:inline-block}
+#stage-main:empty{min-height:180px}
