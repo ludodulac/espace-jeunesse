@@ -34,3 +34,11 @@ L'éditeur conserve un brouillon et un statut par page : `published`, `draft`, `
 ## Référence esthétique
 
 Interface inspirée des principes de l'éditeur Célébrations : fond crème, navigation bleu ardoise, panneaux clairs et boutons terracotta. C'est un projet **séparé** avec une architecture simplifiée, pas une copie du système Célébrations complet.
+
+## Fidélité à Célébrations (révision visuelle)
+
+Les feuilles CSS des pages publiques et de l'administration proviennent **directement des modules canoniques** de `ludodulac/Celebrations`, sans reproduire les couleurs à l'approximation. Les gabarits utilisent les mêmes structures : `site-menu-bar`, `general-navigation`, `site-paper`, `footer-pages`, `shell stage-editor`, `rail`, `canvas-wrap`, `canvas`, `block`, `tools` et `ed`. Le champ visuel permet de modifier directement les textes, de déplacer, dupliquer et supprimer des blocs, et d'insérer entre les blocs.
+
+Le **moteur métier** reste volontairement limité aux pages : aucune célébration, compte de membre, catégorie ou outil de traduction n'est repris. La médiathèque est privée et les médias ne figurent publiquement que lorsqu'ils sont placés dans une page.
+
+Aucune donnée, ressource Cloudflare ou identifiant de Célébrations n'est copié. La sauvegarde commune via Cloudflare reste à activer séparément.

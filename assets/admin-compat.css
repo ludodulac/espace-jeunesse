@@ -61,3 +61,32 @@ html,body{max-width:100%;overflow-x:hidden}
 .login-card form .input{display:block;min-height:44px;width:100%;padding:10px;border:1px solid #dbe0e1;border-radius:9px}
 @media(max-width:1000px){.stage-editor .page-layout{grid-template-columns:1fr}.stage-editor .page-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stage-editor .form-grid{grid-template-columns:1fr}.stage-editor .page-list{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-editor .topbar{align-items:center;flex-wrap:wrap}.stage-editor .topbar .actions{justify-content:space-between;width:100%}.stage-editor .topbar .actions .btn{width:auto}.stage-editor .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-editor .site-paper-preview .columns{grid-template-columns:1fr}}
+
+/* Véritable surface d'édition : même canvas, mêmes blocs et mêmes outils
+   que la présentation de l'éditeur Célébrations. */
+.stage-editor .ej-editor-wrap{margin-bottom:15px}
+.stage-editor .canvas{min-height:340px}
+.stage-editor .ej-visual-block{background:#fff;max-width:100%;min-width:0;overflow-wrap:anywhere}
+.stage-editor .ej-canvas-tools{display:flex!important;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.stage-editor .ej-canvas-tools button{min-width:32px;min-height:32px}
+.stage-editor .ej-drag-handle{cursor:grab!important;touch-action:none}
+.stage-editor .ej-visual-block.is-dragging{opacity:.4}
+.stage-editor .ej-visual-block .ed{display:block;min-height:30px;outline:0;white-space:pre-wrap;overflow-wrap:anywhere;cursor:text}
+.stage-editor .ej-visual-block .ed:focus{outline:1px dashed #b17a59}
+.stage-editor .ej-visual-block .page-title{font-family:Georgia,serif;font-weight:400;color:#293746}
+.stage-editor .ej-visual-block .trial-paragraph{font-size:16px;line-height:1.8}
+.stage-editor .ej-visual-block .trial-content-columns,.stage-editor .ej-two-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.stage-editor .ej-visual-block .trial-content-column{min-width:0}
+.stage-editor .ej-visual-block audio,.stage-editor .ej-visual-block video,.stage-editor .ej-visual-block iframe{max-width:100%;width:100%}
+.stage-editor .ej-visual-block .trial-figure{margin:0}
+.stage-editor .ej-insert{position:relative;display:flex;align-items:center;justify-content:center;min-height:32px;margin:8px 0}
+.stage-editor .ej-insert>.section-add-blue{opacity:1!important;pointer-events:auto!important;z-index:2}
+.stage-editor .ej-insert-options{position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);z-index:70;max-height:50vh;overflow:auto;display:flex;gap:6px;flex-wrap:wrap;width:min(440px,95vw);padding:12px;background:#fff;border:1px solid #d5dce1;border-radius:12px;box-shadow:0 8px 24px #1e2b3929}
+.stage-editor .ej-insert-options[hidden]{display:none!important}
+.stage-editor .ej-insert-options .btn{font-size:12px;min-height:34px;padding:6px 9px}
+.stage-editor .ej-properties{margin:13px 0 25px}
+.stage-editor .ej-properties>summary{cursor:pointer;list-style:none;border:1px solid #d7dde1;border-radius:10px;padding:12px 15px;background:#fff;color:#4c5d67;font-size:13px;font-weight:700}
+.stage-editor .ej-properties>summary::-webkit-details-marker{display:none}
+.stage-editor .ej-properties[open]>summary{border-radius:10px 10px 0 0;background:#fff7f2}
+.stage-editor .ej-properties .panel{margin:0;border-top:0}
+@media(max-width:600px){.stage-editor .canvas{padding:25px 17px}.stage-editor .ej-visual-block .trial-content-columns,.stage-editor .ej-two-columns{grid-template-columns:1fr;gap:8px}.stage-editor .ej-insert-options{left:auto;right:0;transform:none;width:min(320px,88vw)}}

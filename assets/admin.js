@@ -142,12 +142,19 @@ function showPages(root){
  if(p.id!==state.homeId)actions.append(button("Définir comme accueil",()=>{state.homeId=p.id;touch();refresh()}));
  else actions.append(U.make("span","pill published","Page d'accueil"));
  settings.append(actions);area.append(settings);
+ const canvasTitle=U.make("div","editor-head");canvasTitle.append(U.make("h2","page-title","Modifier la page"));
+ area.append(canvasTitle);
+ const canvas=window.EJCanvas?.build(p,{mark:touch,refresh});
+ if(canvas)area.append(canvas);
+ const detail=document.createElement("details");detail.className="ej-properties";
+ const summary=document.createElement("summary");summary.textContent="⚙ Réglages détaillés des blocs (médias, alignements, liens)";
+ detail.append(summary);
  const blockPanel=U.make("div","panel");blockPanel.append(U.make("h2","","Contenu de la page"));
  if(!p.blocks.length)blockPanel.append(U.make("div","box-empty","Page vide : ajoutez votre premier bloc ci-dessous."));
  p.blocks.forEach((b,i)=>blockPanel.append(blockEditor(p,b,i)));
  const tools=U.make("div","block-tools");Object.entries(U.typeLabel).forEach(([type,label])=>tools.append(button("＋ "+label,()=>{p.blocks.push({id:U.uuid(),type,text:"",align:"left",left:"",right:"",url:""});touch();refresh()})));
  blockPanel.append(U.make("h3","","Ajouter un bloc"),tools);
- area.append(blockPanel);
+ detail.append(blockPanel);area.append(detail);
 }
 function blockEditor(page,b,i){
  const container=U.make("div","block-card"),head=U.make("div","block-head"),label=U.make("strong","",U.typeLabel[b.type]||b.type),controls=U.make("div","block-controls");
