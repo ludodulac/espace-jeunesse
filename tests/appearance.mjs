@@ -27,6 +27,6 @@ const canvas=read("assets/editor-canvas.js");
 assert.match(canvas,/canvas-wrap/);
 assert.match(canvas,/section-add-blue/);
 assert.match(canvas,/contentEditable/);
-assert.match(html,/editor-canvas\\.js/);
+assert.match(html,/editor-canvas[.]js/);
 assert.match(admin,/EJCanvas/);
 console.log("Conformité visuelle au site source et séparation des projets : OK");
