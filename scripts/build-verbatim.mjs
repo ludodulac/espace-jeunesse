@@ -95,10 +95,9 @@ once("if(IS_STAGE&&!remoteMediaLoading&&!globalMediaLoaded)void refreshGlobalMed
 once("const src=key&&/^editor-trials\\/audio\\/[0-9a-f-]{36}\\.mp3$/.test(key)",
 "const src=key&&/^editor-trials\\/audio\\/[0-9a-f-]{36}\\.mp3$/.test(key)",
 "intégrité du lecteur MP3"); // No-op assertion on official code.
-const originalAudio=": /^\\/media\\/(?!.*\\.\\.)[^?#]+\\.mp3$/i.test(String(x.src||''))?x.src:'';";
-if(client.includes(originalAudio)){
- client=client.replace(originalAudio,": (window.EJBridge?.remote&&/^https:\\/\\//.test(String(x.src||'')))?x.src:(/^\\/media\\/(?!.*\\.\\.)[^?#]+\\.mp3$/i.test(String(x.src||''))?x.src:'');");
-}
+const originalAudio=":/^\\/media\\/(?!.*\\.\\.)[^?#]+\\.mp3$/i.test(String(x.src||''))?x.src:'';";
+if(!client.includes(originalAudio))throw Error("La source audio Célébrations a changé");
+client=client.replace(originalAudio,":window.EJBridge?.remote&&/^https:\\/\\//.test(String(x.src||''))?x.src:(/^\\/media\\/(?!.*\\.\\.)[^?#]+\\.mp3$/i.test(String(x.src||''))?x.src:'');");
 // Original client source, unchanged except these explicit isolation adaptations.
 client+="\n//# sourceURL=ej-verbatim-compiled-celebrations.js\n";
 mkdirSync("assets",{recursive:true});
