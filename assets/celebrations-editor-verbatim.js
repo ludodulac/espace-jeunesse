@@ -4816,7 +4816,7 @@ function block(x,p,items=p.blocks,section=null){
   const key=x.remoteKey;
   const src=key&&/^editor-trials\/audio\/[0-9a-f-]{36}\.mp3$/.test(key)
     ?'/api/editor-trial-audio?action=stream&key='+encodeURIComponent(key)
-    :/^\/media\/(?!.*\.\.)[^?#]+\.mp3$/i.test(String(x.src||''))?x.src:'';
+    :window.EJBridge?.remote&&/^https:\/\//.test(String(x.src||''))?x.src:(/^\/media\/(?!.*\.\.)[^?#]+\.mp3$/i.test(String(x.src||''))?x.src:'');
   if(src){
    const audio=n('audio','audio-player');audio.controls=true;audio.preload='none';audio.src=src;
    wrap.append(audio);box.append(wrap);
