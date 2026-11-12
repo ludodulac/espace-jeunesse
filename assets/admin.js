@@ -243,7 +243,9 @@ function showGuide(root){
  panel.append(U.make("h2","","Mode d'emploi — Espace Jeunesse"));
  const steps=[
   "Pages : sélectionnez « ＋ Nouvelle page » pour créer une page.",
-  "Contenu : ajoutez des blocs de texte, images, MP3, vidéos, PDF, liens ou colonnes. Les flèches ↑ et ↓ changent leur ordre.",
+  "Le bouton ＋ BLEU ajoute une zone entière dans la page : bloc simple, deux colonnes, image et document, vidéo, audio ou PDF.",
+  "Le bouton ＋ VERT, situé dans chaque zone ou colonne, ajoute un élément : titre, texte, image, bouton, vidéo, audio ou séparateur.",
+  "Touchez un élément pour le modifier, le déplacer, le dupliquer ou le masquer. Avec un bouton, vous pouvez joindre un PDF depuis la médiathèque.",
   "Médiathèque (administration) : importez des fichiers, puis choisissez-les dans les blocs. La rubrique « Inutilisés » regroupe ceux qui ne sont employés dans aucune page, y compris dans les brouillons.",
   "Menu : les pages peuvent figurer dans le menu, dans le pied de page ou hors menu. Modifiez leur ordre dans la rubrique Menu.",
   "Visibilité : Brouillon et Masquée ne sont pas visibles des visiteurs. Publiée rend la page accessible sur le site.",
