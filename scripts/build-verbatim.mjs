@@ -142,3 +142,39 @@ writeFileSync("assets/ej-source-provenance.json",JSON.stringify({
  generatedAt:new Date().toISOString()
 },null,2));
 console.log("Original admin compiled",client.length,"CSS",DEMO_CSS.length);
+
+
+/* Le moteur VISITEURS est, lui aussi, le vrai composant Célébrations, pas
+ * une imitation maison. Toutes les navigations membres/célébrations sont
+ * supprimées du menu ; les fonctions de rendu sont conservées telles quelles.
+ */
+const {TRIAL_SITE_CLIENT,TRIAL_SITE_STYLE}=await imp("editor-trial-site-client.mjs");
+const {PUBLIC_LANGUAGE_STYLE}=await imp("editor-trial-site-page.mjs");
+const {SERVER_PREVIEW_PREFETCH}=await imp("editor-server-sync-client.mjs");
+let visitor=TRIAL_SITE_CLIENT;
+if(visitor.length<50000)throw Error("Le vrai moteur visiteur est incomplet.");
+function publicOnce(from,to,label){
+ const count=visitor.split(from).length-1;
+ if(count!==1)throw Error(label+": "+count+" occurrences; arrêt pour éviter une imitation.");
+ visitor=visitor.replace(from,to);
+}
+if(visitor.includes(SERVER_PREVIEW_PREFETCH))visitor=visitor.replace(SERVER_PREVIEW_PREFETCH,"");
+// Le nouveau site a des IDs simples ; l'ancien filtre de pages historiques
+// est donc remplacé par un filtre de pages publiées, mais pas leur affichage.
+publicOnce("(p.id==='neutral-accueil-general'||/^neutral-[0-9a-f-]{30,45}$/.test(p.id))","true","filtre des pages historiques");
+publicOnce("const all=make('button',listing?'general-tab current':'general-tab',t('✧ Célébrations'));",
+ "const all=null;","menu célébrations masqué");
+publicOnce("all.type='button';all.onclick=()=>go('celebrations');general.append(all);",
+ "/* Pas de célébrations sur Espace Jeunesse. */","action menu célébrations");
+publicOnce("const library=make('button',active==='mediatheque-generale'?'general-tab current':'general-tab',t('▧ Médiathèque générale'));",
+ "const library=null;","menu médiathèque publique masqué");
+publicOnce("library.type='button';library.onclick=()=>go('mediatheque-generale');general.append(library);",
+ "/* La médiathèque reste UNIQUEMENT dans l'administration. */","action médiathèque publique");
+publicOnce("el('back-admin').href='/__editor/demo-preparation?celebration='+encodeURIComponent(celebration)+'&page='+encodeURIComponent(active);",
+ "el('back-admin').href='admin.html';","lien admin indépendant");
+publicOnce("next.searchParams.set('celebration',celebration);","next.searchParams.delete('celebration');","pas de célébration dans les URLs");
+// Pas de langues ni de membres à activer côté visiteur, et jamais d'appel à l'API Célébrations.
+visitor+="\n//# sourceURL=ej-original-celebrations-public.js\n";
+writeFileSync("assets/celebrations-public-verbatim.js",visitor);
+writeFileSync("assets/celebrations-public-verbatim.css",TRIAL_SITE_STYLE+"\n"+PUBLIC_LANGUAGE_STYLE);
+console.log("Original public compiled",visitor.length,"CSS",TRIAL_SITE_STYLE.length+PUBLIC_LANGUAGE_STYLE.length);
