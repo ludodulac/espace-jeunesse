@@ -1,0 +1,11 @@
+/* Uniquement le point d'entrée et la connexion. Toute l'interface
+   d'édition est stylée par les feuilles canoniques non modifiées de Célébrations. */
+[hidden]{display:none!important}
+#ej-auth-screen.ej-login{min-height:100dvh;display:grid;place-items:center;padding:24px;background:#f4f3ee}
+.ej-login form{width:min(440px,100%);padding:26px;border:1px solid #e0dfd9;background:white;border-radius:12px;display:grid;gap:14px}
+.ej-login input{width:100%;height:46px;border:1px solid #cdd2d4;border-radius:8px;padding:11px}
+.ej-login form h1{margin:0;font:26px Georgia,serif;color:#273a45}
+.ej-login form p{margin:0;color:#5a6971}
+#ej-storage-notice:empty{display:none}
+#ej-storage-notice{margin:0 0 16px;padding:10px 12px;border:1px solid #e8d2b7;border-radius:8px;background:#fff9e8;font-size:13px;color:#725633}
+#ej-storage-notice.error{background:#fff0eb;color:#8f342b;border-color:#eeb8b0}
