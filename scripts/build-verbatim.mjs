@@ -86,7 +86,7 @@ once("async function refreshGlobalMedia(){",
 once("async function importFiles(files){",
 "async function importFiles(files){\n if(window.EJBridge?.remote){await window.EJBridge.importFiles(files);globalMedia=await window.EJBridge.listMedia();globalMediaLoaded=true;render();return;}",
 "import des médias");
-once("if(IS_STAGE&&!remoteMediaLoading&&!globalMediaLoaded)void refreshGlobalMedia().then(()=>{if(dialog.open)draw()});",
+once("if(IS_STAGE&&!globalMediaLoaded)void refreshGlobalMedia().then(()=>{if(dialog.open)draw()});",
 "if((IS_STAGE||window.EJBridge?.remote)&&!globalMediaLoaded)void refreshGlobalMedia().then(()=>{if(dialog.open)draw()});",
 "fichiers du sélecteur");
 once("if(IS_STAGE&&!remoteMediaLoading&&!globalMediaLoaded)void refreshGlobalMedia();",
