@@ -142,19 +142,8 @@ function showPages(root){
  if(p.id!==state.homeId)actions.append(button("Définir comme accueil",()=>{state.homeId=p.id;touch();refresh()}));
  else actions.append(U.make("span","pill published","Page d'accueil"));
  settings.append(actions);area.append(settings);
- const canvasTitle=U.make("div","editor-head");canvasTitle.append(U.make("h2","page-title","Modifier la page"));
- area.append(canvasTitle);
- const canvas=window.EJCanvas?.build(p,{mark:touch,refresh});
+ const canvas=window.EJCanvas?.build(p,{mark:touch,refresh,getMedia:()=>media});
  if(canvas)area.append(canvas);
- const detail=document.createElement("details");detail.className="ej-properties";
- const summary=document.createElement("summary");summary.textContent="⚙ Réglages détaillés des blocs (médias, alignements, liens)";
- detail.append(summary);
- const blockPanel=U.make("div","panel");blockPanel.append(U.make("h2","","Contenu de la page"));
- if(!p.blocks.length)blockPanel.append(U.make("div","box-empty","Page vide : ajoutez votre premier bloc ci-dessous."));
- p.blocks.forEach((b,i)=>blockPanel.append(blockEditor(p,b,i)));
- const tools=U.make("div","block-tools");Object.entries(U.typeLabel).forEach(([type,label])=>tools.append(button("＋ "+label,()=>{p.blocks.push({id:U.uuid(),type,text:"",align:"left",left:"",right:"",url:""});touch();refresh()})));
- blockPanel.append(U.make("h3","","Ajouter un bloc"),tools);
- detail.append(blockPanel);area.append(detail);
 }
 function blockEditor(page,b,i){
  const container=U.make("div","block-card"),head=U.make("div","block-head"),label=U.make("strong","",U.typeLabel[b.type]||b.type),controls=U.make("div","block-controls");
@@ -266,22 +255,17 @@ function showGuide(root){
  list.style.cssText="padding:12px 32px;line-height:1.9";panel.append(list);root.append(panel);
 }
 function showPreview(root){
- const p=current(),panel=U.make("div","panel");
- panel.append(U.make("h2","","Aperçu : "+(p?.title||"")));
- panel.append(U.make("p","muted","Cette prévisualisation n'est pas une publication. Revenez à Pages pour modifier."));
+ const p=current(),panel=U.make("section","panel");
+ panel.append(U.make("h2","","Aperçu du brouillon : "+(p?.title||"")));
+ panel.append(U.make("p","muted","Cet aperçu ne publie rien. Le bouton Enregistrer conserve vos modifications."));
  if(!p){root.append(panel);return}
- const preview=U.make("article","preview-box site-paper-preview");p.blocks.forEach(b=>{
-  const div=U.make("div","block "+(b.align||""));div.style.marginBottom="20px";
-  if(b.type==="heading")div.append(U.make(b.level||"h1","",b.text||""));
-  else if(b.type==="text")div.append(U.make("p","",b.text||""));
-  else if(b.type==="columns"){const cols=U.make("div","columns");cols.append(U.make("p","",b.left||""),U.make("p","",b.right||""));div.append(cols)}
-  else if(b.type==="image"&&U.mediaUrl(b)){const i=document.createElement("img");i.src=U.mediaUrl(b);i.alt=b.alt||"";i.style.maxWidth="100%";div.append(i)}
-  else if(b.type==="audio"&&U.mediaUrl(b)){const a=document.createElement("audio");a.src=U.mediaUrl(b);a.controls=true;div.append(a)}
-  else if(b.type==="video"&&U.mediaUrl(b)){const u=U.youtubeEmbed(U.mediaUrl(b));if(u){const f=document.createElement("iframe");f.src=u;f.style.cssText="width:100%;aspect-ratio:16/9;border:0";f.allowFullscreen=true;div.append(f)}else{const v=document.createElement("video");v.src=U.mediaUrl(b);v.controls=true;v.style.maxWidth="100%";div.append(v)}}
-  else if(b.type==="document"||b.type==="button"){const a=U.make("a","btn",b.text||"Ouvrir");a.href=U.mediaUrl(b)||"#";a.target="_blank";a.rel="noopener noreferrer";div.append(a)}
-  else if(b.type==="divider")div.append(document.createElement("hr"));
-  preview.append(div);
- });panel.append(preview);root.append(panel);
+ const article=U.make("article","preview-box site-paper-preview");
+ for(const block of p.blocks||[]){
+  const element=window.EJPageRender?.drawBlock(block);
+  if(element)article.append(element);
+ }
+ if(!article.childNodes.length)article.append(U.make("p","muted","La page est vide."));
+ panel.append(article);root.append(panel);
 }
 async function load(){
  try{

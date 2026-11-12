@@ -1,0 +1,61 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {runInNewContext} from "node:vm";
+const read=p=>readFileSync(new URL("../"+p,import.meta.url),"utf8");
+let seq=0;
+const win={EJ:{uuid:()=>String(++seq),make:()=>{throw Error("Pas de DOM dans le test modèle")}}};
+runInNewContext(read("assets/editor-sections.js"),{window:win});
+const S=win.EJSections;
+test("plus bleu : crée des sections avec leurs deux colonnes",()=>{
+ const a=S.preset("single"),b=S.preset("columns");
+ assert.equal(a.type,"section");assert.equal(a.layout,"single");assert.equal(b.layout,"columns");
+ assert.equal(a.columns.length,2);
+ assert.equal(S.preset("divider").type,"divider");
+ const resource=S.preset("resource");
+ assert.equal(resource.presentation,"resource");assert.equal(resource.layout,"columns");
+ assert.equal(resource.columns[0][0].type,"image");
+ assert.equal(resource.columns[1].map(x=>x.type).join(","),"heading,text,button");
+ const doc=S.preset("documents");
+ assert.equal(doc.columns[0].map(x=>x.type).join(","),"heading,document");
+});
+test("plus vert : chaque élément a son identifiant et reste dans la colonne",()=>{
+ const s=S.preset("columns");const item=S.element("audio");
+ s.columns[1].push(item);
+ assert.equal(item.type,"audio");assert.equal(s.columns[1][0].id,item.id);
+});
+const worker=read("worker/src/index.js");
+const prelude=worker.slice(0,worker.indexOf("export default"));
+const globals={TextEncoder,TextDecoder,URL};
+runInNewContext(prelude+"\nglobalThis.__clean=cleanState;globalThis.__public=publicProjection;",globals);
+const clean=globals.__clean,projection=globals.__public;
+test("D1 conserve les sections, styles, PDF, MP3, colonnes et éléments",()=>{
+ const seed=JSON.parse(read("data/site.json")),home=seed.pages[0];
+ const s=S.preset("columns");s.style={border:"round",color:"#bada55",width:3,shadow:true};
+ const a=S.element("audio");a.mediaId="uuid-media";a.text="Mon MP3";
+ const d=S.element("document");d.mediaId="pdf-media";d.text="Document PDF";
+ const img=S.element("image");img.mediaId="image-media";
+ const hidden=S.element("text");hidden.text="Texte à masquer";hidden.hideOnSite=true;
+ s.columns[0].push(img);s.columns[1].push(a,d,hidden);
+ home.blocks=[s];const saved=clean(seed),copy=saved.pages[0].blocks[0];
+ assert.equal(copy.type,"section");assert.equal(copy.layout,"columns");
+ assert.equal(copy.columns[0][0].mediaId,"image-media");
+ assert.equal(copy.columns[1][0].mediaId,"uuid-media");
+ assert.equal(copy.columns[1][1].mediaId,"pdf-media");
+ assert.equal(copy.style.color,"#bada55");
+ assert.equal(copy.columns[1][3].hideOnSite,true);
+ const published=projection(saved);
+ assert.equal(published.pages[0].blocks[0].columns[1].length,2);
+ assert.ok(!JSON.stringify(published).includes("Texte à masquer"));
+});
+test("les pages non publiées ne sortent jamais dans les données publiques",()=>{
+ const state=clean(JSON.parse(read("data/site.json")));
+ const publicPages=projection(state).pages;
+ assert.equal(publicPages.length,1);
+ assert.equal(publicPages[0].id,"accueil");
+});
+test("schéma rejette une section emboîtée pour éviter des boucles",()=>{
+ const data=JSON.parse(read("data/site.json")),s=S.preset("single");
+ s.columns[0].push(S.preset("columns"));data.pages[0].blocks=[s];
+ assert.throws(()=>clean(data),/imbriqués/);
+});

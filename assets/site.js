@@ -121,7 +121,7 @@ function render(){
  }else{
   document.title=page.title+" — "+state.title;
   if(page.blocks.length){
-   for(const block of page.blocks)content.append(drawBlock(block));
+   for(const block of page.blocks){const node=window.EJPageRender.drawBlock(block);if(node)content.append(node)}
   }else content.append(U.make("h2","trial-heading",page.title));
  }
  status.hidden=true;closeMenu();
