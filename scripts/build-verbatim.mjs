@@ -28,7 +28,9 @@ const SEED={pages:[{id:"accueil",name:"Accueil",group:"page",placement:"menu",
  visibility:"published",blocks:[]}]};
 client=client.slice(0,seedStart)+"const seed="+JSON.stringify(SEED)+";"+client.slice(seedEnd);
 once("let tab=stageTab,id=","let tab=stageTab||'pages',id=","onglet de démarrage");
-once("'celebrations-demo-editor-v1'","'ej-original-editor-v1'","stockage isolé");
+const oldKey="'celebrations-demo-editor-v1'";
+if(!client.includes(oldKey))throw Error("Clé source originale absente");
+client=client.replaceAll(oldKey,"'ej-original-editor-v1'");
 once("SHARED_KEY='celebrations-demo-shared-pages-v1'","SHARED_KEY='ej-original-shared-pages-v1'","pages isolées");
 once("'celebrations-demo-files-v1'","'ej-original-files-v1'","fichiers isolés");
 
