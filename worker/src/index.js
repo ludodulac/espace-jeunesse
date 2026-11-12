@@ -4,13 +4,8 @@
  */
 const TE=new TextEncoder(),TD=new TextDecoder();
 const MAX_MEDIA=200*1024*1024;
-const DEFAULT_STATE={
- title:"Espace Jeunesse",tagline:"Un lieu pour découvrir, créer et partager",homeId:"accueil",
- pages:[{id:"accueil",slug:"accueil",title:"Accueil",placement:"menu",status:"published",
- blocks:[{id:"welcome",type:"heading",text:"Bienvenue dans l'Espace Jeunesse",align:"center"},
- {id:"intro",type:"text",text:"Cet espace est en préparation. Retrouvez bientôt de nouveaux contenus.",align:"center"}]}]
-};
-const allowedTypes=new Set(["heading","text","image","audio","video","document","button","columns","divider"]);
+const DEFAULT_STATE={"title":"Espace Jeunesse","tagline":"Un lieu pour découvrir, créer et partager","homeId":"accueil","pages":[{"id":"accueil","slug":"accueil","title":"Accueil","placement":"menu","status":"published","blocks":[{"id":"home-zone","type":"section","layout":"single","presentation":"intro","style":{"border":"none","color":"#d7dde5","width":1,"shadow":false},"columnAlignments":["top","top"],"columnButtonLayouts":["stack","stack"],"hideOnSite":false,"columns":[[{"id":"titre-accueil","type":"heading","text":"Bienvenue dans l'Espace Jeunesse","align":"center","level":"h1","hideOnSite":false},{"id":"texte-accueil","type":"text","text":"Cet espace est en préparation. Les prochaines pages pourront accueillir des textes, des images, des vidéos, des documents et des sons.","align":"center","level":"h2","hideOnSite":false}],[]]}]},{"id":"page-decouvrir","slug":"decouvrir","title":"Découvrir","placement":"menu","status":"draft","blocks":[]},{"id":"page-contact","slug":"contact","title":"Contact","placement":"footer","status":"draft","blocks":[]}]};
+const allowedTypes=new Set(["heading","event","text","image","audio","video","document","button","columns","divider","section"]);
 const mimeMap={jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",gif:"image/gif",webp:"image/webp",
  mp3:"audio/mpeg",wav:"audio/wav",pdf:"application/pdf",mp4:"video/mp4",webm:"video/webm"};
 const corsOrigin=env=>String(env.SITE_ORIGIN||"https://ludodulac.github.io").replace(/\/$/,"");
@@ -60,11 +55,49 @@ async function currentState(env){
  if(!row)return {version:0,state:DEFAULT_STATE};
  return {version:Number(row.version),state:JSON.parse(row.data)};
 }
+function visibleBlock(b){
+ if(!b||b.hideOnSite===true)return null;
+ if(b.type!=="section")return b;
+ return {...b,columns:(b.columns||[[],[]]).map(items=>(items||[]).map(visibleBlock).filter(Boolean))};
+}
 function publicProjection(s){
  const pages=(s.pages||[]).filter(p=>p.status==="published").map(p=>({
-  id:p.id,slug:p.slug,title:p.title,placement:p.placement,status:p.status,blocks:p.blocks
+  id:p.id,slug:p.slug,title:p.title,placement:p.placement,status:p.status,
+  blocks:(p.blocks||[]).map(visibleBlock).filter(Boolean)
  }));
  return {title:s.title,tagline:s.tagline,homeId:s.homeId,pages};
+}
+function cleanBlock(b,i,depth){
+ if(!b||typeof b!=="object"||!allowedTypes.has(b.type))throw Error("Type de bloc inconnu");
+ const id=String(b.id||i).slice(0,100);
+ if(b.type==="section"){
+  if(depth!==0)throw Error("Les blocs ne peuvent pas être imbriqués dans un élément");
+  if(!Array.isArray(b.columns)||b.columns.length!==2||b.columns.some(c=>!Array.isArray(c)||c.length>100))
+   throw Error("Colonnes du bloc invalides");
+  const frame=b.style&&typeof b.style==="object"?b.style:{};
+  const border=["none","round","square"].includes(frame.border)?frame.border:"none";
+  const color=/^#[0-9a-f]{6}$/i.test(frame.color||"")?frame.color:"#d7dde5";
+  const width=Math.max(1,Math.min(5,Number(frame.width)||1));
+  const cols=b.columns.map((items,j)=>items.map((item,k)=>cleanBlock(item,j+"-"+k,depth+1)));
+  return {id,type:"section",layout:b.layout==="columns"?"columns":"single",columns:cols,
+   style:{border,color,width,shadow:frame.shadow===true},
+   presentation:["resource","video","documents","intro","text"].includes(b.presentation)?b.presentation:"",
+   columnAlignments:[0,1].map(j=>["top","center","bottom"].includes(b.columnAlignments?.[j])?b.columnAlignments[j]:"top"),
+   columnButtonLayouts:[0,1].map(j=>b.columnButtonLayouts?.[j]==="row"?"row":"stack"),
+   hideOnSite:b.hideOnSite===true};
+ }
+ const out={id,type:b.type};
+ for(const f of ["text","left","right","caption","alt","url","mediaId"]){
+  out[f]=String(b[f]||"").slice(0,["text","left","right"].includes(f)?40000:500);
+ }
+ out.align=["left","center","right"].includes(b.align)?b.align:"left";
+ out.level=["h1","h2","h3"].includes(b.level)?b.level:"h2";
+ out.hideOnSite=b.hideOnSite===true;
+ out.bold=b.bold===true;out.italic=b.italic===true;
+ const n=Number(b.fontSize);
+ out.fontSize=Number.isSafeInteger(n)&&n>=10&&n<=72?n:0;
+ out.color=/^#[0-9a-f]{6}$/i.test(b.color||"")?b.color:"";
+ return out;
 }
 function cleanState(raw){
  if(!raw||typeof raw!=="object"||!Array.isArray(raw.pages)||!raw.pages.length||raw.pages.length>300)throw Error("Nombre de pages invalide");
@@ -76,16 +109,7 @@ function cleanState(raw){
   ids.add(id);slugs.add(slug);
   if(!["published","draft","hidden"].includes(p.status)||!["menu","footer","none"].includes(p.placement))throw Error("Visibilité ou emplacement invalide");
   if(!Array.isArray(p.blocks)||p.blocks.length>300)throw Error("Nombre de blocs invalide");
-  const blocks=p.blocks.map((b,i)=>{
-   if(!b||!allowedTypes.has(b.type))throw Error("Type de bloc inconnu");
-   const out={id:String(b.id||i).slice(0,100),type:b.type};
-   for(const f of ["text","left","right","caption","alt","url","mediaId"]){
-    out[f]=String(b[f]||"").slice(0,f==="text"||f==="left"||f==="right"?40000:500);
-   }
-   out.align=["left","center","right"].includes(b.align)?b.align:"left";
-   out.level=["h1","h2","h3"].includes(b.level)?b.level:"h1";
-   return out;
-  });
+  const blocks=p.blocks.map((b,i)=>cleanBlock(b,i,0));
   return {id,slug,title:name,placement:p.placement,status:p.status,blocks};
  });
  if(!ids.has(String(raw.homeId)))throw Error("La page d'accueil n'existe pas");

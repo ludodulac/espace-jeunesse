@@ -11,16 +11,46 @@
       "status": "published",
       "blocks": [
         {
-          "id": "titre-accueil",
-          "type": "heading",
-          "text": "Bienvenue dans l'Espace Jeunesse",
-          "align": "center"
-        },
-        {
-          "id": "texte-accueil",
-          "type": "text",
-          "text": "Cet espace est en préparation. Les prochaines pages pourront accueillir des textes, des images, des vidéos, des documents et des sons.",
-          "align": "center"
+          "id": "home-zone",
+          "type": "section",
+          "layout": "single",
+          "presentation": "intro",
+          "style": {
+            "border": "none",
+            "color": "#d7dde5",
+            "width": 1,
+            "shadow": false
+          },
+          "columnAlignments": [
+            "top",
+            "top"
+          ],
+          "columnButtonLayouts": [
+            "stack",
+            "stack"
+          ],
+          "hideOnSite": false,
+          "columns": [
+            [
+              {
+                "id": "titre-accueil",
+                "type": "heading",
+                "text": "Bienvenue dans l'Espace Jeunesse",
+                "align": "center",
+                "level": "h1",
+                "hideOnSite": false
+              },
+              {
+                "id": "texte-accueil",
+                "type": "text",
+                "text": "Cet espace est en préparation. Les prochaines pages pourront accueillir des textes, des images, des vidéos, des documents et des sons.",
+                "align": "center",
+                "level": "h2",
+                "hideOnSite": false
+              }
+            ],
+            []
+          ]
         }
       ]
     },
