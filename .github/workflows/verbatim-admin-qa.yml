@@ -1,0 +1,45 @@
+name: Vérifier la copie du véritable éditeur Célébrations
+on:
+  push:
+    branches: [feat/verbatim-source-celebrations-pages-only]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  source-original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Cloner Célébrations en lecture seule à un commit figé
+        run: |
+          git clone --depth 1 --branch feat/m028-language-options-in-settings-20261112 https://github.com/ludodulac/Celebrations.git .upstream-celebrations
+          test "$(git -C .upstream-celebrations rev-parse HEAD)" = "f4cc58653dd68d8a4c3e0fa614a93969987d47da"
+      - name: Construire les assets depuis le vrai code source
+        run: |
+          node --check scripts/build-verbatim.mjs
+          node scripts/build-verbatim.mjs
+          node --check assets/celebrations-editor-verbatim.js
+          node --check assets/ej-original-bridge.js
+      - name: Installer Chromium pour vérifier le même éditeur sur téléphone
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Parcours réel bureau et smartphone
+        run: |
+          python3 -m http.server 8899 --bind 127.0.0.1 >/tmp/ej-original-http.log 2>&1 &
+          sleep 2
+          node scripts/qa-verbatim.mjs
+      - name: Conserver les sources compilées dans Espace Jeunesse seulement
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/celebrations-editor-verbatim.js assets/celebrations-editor-verbatim.css assets/ej-source-provenance.json admin-identique.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Importer le vrai moteur Célébrations en mode pages seules"
+            git push origin HEAD:feat/verbatim-source-celebrations-pages-only
+          fi
