@@ -40,6 +40,22 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.equal(colors[1],"rgb(24, 154, 70)");
  assert.ok(colors[2]<=colors[3]+3,label+" déborde horizontalement");
  console.log(label+" : vrai moteur Célébrations, zones, éléments, sauvegarde locale, couleurs OK");
+ // Vérifier le vrai moteur PUBLIC, ses titres, son menu et sa galerie absente.
+ const visitor=await ctx.newPage();
+ visitor.on("pageerror",err=>{failures.push(label+" VISITEUR: "+err.message);console.error("PUBLIC JS ERROR",err.stack||err.message)});
+ await visitor.goto("http://127.0.0.1:8899/index-identique.html",{waitUntil:"networkidle"});
+ try{await visitor.locator(".trial-heading").first().waitFor({timeout:10000})}
+ catch(error){console.error("PUBLIC DOM",(await visitor.locator("body").innerText()).slice(0,1400));throw error}
+ assert.ok((await visitor.locator("#stage-main").innerText()).includes("Bienvenue dans l'Espace Jeunesse"));
+ await visitor.locator("#menu-toggle").click();
+ await visitor.locator("#general-navigation button").first().waitFor();
+ const nav=(await visitor.locator("#general-navigation").innerText()).toLowerCase();
+ assert.ok(nav.includes("accueil"),label+" : lien accueil manquant");
+ assert.ok(!nav.includes("célébration"),label+" : ancien menu Célébrations encore visible");
+ assert.ok(!nav.includes("médiathèque"),label+" : médiathèque publique interdite");
+ assert.equal(await visitor.locator("#member-connection:visible").count(),0);
+ assert.ok(await visitor.locator(".trial-content-section").count()>0);
+ console.log(label+" : véritable visiteur Célébrations épuré, page accueil, menu, blocs = OK");
  await ctx.close();
 }
 await browser.close();
