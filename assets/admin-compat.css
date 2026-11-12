@@ -1,0 +1,63 @@
+/* Compatibilité des champs avec le vrai thème et la disposition historique
+   Célébrations. Les 9 couches originales restent intactes. */
+html,body{max-width:100%;overflow-x:hidden}
+.stage-editor .brand{padding:4px 9px 18px;display:flex;gap:11px;align-items:center}
+.stage-editor .brand strong{font:22px Georgia,serif}
+.stage-editor .topbar .topbar-title{min-width:130px}
+.stage-editor .topbar .topbar-title p{max-width:36rem}
+.stage-editor .actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.stage-editor .page-layout{display:grid;grid-template-columns:minmax(190px,255px) minmax(0,1fr);gap:22px;align-items:start}
+.stage-editor .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.stage-editor .row.space{justify-content:space-between}
+.stage-editor .row.end{justify-content:flex-end}
+.stage-editor .panel{padding-bottom:14px}
+.stage-editor .panel>h2{margin:0 0 13px}
+.stage-editor .panel>h3{padding:0 14px;color:#59646c;font-size:13px}
+.stage-editor .panel>.row,.stage-editor .panel>.form-grid,.stage-editor .panel>.form-field,.stage-editor .panel>.block-card,.stage-editor .panel>.block-tools,.stage-editor .panel>.tabs,.stage-editor .panel>.media-grid,.stage-editor .panel>.box-empty,.stage-editor .panel>.muted,.stage-editor .panel>.preview-box{margin-left:14px;margin-right:14px}
+.stage-editor .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stage-editor .form-field{display:grid;gap:5px;margin-bottom:12px;min-width:0}
+.stage-editor .form-field label{display:grid;gap:5px;font-size:12px;font-weight:650;color:#53616a}
+.stage-editor .form-field input,.stage-editor .form-field textarea,.stage-editor .form-field select,.stage-editor .input{width:100%;max-width:100%;border:1px solid #dbe0e1;border-radius:9px;background:#fff;min-height:42px;padding:10px 11px;color:#293746}
+.stage-editor .form-field textarea{min-height:105px;resize:vertical}
+.stage-editor .page-list{display:grid;gap:6px;padding:10px}
+.stage-editor .page-list .item{display:block;text-align:left;padding:12px 11px;border-radius:8px;border:0;background:transparent;width:100%;font-size:13px;min-height:52px}
+.stage-editor .page-list .item:hover{background:#faf4ee}
+.stage-editor .page-list .item.active{background:#f8eee9;color:#8a4a34;font-weight:700}
+.stage-editor .page-list .item small{display:block;color:#73818a}
+.stage-editor .page-list .item .pill{margin-top:5px}
+.stage-editor .pill{display:inline-block;border-radius:16px;padding:4px 9px;background:#e9ecef;color:#555c62;font-size:11px;font-weight:700}
+.stage-editor .pill.published{background:#e1f3e9;color:#226749}
+.stage-editor .pill.draft,.stage-editor .pill.hidden{background:#fff0d8;color:#795321}
+.stage-editor .block-card{border:1px solid #e8e2d9;border-radius:11px;padding:13px 12px;margin-top:12px;margin-bottom:12px;background:#fff}
+.stage-editor .block-card .block-head{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.stage-editor .block-card .block-head strong{font-size:13px}
+.stage-editor .block-controls,.stage-editor .block-tools,.stage-editor .tabs{display:flex;gap:5px;flex-wrap:wrap}
+.stage-editor .btn.small{font-size:12px;min-height:34px;padding:6px 10px}
+.stage-editor .btn.active{color:#fff;background:#293746;border-color:#293746}
+.stage-editor .btn.danger{color:#a23e31;border-color:#e5bdb9}
+.stage-editor .box-empty{text-align:center;padding:23px;border:1px dashed #d8c2b3;border-radius:10px;color:#758088;font-size:13px}
+.stage-editor .media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.stage-editor .media-card{padding:13px;border:1px solid #e8e2d9;border-radius:12px;min-width:0}
+.stage-editor .media-card img{width:100%;height:115px;object-fit:cover;border-radius:7px}
+.stage-editor .media-card audio,.stage-editor .media-card video{width:100%;max-width:100%;max-height:150px}
+.stage-editor .media-card strong{display:block;font-size:13px;overflow-wrap:anywhere}
+.stage-editor .muted{color:#7d8388;font-size:12px}
+.stage-editor .notice.ok{background:#edf8f1;color:#236443;border-color:#bee5cd}
+.stage-editor .notice.error{background:#fff0ee;color:#87392f;border-color:#edc5c1}
+.stage-editor .notice[hidden],.stage-editor .hidden{display:none!important}
+.stage-editor .progress-wrap{height:12px;background:#ede5dc;border-radius:10px;overflow:hidden}
+.stage-editor .progress-bar{height:100%;width:0;background:#a66d50;transition:width .16s}
+.stage-editor .preview-box{background:#fffdfb;border:1px dashed #ddcebe;border-radius:12px;padding:22px}
+.stage-editor .status-line{min-height:20px;color:#65717b;font-size:12px}
+.stage-editor footer{margin-top:14px;color:#7d8388;font-size:12px}
+.stage-editor .site-paper-preview{font:16px/1.8 system-ui,sans-serif}
+.stage-editor .site-paper-preview h1{font:34px Georgia,serif;color:#293746}
+.stage-editor .site-paper-preview h2{font:28px Georgia,serif;color:#293746}
+.stage-editor .site-paper-preview img{max-width:100%}
+.stage-editor .site-paper-preview audio{max-width:100%;width:100%}
+.stage-editor .site-paper-preview video,.stage-editor .site-paper-preview iframe{width:100%;max-width:100%}
+.stage-editor .site-paper-preview .columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.login-card{max-width:440px;margin:9vh auto 0;padding:22px}
+.login-card form .input{display:block;min-height:44px;width:100%;padding:10px;border:1px solid #dbe0e1;border-radius:9px}
+@media(max-width:1000px){.stage-editor .page-layout{grid-template-columns:1fr}.stage-editor .page-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.stage-editor .form-grid{grid-template-columns:1fr}.stage-editor .page-list{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-editor .topbar{align-items:center;flex-wrap:wrap}.stage-editor .topbar .actions{justify-content:space-between;width:100%}.stage-editor .topbar .actions .btn{width:auto}.stage-editor .media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-editor .site-paper-preview .columns{grid-template-columns:1fr}}

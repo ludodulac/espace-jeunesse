@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const read=path=>readFileSync(new URL("../"+path,import.meta.url),"utf8");
+const index=read("index.html"),admin=read("assets/admin.js"),html=read("admin.html");
+const publicCss=read("assets/celebrations-original-public.css");
+const adminCss=read("assets/celebrations-original-admin.css");
+assert.ok(publicCss.length>25000,"feuilles CSS publiques d'origine conservées");
+assert.ok(adminCss.length>100000,"feuilles CSS administratives d'origine conservées");
+for(const selector of [".site-menu-bar",".general-navigation",".site-paper",".trial-heading",".trial-audio",".footer-pages"])
+ assert.ok(publicCss.includes(selector),"sélecteur d'origine : "+selector);
+for(const selector of [".shell{",".rail{",".topbar{",".navbtn{",".panel{",".stage-editor"])
+ assert.ok(adminCss.includes(selector),"sélecteur de l'éditeur d'origine : "+selector);
+assert.match(index,/class="site-menu-bar"/);
+assert.match(index,/class="general-navigation"/);
+assert.match(index,/class="site-paper"/);
+assert.match(index,/class="footer-pages"/);
+assert.match(index,/celebrations-original-public\.css/);
+assert.match(html,/celebrations-original-admin\.css/);
+assert.match(admin,/class="shell stage-editor"/);
+assert.match(admin,/Pages de bas de page/);
+assert.match(admin,/Médiathèque \(administration\)/);
+assert.match(admin,/Aperçu du brouillon/);
+assert.match(admin,/Mode d'emploi/);
+assert.doesNotMatch(admin,/data-tab="celebrations"|data-tab="members-spaces"|data-tab="languages-categories"/);
+assert.doesNotMatch(index,/jwyayfkssyagvnablttg|celebrations-media|ronde\.workers\.dev/);
+console.log("Conformité visuelle au site source et séparation des projets : OK");

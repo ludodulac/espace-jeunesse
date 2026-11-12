@@ -2,6 +2,7 @@
 "use strict";
 const U=window.EJ,KEY="ej-local-preview-v1",TOKEN_KEY="ej-admin-session-v1";
 let state,version=0,token=sessionStorage.getItem(TOKEN_KEY)||"",media=[],selected="accueil",tab="pages",mediaTab="images",dirty=false,preview=false;
+let undoHistory=[],lastSnapshot="",lastEditAt=0;
 const remote=!!U.api();
 const $=(id)=>document.getElementById(id);
 const html=(s)=>{const t=document.createElement("template");t.innerHTML=s;return t.content};
@@ -18,7 +19,21 @@ const field=(title,val,onchange,kind="input",options=null)=>{
 };
 const badge=(status)=>U.make("span","pill "+status,({published:"Publiée",draft:"Brouillon",hidden:"Masquée"})[status]||status);
 function notice(message,error=false){const n=$("global-notice");if(!n)return;n.textContent=message;n.className="notice "+(error?"error":"ok");n.hidden=false;}
-function touch(){dirty=true;const label=$("save-state");if(label)label.textContent="Modifications non enregistrées";}
+function touch(){
+ const next=JSON.stringify(state);
+ if(lastSnapshot&&next!==lastSnapshot){
+  const now=Date.now();
+  if(now-lastEditAt>750||!undoHistory.length)undoHistory.push(lastSnapshot);
+  if(undoHistory.length>60)undoHistory.shift();
+  lastEditAt=now;lastSnapshot=next;
+ }
+ dirty=true;const label=$("save-state");if(label)label.textContent="Modifications non enregistrées";
+ const back=$("undo-btn");if(back)back.disabled=!undoHistory.length;
+}
+function undo(){
+ if(!undoHistory.length)return;
+ state=U.cleanSite(JSON.parse(undoHistory.pop()));lastSnapshot=JSON.stringify(state);lastEditAt=0;dirty=true;refresh();
+}
 async function request(path,opts={}){
  const headers={"Accept":"application/json",...(opts.body&&! (opts.body instanceof Blob)?{"Content-Type":"application/json"}:{}),...(token?{"Authorization":"Bearer "+token}:{}),...opts.headers};
  const res=await fetch(U.api()+path,{...opts,headers,mode:"cors"});
@@ -41,38 +56,56 @@ function showLogin(){
  });
 }
 function shell(){
- $("app").innerHTML=`<div class="shell">
- <aside class="rail"><a class="identity" href="index.html"><span class="mark">✦</span><span><strong>Espace Jeunesse</strong><small>Administration</small></span></a>
- <nav aria-label="Administration"><button class="navbtn" data-tab="pages"><span>▤</span> Pages</button><button class="navbtn" data-tab="menu"><span>☷</span> Menu</button><button class="navbtn" data-tab="media"><span>▣</span> Médiathèque</button><button class="navbtn" data-tab="settings"><span>⚙</span> Paramètres</button></nav>
- <div class="bottom">Un seul site, uniquement des pages.<br><a href="index.html" style="color:inherit">Voir le site public ↗</a></div></aside>
- <div class="main-area"><header class="topbar"><div><h1 id="screen-title">Pages</h1><p id="screen-subtitle">Créer et organiser vos pages</p></div>
- <div class="row"><span class="pill" id="save-state">Aucune modification</span><button class="btn" id="preview-btn" type="button">Aperçu</button><button class="btn primary" id="save-btn" type="button">Enregistrer</button></div></header>
- <main class="main-content"><div class="notice" id="local-banner" hidden>⚠ Mode aperçu local : les changements sont enregistrés seulement dans ce navigateur. Ils ne sont PAS visibles par les visiteurs. Configurez votre nouveau Worker Cloudflare pour publier.</div>
- <div class="notice" id="global-notice" hidden role="status"></div><div id="tab-content"></div>
- <footer>Administration privée · La médiathèque n'est jamais affichée comme rubrique aux visiteurs.</footer></main></div></div>`;
+ $("app").innerHTML=`<div class="shell stage-editor">
+ <aside class="rail"><div class="brand"><div class="mark">✦</div><div><strong>Administration</strong></div></div>
+ <nav aria-label="Navigation">
+ <button class="navbtn" data-tab="pages">▤ Pages</button>
+ <button class="navbtn" data-tab="footer">▤ Pages de bas de page</button>
+ <button class="navbtn" data-tab="menu">☰ Menu</button>
+ <button class="navbtn" data-tab="media">▧ Médiathèque (administration)</button>
+ <button class="navbtn" data-tab="settings">⚙ Paramètres</button>
+ <button class="navbtn" data-tab="guide">ⓘ Mode d'emploi</button>
+ </nav></aside>
+ <div class="content"><header class="topbar"><div class="topbar-title"><h1 id="screen-title">Pages</h1><p id="screen-subtitle">Éditeur de pages</p></div>
+ <div class="actions">
+ <span class="badge" id="save-state">Tout est enregistré</span>
+ <button class="editor-undo-button" id="undo-btn" type="button" title="Annuler" aria-label="Annuler la dernière modification" disabled>↶</button>
+ <button class="btn sm" id="preview-btn" type="button" title="Voir la page en brouillon">Aperçu du brouillon</button>
+ <button class="btn primary" id="save-btn" type="button">Enregistrer</button>
+ <a class="btn view-site-btn" id="view-site-btn" href="index.html" target="_blank" rel="noopener noreferrer">Voir le site</a>
+ </div></header>
+ <main class="main">
+ <div class="notice" id="local-banner" hidden>⚠ Mode d'essai local : les changements restent sur ce navigateur et ne sont pas publiés. L'administration en ligne nécessitera l'activation du nouveau stockage Cloudflare Espace Jeunesse.</div>
+ <div class="notice" id="global-notice" hidden role="status"></div>
+ <div id="tab-content"></div>
+ <p class="status" id="status" role="status"></p></main></div></div>`;
  for(const btn of document.querySelectorAll("[data-tab]"))btn.addEventListener("click",()=>{tab=btn.dataset.tab;preview=false;refresh()});
  $("save-btn").addEventListener("click",save);
  $("preview-btn").addEventListener("click",()=>{preview=!preview;refresh()});
+ $("undo-btn").addEventListener("click",undo);
  $("local-banner").hidden=remote;
 }
 function refresh(){
  if(!$("tab-content"))return;
  for(const b of document.querySelectorAll("[data-tab]"))b.classList.toggle("active",b.dataset.tab===tab);
- const titles={pages:["Pages","Créer, modifier et publier vos pages"],menu:["Menu","Organisez le menu et les liens de bas de page"],media:["Médiathèque","Images, audios, vidéos et documents — privée"],settings:["Paramètres","Nom et description du site"]};
+ const titles={pages:["Pages","Ajouter et modifier les pages du site"],footer:["Pages de bas de page","Modifier les pages du pied de site"],menu:["Menu","Organiser les pages du menu"],media:["Médiathèque (administration)","Images, audios, vidéos et documents — privée"],settings:["Paramètres","Nom et présentation du site"],guide:["Mode d'emploi","Les commandes essentielles"]};
  $("screen-title").textContent=preview?"Aperçu":titles[tab][0];$("screen-subtitle").textContent=preview?"Prévisualisation de la page sélectionnée":titles[tab][1];
  $("preview-btn").classList.toggle("active",preview);$("save-state").textContent=dirty?"Modifications non enregistrées":"Tout est enregistré";
  const root=$("tab-content");root.replaceChildren();
  if(preview)return showPreview(root);
- if(tab==="pages")showPages(root);
+ if(tab==="pages"||tab==="footer")showPages(root);
  if(tab==="menu")showMenu(root);
  if(tab==="media")showMedia(root);
  if(tab==="settings")showSettings(root);
+ if(tab==="guide")showGuide(root);
+ const back=$("undo-btn");if(back)back.disabled=!undoHistory.length;
 }
 function current(){return state.pages.find(p=>p.id===selected)||state.pages[0]}
 function newPage(){
  const id=U.uuid(),slug="page-"+id.slice(0,8);
- state.pages.push({id,slug,title:"Nouvelle page",placement:"menu",status:"draft",blocks:[]});
- selected=id;tab="pages";preview=false;touch();refresh();
+ const footer=tab==="footer";
+ state.pages.push({id,slug,title:footer?"Nouvelle page de bas de page":"Nouvelle page",placement:footer?"footer":"menu",status:"draft",blocks:[]});
+ selected=id;preview=false;touch();refresh();
 }
 function duplicatePage(p){
  const id=U.uuid(),copy=U.clone(p);copy.id=id;copy.slug=p.slug+"-copie-"+id.slice(0,5);copy.title=p.title+" (copie)";copy.status="draft";copy.blocks.forEach(b=>b.id=U.uuid());state.pages.push(copy);selected=id;touch();refresh();
@@ -88,13 +121,15 @@ function move(arr,item,direction){
  [state.pages[a],state.pages[b]]=[state.pages[b],state.pages[a]];touch();refresh();
 }
 function showPages(root){
- const title=U.make("div","row space"),h=U.make("h2","","Vos pages");title.append(h,button("＋ Nouvelle page",newPage,"btn primary"));root.append(title);
- const layout=U.make("div","page-layout"),side=U.make("div","panel page-list"),area=U.make("div","");
- state.pages.forEach(p=>{const b=U.make("button",p.id===selected?"active":"",p.title);
+ const title=U.make("div","row space"),footerMode=tab==="footer",h=U.make("h2","",footerMode?"Pages de bas de page":"Pages du site");title.append(h,button(footerMode?"＋ Nouvelle page de bas de page":"＋ Nouvelle page",newPage,"btn primary"));root.append(title);
+ const layout=U.make("div","layout page-layout"),side=U.make("div","panel page-list list"),area=U.make("div","");
+ const listPages=state.pages.filter(p=>footerMode?p.placement==="footer":p.placement!=="footer");
+ if(!listPages.some(p=>p.id===selected)&&listPages.length)selected=listPages[0].id;
+ listPages.forEach(p=>{const b=U.make("button","item "+(p.id===selected?"active":""),p.title);
  b.append(U.make("small","",p.placement==="footer"?"Bas de page":p.placement==="none"?"Hors menu":"Menu principal"));
  b.append(badge(p.status));b.addEventListener("click",()=>{selected=p.id;refresh()});side.append(b)});
  layout.append(side,area);root.append(layout);
- const p=current();if(!p){area.append(U.make("div","panel","Aucune page"));return}
+ const p=listPages.find(p=>p.id===selected);if(!p){area.append(U.make("div","panel","Aucune page dans cette rubrique."));return}
  const settings=U.make("section","panel");
  settings.append(U.make("h2","","Réglages de la page"));
  const grid=U.make("div","form-grid");grid.append(
@@ -204,15 +239,31 @@ async function save(){
  try{
   if(remote){const resp=await request("/api/admin/state",{method:"PUT",body:JSON.stringify({state,version})});version=resp.version}
   else localStorage.setItem(KEY,JSON.stringify(state));
-  dirty=false;refresh();notice(remote?"Pages enregistrées dans le nouveau Cloudflare Espace Jeunesse.":"Aperçu enregistré uniquement sur cet appareil (non publié).");
+  dirty=false;lastSnapshot=JSON.stringify(state);lastEditAt=0;refresh();notice(remote?"Pages enregistrées dans le nouveau Cloudflare Espace Jeunesse.":"Aperçu enregistré uniquement sur cet appareil (non publié).");
  }catch(err){notice("Enregistrement impossible : "+err.message,true)}finally{btn.disabled=false}
+}
+function showGuide(root){
+ const panel=U.make("section","panel");
+ panel.append(U.make("h2","","Mode d'emploi — Espace Jeunesse"));
+ const steps=[
+  "Pages : sélectionnez « ＋ Nouvelle page » pour créer une page.",
+  "Contenu : ajoutez des blocs de texte, images, MP3, vidéos, PDF, liens ou colonnes. Les flèches ↑ et ↓ changent leur ordre.",
+  "Médiathèque (administration) : importez des fichiers, puis choisissez-les dans les blocs. La rubrique « Inutilisés » regroupe ceux qui ne sont employés dans aucune page, y compris dans les brouillons.",
+  "Menu : les pages peuvent figurer dans le menu, dans le pied de page ou hors menu. Modifiez leur ordre dans la rubrique Menu.",
+  "Visibilité : Brouillon et Masquée ne sont pas visibles des visiteurs. Publiée rend la page accessible sur le site.",
+  "Aperçu du brouillon permet de vérifier votre travail. Enregistrer sauvegarde le contenu. Voir le site ouvre la version publique.",
+  "L'enregistrement en ligne dépend des nouvelles ressources Cloudflare indépendantes d'Espace Jeunesse."
+ ];
+ const list=U.make("ol","",null);
+ for(const step of steps)list.append(U.make("li","",step));
+ list.style.cssText="padding:12px 32px;line-height:1.9";panel.append(list);root.append(panel);
 }
 function showPreview(root){
  const p=current(),panel=U.make("div","panel");
  panel.append(U.make("h2","","Aperçu : "+(p?.title||"")));
  panel.append(U.make("p","muted","Cette prévisualisation n'est pas une publication. Revenez à Pages pour modifier."));
  if(!p){root.append(panel);return}
- const preview=U.make("article","preview-box");p.blocks.forEach(b=>{
+ const preview=U.make("article","preview-box site-paper-preview");p.blocks.forEach(b=>{
   const div=U.make("div","block "+(b.align||""));div.style.marginBottom="20px";
   if(b.type==="heading")div.append(U.make(b.level||"h1","",b.text||""));
   else if(b.type==="text")div.append(U.make("p","",b.text||""));
@@ -230,7 +281,7 @@ async function load(){
   if(remote){const resp=await request("/api/admin/state");state=U.cleanSite(resp.state);version=resp.version;await loadMedia()}
   else{const saved=localStorage.getItem(KEY);state=U.cleanSite(saved?JSON.parse(saved):await(await fetch("data/site.json")).json())}
   selected=state.pages.some(p=>p.id===selected)?selected:state.homeId;
-  dirty=false;preview=false;shell();refresh();
+  dirty=false;preview=false;undoHistory=[];lastSnapshot=JSON.stringify(state);lastEditAt=0;shell();refresh();
  }catch(err){if(remote&& !token)return;if(remote){showLogin();return} $("app").textContent="Impossible d'ouvrir l'éditeur : "+err.message}
 }
 if(remote){if(token)load();else showLogin()}else load();
