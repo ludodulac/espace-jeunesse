@@ -160,7 +160,7 @@ function mount(){
  document.body.append(src);
 }
 async function boot(){
- window.__PREPARATION_SEED__=null;
+ window.__PREPARATION_SEED__=null;window.__EJ_PAGES_ONLY__=true;
  if(!remote){mount();return}
  const login=document.getElementById("ej-auth-screen");
  const launch=async()=>{
