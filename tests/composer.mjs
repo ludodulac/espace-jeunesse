@@ -43,7 +43,7 @@ test("D1 conserve les sections, styles, PDF, MP3, colonnes et éléments",()=>{
  assert.equal(copy.columns[1][0].mediaId,"uuid-media");
  assert.equal(copy.columns[1][1].mediaId,"pdf-media");
  assert.equal(copy.style.color,"#bada55");
- assert.equal(copy.columns[1][3].hideOnSite,true);
+ assert.equal(copy.columns[1][2].hideOnSite,true);
  const published=projection(saved);
  assert.equal(published.pages[0].blocks[0].columns[1].length,2);
  assert.ok(!JSON.stringify(published).includes("Texte à masquer"));
