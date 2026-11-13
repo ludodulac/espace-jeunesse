@@ -108,6 +108,7 @@ const html=`<!doctype html><html lang="fr"><head>
 <meta name="theme-color" content="#293746"><title>Administration — Espace Jeunesse</title>
 <link rel="stylesheet" href="assets/celebrations-editor-verbatim.css">
 <link rel="stylesheet" href="assets/ej-auth.css">
+<link rel="stylesheet" href="assets/ej-admin-layout.css">
 <script src="config.js" defer></script>
 <script src="assets/ej-original-bridge.js" defer></script>
 </head><body>
@@ -131,7 +132,7 @@ const html=`<!doctype html><html lang="fr"><head>
 <div id="editor-save-toast" class="editor-save-toast" role="status" aria-live="polite" hidden></div>
 <input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
 </body></html>`;
-writeFileSync("admin-identique.html",html);
+writeFileSync("admin.html",html);
 writeFileSync("assets/ej-source-provenance.json",JSON.stringify({
  source:"ludodulac/Celebrations",sha:ORIGIN,
  files:["migration/cloudflare/editor-demo-client.mjs",
