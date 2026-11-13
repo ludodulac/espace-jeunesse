@@ -92,9 +92,11 @@ const PROFILES=[
 function textBlock(id,t,size){return {id,type:"text",text:t,...(size?{fontSize:size}:{}),hideOnSite:false}}
 function heading(id,t,level="h2"){return {id,type:"heading",text:t,level,hideOnSite:false}}
 function button(id,t,url){return {id,type:"button",text:t,url,hideOnSite:false}}
-function section(id,left,right,style={border:"round",color:"#dedad1",width:1,shadow:false}){
+function section(id,left,right){
+ // Exactement le modèle de bloc que crée l’éditeur natif : deux colonnes et aucun style de cadre ajouté.
  return {id,type:"section",layout:"columns",presentation:"resource",hideOnSite:false,
- style,columnAlignments:["center","center"],columnButtonLayouts:["stack","row"],columns:[left,right]};
+  style:{border:"none",color:"#d7dde5",width:1,shadow:false},
+  columnAlignments:["center","center"],columnButtonLayouts:["stack","row"],columns:[left,right]};
 }
 function artisanSection(p,i){
  const l=p.cover?[{id:"artisan-"+p.id+"-image",type:"image",url:p.cover,
@@ -126,7 +128,7 @@ function dossier(){
   ],[
    heading("artisans-first","Où commencer ?","h2"),
    textBlock("artisans-first-text","Pour la proximité : Hell of Persephone (accessible à Brest). Pour une collection sur mesure : Le Monde de Gurumi à Rennes. Pour un catalogue déjà varié et du prototypage : Pamplemousse Peluches.")
-  ],{border:"round",color:"#bdac91",width:2,shadow:true}),
+  ]),
   heading("artisans-profiles-title","Les quatre ateliers à étudier","h2"),
   ...PROFILES.map(artisanSection),
   heading("artisans-compare-title","Comparaison rapide","h2"),
@@ -152,7 +154,7 @@ function dossier(){
   ]),
   heading("artisans-questions-title","Questions à poser à chaque créateur","h2"),
   textBlock("artisans-questions-text","Pouvez-vous créer tout ou partie de nos 21 animaux ?\nAcceptez-vous les petites séries et les prototypes ?\nQuels sont vos tarifs et délais pour 1, 10 ou 30 unités ?\nQuels matériaux et quelles certifications pour chaque âge ?\nPeut-on reproduire vos photographies avec crédit sur notre site ?\nUn partenariat avec code promotionnel ou commission est-il envisageable ?"),
-  textBlock("artisans-end","Notes de recherche uniquement · Les références, stocks, tarifs, contacts et conditions doivent être confirmés directement avec les artisans. Cette page est hors menu, mais son lien reste accessible publiquement à toute personne qui le connaît.")
+  textBlock("artisans-end","Notes de recherche uniquement · Les références, stocks, tarifs, contacts et conditions doivent être confirmés directement avec les artisans. Cette page est visible dans le menu des visiteurs.")
  ];
  return {id:"artisans-peluches-totem",slug:"artisans-peluches-totem",
   title:"Artisans & partenariats — Peluches totem",placement:"menu",
@@ -177,13 +179,27 @@ function restoreImages(page){
  });
  return changed?{...page,blocks}:page;
 }
+function standardizeOriginalFrames(page){
+ if(!page||!(page.id==="artisans-peluches-totem"||page.slug==="artisans-peluches-totem"))return page;
+ const generated=new Set(["artisans-intro","artisan-persephone","artisan-gurumi",
+  "artisan-pamplemousse","artisan-nelya","artisan-comparison-left","artisans-images-tip"]);
+ const blocks=(page.blocks||[]).map(block=>{
+  if(!generated.has(block.id)||block.type!=="section")return block;
+  const style=block.style||{};
+  // Supprime uniquement les encadrements ajoutés dans la première version.
+  // Un style choisi ensuite dans l’éditeur est conservé.
+  if(style.border!=="round"||!["#dedad1","#bdac91"].includes(style.color))return block;
+  return {...block,style:{border:"none",color:"#d7dde5",width:1,shadow:false}};
+ });
+ return {...page,blocks};
+}
 function mergeSite(raw){
  if(!raw||!Array.isArray(raw.pages))return raw;
  const pages=raw.pages.map(p=>{
   const restored=restoreImages(p);
   // Le propriétaire souhaite afficher ce dossier dans le menu visiteurs.
   if(restored.id==="artisans-peluches-totem"||restored.slug==="artisans-peluches-totem")
-   return {...restored,placement:"menu",status:"published"};
+   return {...standardizeOriginalFrames(restored),placement:"menu",status:"published"};
   return restored;
  });
  if(!pages.some(p=>p.id==="artisans-peluches-totem"||p.slug==="artisans-peluches-totem"))
