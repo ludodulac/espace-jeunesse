@@ -176,6 +176,7 @@
  line-height:1!important;
  border-radius:10px;
 }
+#ej-original-shell .topbar .actions>[hidden]{display:none!important}
 #ej-original-shell .topbar .actions>#undo-btn:disabled{
  opacity:.40;cursor:not-allowed;
 }
