@@ -155,7 +155,7 @@ function dossier(){
   textBlock("artisans-end","Notes de recherche uniquement · Les références, stocks, tarifs, contacts et conditions doivent être confirmés directement avec les artisans. Cette page est hors menu, mais son lien reste accessible publiquement à toute personne qui le connaît.")
  ];
  return {id:"artisans-peluches-totem",slug:"artisans-peluches-totem",
-  title:"Artisans & partenariats — Peluches totem",placement:"none",
+  title:"Artisans & partenariats — Peluches totem",placement:"menu",
   status:"published",blocks:sections};
 }
 function restoreImages(page){
@@ -179,7 +179,13 @@ function restoreImages(page){
 }
 function mergeSite(raw){
  if(!raw||!Array.isArray(raw.pages))return raw;
- const pages=raw.pages.map(restoreImages);
+ const pages=raw.pages.map(p=>{
+  const restored=restoreImages(p);
+  // Le propriétaire souhaite afficher ce dossier dans le menu visiteurs.
+  if(restored.id==="artisans-peluches-totem"||restored.slug==="artisans-peluches-totem")
+   return {...restored,placement:"menu",status:"published"};
+  return restored;
+ });
  if(!pages.some(p=>p.id==="artisans-peluches-totem"||p.slug==="artisans-peluches-totem"))
   pages.push(dossier());
  return {...raw,pages};
