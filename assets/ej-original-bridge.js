@@ -157,7 +157,7 @@ function mount(){
  document.getElementById("ej-original-shell").hidden=false;
  const head=document.getElementById("ej-auth-screen");head.hidden=true;head.replaceChildren();
  if(!remote)notice("⚠ Mode d'essai local : ce navigateur ne publie pas sur le site. Activez le NOUVEAU Cloudflare Espace Jeunesse.");
- const src=document.createElement("script");src.src="assets/celebrations-editor-verbatim.js?v=ej-20261113-compact";
+ const src=document.createElement("script");src.src="assets/celebrations-editor-verbatim.js?v=ej-20261113-navigation2";
  src.onerror=()=>notice("Impossible de charger la copie de l'éditeur Célébrations.",true);
  document.body.append(src);
 }
@@ -176,10 +176,24 @@ async function boot(){
  form.append(make("p","Même éditeur que Célébrations, sans comptes membres ni célébrations."));
  const input=document.createElement("input");input.type="password";input.required=true;
  input.autocomplete="current-password";input.setAttribute("aria-label","Mot de passe administrateur");
- input.placeholder="Mot de passe administrateur";
+ input.placeholder="Mot de passe administrateur";input.id="ej-admin-password";
+ const inputWrap=make("div",undefined,"ej-password-wrap");
+ const eye=make("button","👁","ej-password-eye");
+ eye.type="button";eye.setAttribute("aria-label","Afficher le mot de passe");
+ eye.setAttribute("aria-pressed","false");eye.title="Afficher le mot de passe";
+ eye.setAttribute("aria-controls",input.id);
+ eye.addEventListener("click",()=>{
+  const show=input.type==="password";
+  input.type=show?"text":"password";
+  eye.textContent=show?"🙈":"👁";
+  eye.setAttribute("aria-label",show?"Masquer le mot de passe":"Afficher le mot de passe");
+  eye.setAttribute("aria-pressed",String(show));
+  eye.title=show?"Masquer le mot de passe":"Afficher le mot de passe";
+ });
+ inputWrap.append(input,eye);
  const button=make("button","Se connecter","btn primary");button.type="submit";
  const status=make("p","","status");status.setAttribute("role","status");
- form.append(input,button,status);login.append(form);
+ form.append(inputWrap,button,status);login.append(form);
  form.addEventListener("submit",async e=>{
   e.preventDefault();button.disabled=true;
   try{const result=await request("/api/auth/login",{method:"POST",body:JSON.stringify({password:input.value})});

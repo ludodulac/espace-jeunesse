@@ -382,3 +382,12 @@
 #ej-original-shell .brand .ej-admin-home-link:focus-visible{
  outline:3px solid #648caa;outline-offset:3px;
 }
+
+/* La petite étoile de la marque remplace le bouton redondant Voir le site.
+   Le titre « Administration » garde son rôle de rechargement. */
+#ej-original-shell .brand .ej-site-mark-link{
+ display:grid;place-items:center;text-decoration:none;color:inherit;
+ cursor:pointer;flex-shrink:0;
+}
+#ej-original-shell .brand .ej-site-mark-link:hover{filter:brightness(1.12);transform:translateY(-1px)}
+#ej-original-shell .brand .ej-site-mark-link:focus-visible{outline:3px solid #39789f;outline-offset:3px}

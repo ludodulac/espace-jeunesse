@@ -16,3 +16,10 @@
  .site-menu-bar .ej-menu-site-title{font-size:clamp(15px,4vw,19px)}
  .site-menu-bar .menu-toggle{flex:none}
 }
+
+/* Le titre public conduit à la page d'accueil et recharge le site. */
+.site-menu-bar a.ej-site-home-link{
+ text-decoration:none;cursor:pointer;
+}
+.site-menu-bar a.ej-site-home-link:hover{text-decoration:underline;text-underline-offset:4px}
+.site-menu-bar a.ej-site-home-link:focus-visible{outline:3px solid #39789f;outline-offset:3px;border-radius:4px}
