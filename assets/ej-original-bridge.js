@@ -203,6 +203,17 @@ async function boot(){
   finally{button.disabled=false;input.value=""}
  });
 }
-window.EJBridge={remote,meta,prepare,queueSave,listMedia,importFiles};
+async function detailedMedia(){
+ if(!remote)return [];
+ const data=await request("/api/admin/media");
+ return data.media||[];
+}
+async function deleteMedia(id){
+ return request("/api/admin/media/"+encodeURIComponent(id),{method:"DELETE"});
+}
+async function setLudodio(id,enabled){
+ return request("/api/admin/ludodio/"+encodeURIComponent(id),{method:enabled?"PUT":"DELETE"});
+}
+window.EJBridge={remote,meta,prepare,queueSave,listMedia,importFiles,detailedMedia,deleteMedia,setLudodio};
 boot().catch(error=>notice("Impossible de démarrer l'administration : "+error.message,true));
 })();
