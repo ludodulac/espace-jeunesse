@@ -86,7 +86,16 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
   await threeDots.click();
  }
  const plus=page.locator(".canvas .section-add-blue").first();
- await plus.click({force:true});
+ // Les contrôles bas restent devant : sur mobile, faire défiler la cible
+ // AU-DESSUS de la barre avant de vérifier les vrais clics du compositeur.
+ await plus.scrollIntoViewIfNeeded();
+ await page.evaluate(()=>{
+  const button=document.querySelector(".canvas .section-add-blue");
+  const rect=button.getBoundingClientRect();
+  const safeLimit=window.innerHeight-130;
+  if(rect.bottom>safeLimit)window.scrollBy(0,rect.bottom-safeLimit+35);
+ });
+ await plus.click();
  let palette=hasTouch?page.locator("dialog.editor-insert-dialog[open]"):page.locator(".section-insert-choices:not([hidden])");
  await palette.getByRole("button",{name:"Deux colonnes"}).click();
  await page.locator('.content-section[data-layout="columns"]').first().waitFor();
