@@ -104,7 +104,7 @@ mkdirSync("assets",{recursive:true});
 writeFileSync("assets/celebrations-editor-verbatim.js",client);
 writeFileSync("assets/celebrations-editor-verbatim.css",DEMO_CSS+"\n"+ADMIN_STAGE_LAYOUT);
 const html=`<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#293746"><title>Administration — Espace Jeunesse</title>
 <link rel="stylesheet" href="assets/celebrations-editor-verbatim.css">
 <link rel="stylesheet" href="assets/ej-auth.css">
