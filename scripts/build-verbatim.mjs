@@ -106,15 +106,15 @@ writeFileSync("assets/celebrations-editor-verbatim.css",DEMO_CSS+"\n"+ADMIN_STAG
 const html=`<!doctype html><html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#293746"><title>Administration — Espace Jeunesse</title>
-<link rel="stylesheet" href="assets/celebrations-editor-verbatim.css?v=ej-20261113-sticky">
-<link rel="stylesheet" href="assets/ej-auth.css?v=ej-20261113-sticky">
-<link rel="stylesheet" href="assets/ej-admin-layout.css?v=ej-20261113-sticky">
-<script src="config.js?v=ej-20261113-sticky" defer></script>
-<script src="assets/ej-original-bridge.js?v=ej-20261113-sticky" defer></script>
+<link rel="stylesheet" href="assets/celebrations-editor-verbatim.css?v=ej-20261113-compact">
+<link rel="stylesheet" href="assets/ej-auth.css?v=ej-20261113-compact">
+<link rel="stylesheet" href="assets/ej-admin-layout.css?v=ej-20261113-compact">
+<script src="config.js?v=ej-20261113-compact" defer></script>
+<script src="assets/ej-original-bridge.js?v=ej-20261113-compact" defer></script>
 </head><body>
 <div id="ej-auth-screen" hidden></div>
-<div class="shell stage-editor" id="ej-original-shell" data-ej-ui-version="2026-11-13-sticky" hidden>
-<aside class="rail"><div class="brand"><div class="mark">✦</div><div><strong>Administration</strong></div></div>
+<div class="shell stage-editor" id="ej-original-shell" data-ej-ui-version="2026-11-13-compact" hidden>
+<aside class="rail"><div class="brand"><div class="mark">✦</div><div><strong><a class="ej-admin-home-link" href="admin.html" title="Recharger l’administration">Administration</a></strong></div></div>
 <nav aria-label="Navigation">
 <button class="navbtn" data-tab="pages">▤ Pages</button>
 <button class="navbtn" data-tab="footer">▤ Pages de bas de page</button>
