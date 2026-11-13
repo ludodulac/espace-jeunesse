@@ -5648,6 +5648,34 @@ function pageWorkspace(group,mount=w){
       mark();render();
      },'sm danger'));
     }
+
+    // Sur ordinateur, la liste peut défiler sans jamais couper le menu.
+    // L'API Popover affiche les actions au premier plan, hors du panneau.
+    if(window.matchMedia('(min-width:1051px)').matches&&typeof menu.showPopover==='function'){
+     menu.classList.add('ej-page-flyout');
+     menu.setAttribute('popover','auto');
+     menu.setAttribute('role','group');
+     menu.setAttribute('aria-label','Actions pour la page '+q.name);
+     actions.addEventListener('toggle',()=>{
+      if(!actions.open){
+       if(menu.matches(':popover-open'))menu.hidePopover();
+       return;
+      }
+      document.querySelectorAll('.ej-page-flyout:popover-open').forEach(open=>{
+       if(open!==menu)open.hidePopover();
+      });
+      menu.showPopover();
+      const anchor=summary.getBoundingClientRect();
+      const bounds=menu.getBoundingClientRect();
+      const left=Math.max(12,Math.min(anchor.right+12,innerWidth-bounds.width-12));
+      const top=Math.max(12,Math.min(anchor.top-14,innerHeight-bounds.height-12));
+      menu.style.setProperty('left',left+'px','important');
+      menu.style.setProperty('top',top+'px','important');
+     });
+     menu.addEventListener('toggle',event=>{
+      if(event.newState==='closed'&&actions.open)actions.open=false;
+     });
+    }
     actions.append(summary,menu);row.append(actions);
    }
    list.append(row);
