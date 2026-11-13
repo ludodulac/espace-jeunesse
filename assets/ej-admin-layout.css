@@ -1,0 +1,92 @@
+/* Espace Jeunesse : retouches d'ergonomie sans modifier les composants
+   ni le code CSS canonique de l'éditeur Célébrations. */
+
+#ej-original-shell .ej-page-status-row{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) 14px 37px;
+ gap:6px;
+ align-items:center;
+}
+#ej-original-shell .ej-page-status-row>.inline-page-state{
+ display:block!important;width:12px!important;height:12px!important;
+ min-width:12px!important;padding:0!important;margin:0!important;
+ border-radius:50%!important;font-size:0!important;line-height:0!important;
+ justify-self:center;
+}
+#ej-original-shell .ej-page-status-row>.inline-page-state.state-published{background:#29a568!important}
+#ej-original-shell .ej-page-status-row>.inline-page-state.state-draft{background:#e7a348!important}
+#ej-original-shell .ej-page-status-row>.inline-page-state.state-hidden{background:#99a3ae!important}
+#ej-original-shell .ej-page-status-row>.page-options{width:37px;min-width:37px}
+#ej-original-shell .ej-page-status-legend{
+ display:flex;flex-wrap:wrap;gap:8px 12px;margin:10px 12px 14px;
+ color:#58626a;font-size:11px;line-height:1.4;
+}
+#ej-original-shell .ej-page-status-legend>span{display:inline-flex;gap:6px;align-items:center}
+#ej-original-shell .ej-page-status-legend .ej-legend-dot{
+ display:inline-block;flex:none;width:9px;height:9px;border-radius:50%;
+}
+#ej-original-shell .ej-legend-dot.state-published{background:#29a568}
+#ej-original-shell .ej-legend-dot.state-draft{background:#e7a348}
+#ej-original-shell .ej-legend-dot.state-hidden{background:#99a3ae}
+
+@media(min-width:1051px){
+ /* Un seul panneau à gauche pour la navigation ET la liste de pages ;
+    la zone d'édition reçoit toute la largeur de la colonne principale. */
+ #ej-original-shell{grid-template-columns:300px minmax(0,1fr)}
+ #ej-original-shell .rail{
+  position:sticky;top:0;height:100dvh;min-height:0;
+  padding:15px 12px 12px;gap:10px;overflow:visible;
+  border-right:1px solid #e4e7e9;
+ }
+ #ej-original-shell .rail .brand{padding:4px 9px 10px}
+ #ej-original-shell .rail nav{gap:3px}
+ #ej-original-shell .rail .navbtn{
+  min-height:39px;padding:8px 10px;font-size:13px;line-height:1.25;
+ }
+ #ej-original-shell .main{
+  max-width:none!important;width:100%;padding:18px clamp(15px,2vw,34px);
+ }
+ #ej-original-shell #workspace>.layout{
+  display:block!important;grid-template-columns:minmax(0,1fr)!important;
+  max-width:none!important;
+ }
+ #ej-original-shell #workspace>.layout>section{
+  display:block;min-width:0;width:100%;max-width:none;
+ }
+ #ej-original-shell #workspace>.layout>.panel{
+  position:fixed;left:12px;top:323px;bottom:12px;
+  width:276px;max-width:276px;max-height:calc(100dvh - 335px);
+  z-index:25;overflow-y:auto;overflow-x:hidden;
+  background:#fff;border:1px solid #dfe5e8;
+  border-radius:12px;box-shadow:0 3px 12px #25364713;
+  scrollbar-width:thin;
+ }
+ #ej-original-shell #workspace>.layout>.panel .general-pages-list{
+  padding:7px 8px 0;gap:4px;
+ }
+ /* Les actions restent visibles à l'intérieur de la liste défilante,
+    au lieu de s'ouvrir dans une zone qui serait coupée sur l'écran. */
+ #ej-original-shell #workspace>.layout>.panel .ej-page-status-row:has(.page-options[open]){
+  grid-template-columns:minmax(0,1fr) 14px;
+ }
+ #ej-original-shell #workspace>.layout>.panel .ej-page-status-row>.page-options[open]{
+  grid-column:1/-1;grid-row:2;width:100%;max-width:none;
+ }
+ #ej-original-shell #workspace>.layout>.panel .ej-page-status-row>.page-options[open]>.page-options-menu{
+  position:static;width:100%;max-width:100%;min-width:0;margin-top:6px;
+  box-shadow:none;border:1px solid #e1e5e8;
+ }
+ #ej-original-shell #workspace>.layout>.panel .ej-page-status-row>.page-options[open]>summary{
+  margin-left:auto;width:37px;
+ }
+ #ej-original-shell #workspace>.layout .canvas-wrap,
+ #ej-original-shell #workspace>.layout .canvas{max-width:none;width:100%}
+ #ej-original-shell #workspace>.layout .canvas{padding-left:clamp(20px,3vw,45px);padding-right:clamp(20px,3vw,45px)}
+}
+
+/* Sur smartphone et petite tablette, la liste reste à sa place initiale,
+   au-dessus de l'éditeur, comme l'a demandé le propriétaire. */
+@media(max-width:1050px){
+ #ej-original-shell #workspace>.layout>.panel{position:static}
+ #ej-original-shell .ej-page-status-row{grid-template-columns:minmax(0,1fr) 14px 37px}
+}
