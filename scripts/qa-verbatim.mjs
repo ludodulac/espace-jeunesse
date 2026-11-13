@@ -73,12 +73,20 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  const initialDot=page.locator('.general-pages-list .ej-page-status-row .inline-page-state').first();
  assert.ok(await initialDot.isVisible(),label+" : indicateur de publication absent");
  assert.equal(await initialDot.getAttribute("aria-label"),"Publiée sur le site");
- const selector=page.locator('.editor-language-row select[aria-label="Visibilité de la page"]');
- await selector.selectOption("draft");
+ // Une modification se valide en refermant les réglages : la zone
+ // éditable redevient immédiatement entièrement cliquable.
+ const chooseVisibility=async(value)=>{
+  if(!(await page.locator('.ej-page-settings-details').evaluate(el=>el.open)))
+   await page.locator('.ej-page-settings-details summary').click();
+  await page.locator('.editor-language-row select[aria-label="Visibilité de la page"]').selectOption(value);
+  assert.equal(await page.locator('.ej-page-settings-details').evaluate(el=>el.open),false,
+   label+" : réglages doivent se replier après un choix");
+ };
+ await chooseVisibility("draft");
  assert.equal(await page.locator('.ej-page-status-row .inline-page-state.state-draft').count(),1);
- await page.locator('.editor-language-row select[aria-label="Visibilité de la page"]').selectOption("hidden");
+ await chooseVisibility("hidden");
  assert.equal(await page.locator('.ej-page-status-row .inline-page-state.state-hidden').count(),1);
- await page.locator('.editor-language-row select[aria-label="Visibilité de la page"]').selectOption("published");
+ await chooseVisibility("published");
  assert.equal(await page.locator('.ej-page-status-row .inline-page-state.state-published').count(),1);
  const sideBox=await page.locator('#workspace>.layout>aside.panel').boundingBox();
  const canvasBox=await page.locator('#workspace>.layout .canvas').boundingBox();
