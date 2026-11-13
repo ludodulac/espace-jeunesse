@@ -9,3 +9,15 @@
 #ej-storage-notice:empty{display:none}
 #ej-storage-notice{margin:0 0 16px;padding:10px 12px;border:1px solid #e8d2b7;border-radius:8px;background:#fff9e8;font-size:13px;color:#725633}
 #ej-storage-notice.error{background:#fff0eb;color:#8f342b;border-color:#eeb8b0}
+
+/* Champ de mot de passe avec œil accessible et zone de toucher suffisante. */
+.ej-login .ej-password-wrap{position:relative;min-width:0}
+.ej-login .ej-password-wrap input{padding-right:57px}
+.ej-login .ej-password-eye{
+ position:absolute;right:3px;top:50%;transform:translateY(-50%);
+ width:44px;min-height:44px;border:1px solid #d3dce1;border-radius:7px;
+ background:#f6f8fa;color:#253742;font-size:20px;line-height:1;cursor:pointer;
+ display:grid;place-items:center;
+}
+.ej-login .ej-password-eye:hover{background:#eaf0f4}
+.ej-login .ej-password-eye:focus-visible{outline:3px solid #39789f;outline-offset:2px}
