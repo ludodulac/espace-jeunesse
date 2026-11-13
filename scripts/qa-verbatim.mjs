@@ -11,6 +11,25 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  page.on("pageerror",err=>{failures.push(label+": "+err.message);console.error("JS ERROR",label,err.stack||err.message)});
  page.on("console",msg=>{if(msg.type()==="error")console.error("CONSOLE",label,msg.text())});
  page.on("requestfailed",req=>console.error("REQ FAILED",req.url(),req.failure()?.errorText));
+ // L'écran de connexion testé avec une API factice ne reçoit jamais
+ // de mot de passe utilisateur et ne déclenche aucune requête externe.
+ const loginTestPage=await ctx.newPage();
+ await loginTestPage.route("**/config.js*",route=>route.fulfill({
+  contentType:"application/javascript",
+  body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: 'https://test.invalid'};"
+ }));
+ await loginTestPage.goto(BASE,{waitUntil:"networkidle"});
+ const pw=loginTestPage.locator('#ej-admin-password');
+ await pw.waitFor();
+ assert.equal(await pw.getAttribute('type'),'password');
+ await pw.fill('code-de-test-uniquement');
+ const eye=loginTestPage.getByRole('button',{name:'Afficher le mot de passe'});
+ await eye.click();
+ assert.equal(await pw.getAttribute('type'),'text');
+ assert.equal(await pw.inputValue(),'code-de-test-uniquement');
+ await loginTestPage.getByRole('button',{name:'Masquer le mot de passe'}).click();
+ assert.equal(await pw.getAttribute('type'),'password');
+ await loginTestPage.close();
  await page.goto(BASE,{waitUntil:"networkidle"});
  try{await page.locator(".canvas").waitFor({timeout:8000})}catch(e){console.error("DOM",label,(await page.locator("body").innerText()).slice(0,1600));console.error("SCRIPTS",await page.locator("script").evaluateAll(nodes=>nodes.map(n=>n.src)));throw e}
  assert.equal(await page.locator('[data-tab="celebrations"],[data-tab="members-spaces"],[data-tab="languages-categories"]').count(),0);
@@ -20,11 +39,13 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  const adminHome=page.locator('#ej-original-shell .brand .ej-admin-home-link');
  assert.ok(await adminHome.isVisible(),label+" : Administration n'est pas cliquable");
  assert.equal(await adminHome.getAttribute('href'),'admin.html');
- // Une seule commande Voir le site dans la navigation ;
- // les trois vrais boutons sont DANS le panneau sticky des réglages de page.
- assert.equal(await page.locator('#view-site-btn').count(),1);
- assert.ok(await page.locator('.rail nav #view-site-btn').isVisible(),label+" : Voir le site absent du menu");
- assert.equal(await page.locator('.topbar #view-site-btn').count(),0);
+ // Le logo étoile ouvre le site dans un nouvel onglet, le bouton doublon
+ // Voir le site a disparu de la navigation.
+ assert.equal(await page.locator('#view-site-btn').count(),0);
+ const siteMark=page.locator('.brand .ej-site-mark-link');
+ assert.ok(await siteMark.isVisible(),label+" : étoile vers le site manquante");
+ assert.equal(await siteMark.getAttribute('href'),'index.html');
+ assert.equal(await siteMark.getAttribute('target'),'_blank');
  const settingsPanel=page.locator('#workspace .ej-page-settings');
  const toolbar=page.locator('#ej-original-shell .topbar');
  assert.equal(await settingsPanel.count(),1,label+" : panneau Réglages de la page manquant");
@@ -69,6 +90,12 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
   await page.locator('.ej-page-settings-details summary').click();
  }
  assert.ok(await page.locator('.ej-page-settings-details').evaluate(el=>el.open));
+ // Un clic en dehors de la roue dentée doit fermer le panneau sans toucher
+ // aux réglages ni aux boutons, sur ordinateur comme sur smartphone.
+ await page.mouse.click(width-10,height-12);
+ assert.equal(await page.locator('.ej-page-settings-details').evaluate(el=>el.open),false,
+  label+" : les réglages restent ouverts après un clic à l'extérieur");
+ assert.ok(await page.locator('.ej-page-settings .topbar #save-btn').isVisible());
  // Dot de statut accessible sur chaque page : publié, brouillon, masqué.
  const initialDot=page.locator('.general-pages-list .ej-page-status-row .inline-page-state').first();
  assert.ok(await initialDot.isVisible(),label+" : indicateur de publication absent");
@@ -187,6 +214,17 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.equal(await visitor.locator('#site-identity').count(),0,label+" : ancien gros en-tête encore visible");
  assert.ok(await visitor.locator('.site-menu-bar .site-menu-group #site-title').isVisible(),
   label+" : titre absent de la barre Menu permanente");
+ // Le titre est un véritable lien d'accueil : même au milieu d'une autre
+ // page, il nettoie le paramètre page et recharge le site.
+ const homeTitle=visitor.locator('a#site-title');
+ assert.equal(await homeTitle.getAttribute('href'),'index.html');
+ await visitor.locator('#menu-toggle').click();
+ const publicLinks=visitor.locator('#general-navigation button');
+ await publicLinks.first().waitFor();
+ await visitor.locator('#menu-toggle').click();
+ await homeTitle.click();
+ await visitor.locator('.trial-heading').first().waitFor();
+ assert.equal(new URL(visitor.url()).searchParams.has('page'),false);
 
  if(!hasTouch){
   await visitor.locator("#menu-toggle").hover();
