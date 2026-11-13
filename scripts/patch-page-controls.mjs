@@ -17,7 +17,7 @@ const ui=`
   const details=n('details','ej-page-settings-details');
   // Par défaut, les champs restent accessibles sans occuper la hauteur.
   details.open=window.__EJ_SETTINGS_EXPANDED__===true;
-  details.addEventListener('toggle',()=>{window.__EJ_SETTINGS_EXPANDED__=details.open});
+  details.addEventListener('toggle',()=>{if(details.isConnected)window.__EJ_SETTINGS_EXPANDED__=details.open});
   const toggle=n('summary','','⚙');
   toggle.setAttribute('aria-label','Afficher ou masquer le nom, la visibilité et l’emplacement de la page');
   toggle.title='Réglages de la page';
