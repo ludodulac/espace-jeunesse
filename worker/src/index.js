@@ -164,7 +164,7 @@ function getMime(name){
 // Only an explicit owner action deletes a file; status is informational, not an ACL.
 function mediaIdFromReference(value){
  const text=String(value||"");
- const match=text.match(/(?:^|\\/)media\\/([0-9a-f-]{36})(?:[?#]|$)/i);
+ const match=text.match(/(?:^|\/)media\/([0-9a-f-]{36})(?:[?#]|$)/i);
  return match?.[1]||"";
 }
 function visitMediaBlocks(blocks,found){
@@ -257,7 +257,7 @@ async function deleteMedia(env,req,id){
 }
 async function uploadInit(env,req){
  let input;try{input=await bodyJson(req,5000)}catch{return fail(env,req,"Métadonnées manquantes")}
- const name=String(input.name||"").replace(/[\\/\r\n]/g,"_").trim().slice(0,160);
+ const name=String(input.name||"").replace(/[\/\r\n]/g,"_").trim().slice(0,160);
  const size=Number(input.size),mime=getMime(name);
  if(!name||!mime||!Number.isSafeInteger(size)||size<1||size>MAX_MEDIA)return fail(env,req,"Format ou taille refusé (maximum 200 Mio).");
  const id=crypto.randomUUID(),key="media/"+id;
@@ -335,7 +335,7 @@ export default {
    if(req.method==="GET"&&path==="/api/admin/state"){return json(env,req,await currentState(env))}
    if(req.method==="PUT"&&path==="/api/admin/state")return saveState(req,env);
    if(req.method==="GET"&&path==="/api/admin/media")return listMedia(env,req);
-    const ludodioPath=path.match(/^\\/api\\/admin\\/ludodio\\/([0-9a-f-]{36})$/);
+    const ludodioPath=path.match(/^\/api\/admin\/ludodio\/([0-9a-f-]{36})$/);
     if(ludodioPath&&(req.method==="PUT"||req.method==="DELETE"))
       return setLudodioLink(env,req,ludodioPath[1],req.method==="PUT");
    if(req.method==="DELETE"&&/^\/api\/admin\/media\/[0-9a-f-]{36}$/.test(path))return deleteMedia(env,req,path.slice("/api/admin/media/".length));
