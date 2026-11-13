@@ -155,7 +155,7 @@ function mount(){
  document.getElementById("ej-original-shell").hidden=false;
  const head=document.getElementById("ej-auth-screen");head.hidden=true;head.replaceChildren();
  if(!remote)notice("⚠ Mode d'essai local : ce navigateur ne publie pas sur le site. Activez le NOUVEAU Cloudflare Espace Jeunesse.");
- const src=document.createElement("script");src.src="assets/celebrations-editor-verbatim.js";
+ const src=document.createElement("script");src.src="assets/celebrations-editor-verbatim.js?v=ej-20261113-sticky";
  src.onerror=()=>notice("Impossible de charger la copie de l'éditeur Célébrations.",true);
  document.body.append(src);
 }
