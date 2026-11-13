@@ -14,12 +14,16 @@ const ui=`
   row.setAttribute('aria-label','Réglages de la page et actions d’édition');
   const head=n('div','ej-page-settings-head');
   head.append(n('strong','ej-settings-heading','Réglages de la page'));
+  const details=n('details','ej-page-settings-details');
+  // Par défaut, les champs restent accessibles sans occuper la hauteur.
+  details.open=window.__EJ_SETTINGS_EXPANDED__===true;
+  details.addEventListener('toggle',()=>{window.__EJ_SETTINGS_EXPANDED__=details.open});
+  const toggle=n('summary','','⚙');
+  toggle.setAttribute('aria-label','Afficher ou masquer le nom, la visibilité et l’emplacement de la page');
+  toggle.title='Réglages de la page';
+  details.append(toggle);head.append(details);
   head.append(n('div','ej-page-toolbar-slot'));
   row.append(head);
-  const details=n('details','ej-page-settings-details');
-  details.open=window.__EJ_SETTINGS_EXPANDED__??window.matchMedia('(min-width:701px)').matches;
-  details.addEventListener('toggle',()=>{window.__EJ_SETTINGS_EXPANDED__=details.open});
-  details.append(n('summary','','Nom, visibilité et emplacement'));
   const fields=n('div','ej-page-settings-fields');
   const nameField=n('label','editor-language-choice m024-page-name','Nom de la page');
   const nameInput=n('input');nameInput.type='text';nameInput.maxLength=95;nameInput.value=p.name;
@@ -46,7 +50,7 @@ const ui=`
   place.value=['menu','footer','none'].includes(p.placement)?p.placement:'menu';
   place.onchange=()=>{p.placement=place.value;mark();render()};
   placeLabel.append(place);fields.append(placeLabel);
-  details.append(fields);row.append(details);
+  details.append(fields);
   right.append(row);
  }
 `;
@@ -80,6 +84,12 @@ source=source.replace(ejRenderAnchor,"function render(){\n const ejToolbar=docum
 const ejRenderTail=" for(const key of ['save-btn','preview-btn','undo-btn','status']){";
 if(source.split(ejRenderTail).length!==2)throw Error("La fin de render() a changé.");
 source=source.replace(ejRenderTail," if(window.__EJ_PAGES_ONLY__&&!preview&&['pages','footer'].includes(tab)){\n  const slot=document.querySelector('#workspace .ej-page-settings .ej-page-toolbar-slot');\n  if(slot&&ejToolbar)slot.append(ejToolbar);\n }\n for(const key of ['save-btn','preview-btn','undo-btn','status']){");
+
+// L'extension de survol est ajoutée à la liste des pages côté éditeur
+// sans modifier les interactions tactile/clavier du moteur original.
+const ejHoverAnchor="    actions.append(summary,menu);row.append(actions);";
+if(source.split(ejHoverAnchor).length!==2)throw Error("Le menu des pages a changé.");
+source=source.replace(ejHoverAnchor,"    // Souris : survol des trois points = ouverture immédiate.\n    // Clic/tap et navigation clavier continuent à fonctionner.\n    if(window.matchMedia('(hover:hover) and (pointer:fine)').matches){\n     let closeTimer=0;\n     const cancelClose=()=>clearTimeout(closeTimer);\n     const closeLater=()=>{\n      cancelClose();\n      closeTimer=window.setTimeout(()=>{\n       if(!summary.matches(':hover')&&!menu.matches(':hover')&&!actions.matches(':focus-within'))\n        actions.open=false;\n      },260);\n     };\n     summary.addEventListener('pointerenter',event=>{\n      if(event.pointerType==='touch')return;\n      cancelClose();\n      if(!actions.open)actions.open=true;\n     });\n     actions.addEventListener('pointerenter',cancelClose);\n     actions.addEventListener('pointerleave',closeLater);\n     menu.addEventListener('pointerenter',cancelClose);\n     menu.addEventListener('pointerleave',closeLater);\n    }\n"+ejHoverAnchor);
 
 writeFileSync(path,source);
 console.log("Extension pages seules appliquée au véritable pageWorkspace.");
