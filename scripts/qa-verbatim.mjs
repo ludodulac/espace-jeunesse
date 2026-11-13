@@ -38,6 +38,29 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
   assert.ok(sideBox.y<canvasBox.y,label+" : liste des pages doit rester au-dessus de l'éditeur");
  }
 
+
+ // Les trois points doivent ouvrir un menu intégralement visible SANS
+ // devoir descendre dans le petit défilement de la colonne de gauche.
+ const dotMenu=page.locator('.ej-page-status-row .page-options').first();
+ const threeDots=dotMenu.locator('summary');
+ const parentScrollBefore=await page.locator('#workspace>.layout>aside.panel').evaluate(el=>el.scrollTop);
+ await threeDots.click();
+ if(!hasTouch){
+  const popup=dotMenu.locator('.ej-page-flyout:popover-open');
+  await popup.waitFor();
+  assert.ok(await popup.getByRole("button",{name:"Dupliquer"}).isVisible());
+  assert.ok(await popup.locator('select[aria-label^="Visibilité de"]').isVisible());
+  const b=await popup.boundingBox();
+  assert.ok(b.x>=0&&b.y>=0&&b.x+b.width<=width+1&&b.y+b.height<=height+1,
+   label+" : menu des trois points coupé par la colonne gauche ou par l'écran");
+  assert.equal(await page.locator('#workspace>.layout>aside.panel').evaluate(el=>el.scrollTop),
+   parentScrollBefore,label+" : la colonne de pages défile inutilement");
+  await page.keyboard.press("Escape");
+  await page.locator('.ej-page-flyout:popover-open').waitFor({state:'hidden'});
+ }else{
+  assert.ok(await dotMenu.getByRole("button",{name:"Dupliquer"}).isVisible());
+  await threeDots.click();
+ }
  const plus=page.locator(".canvas .section-add-blue").first();
  await plus.click({force:true});
  let palette=hasTouch?page.locator("dialog.editor-insert-dialog[open]"):page.locator(".section-insert-choices:not([hidden])");

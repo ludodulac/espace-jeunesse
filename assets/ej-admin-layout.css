@@ -64,20 +64,32 @@
  #ej-original-shell #workspace>.layout>.panel .general-pages-list{
   padding:7px 8px 0;gap:4px;
  }
- /* Les actions restent visibles à l'intérieur de la liste défilante,
-    au lieu de s'ouvrir dans une zone qui serait coupée sur l'écran. */
- #ej-original-shell #workspace>.layout>.panel .ej-page-status-row:has(.page-options[open]){
-  grid-template-columns:minmax(0,1fr) 14px;
+
+ /* Le menu d'actions flotte dans la couche supérieure du navigateur :
+    aucune flèche de défilement dans le petit panneau des pages. */
+ #ej-original-shell .ej-page-status-row>.page-options>.page-options-menu.ej-page-flyout[popover]:not(:popover-open){
+  display:none!important;
  }
- #ej-original-shell #workspace>.layout>.panel .ej-page-status-row>.page-options[open]{
-  grid-column:1/-1;grid-row:2;width:100%;max-width:none;
+ #ej-original-shell .ej-page-status-row>.page-options>.page-options-menu.ej-page-flyout:popover-open{
+  position:fixed!important;
+  width:300px!important;
+  min-width:0!important;
+  max-width:calc(100vw - 24px)!important;
+  max-height:calc(100dvh - 24px)!important;
+  overflow-y:auto!important;
+  margin:0!important;
+  padding:12px!important;
+  display:grid!important;
+  gap:8px!important;
+  background:#fff!important;
+  border:1px solid #cbd4da!important;
+  border-radius:13px!important;
+  box-shadow:0 16px 40px #1829383b!important;
+  z-index:500!important;
  }
- #ej-original-shell #workspace>.layout>.panel .ej-page-status-row>.page-options[open]>.page-options-menu{
-  position:static;width:100%;max-width:100%;min-width:0;margin-top:6px;
-  box-shadow:none;border:1px solid #e1e5e8;
- }
- #ej-original-shell #workspace>.layout>.panel .ej-page-status-row>.page-options[open]>summary{
-  margin-left:auto;width:37px;
+ #ej-original-shell .ej-page-status-row>.page-options>.page-options-menu.ej-page-flyout:popover-open>.btn{
+  min-height:40px;
+  text-align:left;
  }
  #ej-original-shell #workspace>.layout .canvas-wrap,
  #ej-original-shell #workspace>.layout .canvas{max-width:none;width:100%}
