@@ -101,7 +101,14 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  await page.locator('.content-section[data-layout="columns"]').first().waitFor();
  assert.equal(await page.locator(".content-section .section-column").count(),2);
  const green=page.locator(".content-section .section-column").first().locator(".section-add-green").first();
- await green.click({force:true});
+ await green.scrollIntoViewIfNeeded();
+ await page.evaluate(()=>{
+  const button=document.querySelector(".content-section .section-column .section-add-green");
+  const rect=button.getBoundingClientRect();
+  const safeLimit=window.innerHeight-130;
+  if(rect.bottom>safeLimit)window.scrollBy(0,rect.bottom-safeLimit+35);
+ });
+ await green.click();
  palette=hasTouch?page.locator("dialog.editor-insert-dialog[open]"):page.locator(".section-element-menu:not([hidden])");
  await palette.getByRole("button",{name:"Titre",exact:true}).click();
  const title=page.locator(".section-column .block .ed").first();
