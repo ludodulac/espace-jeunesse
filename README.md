@@ -5,7 +5,7 @@ Site indépendant de **Célébrations**, avec une seule structure : des **pages*
 - Accueil personnalisable, pages publiques, brouillons et pages masquées.
 - Menu principal et liens de bas de page librement configurables.
 - Editeur mobile : textes, titres, images, lecteurs audio, vidéos, PDF, liens et colonnes.
-- Médiathèque **uniquement dans l'administration**, avec onglet « Inutilisés ».
+- Médiathèque **uniquement dans l'administration**, avec liens publics directs, références de pages colorées et sélection d'audios pour Ludodio.
 - Données et médias isolés dans de **nouvelles** ressources Cloudflare D1, R2 et Worker.
 - GitHub Pages pour le site public `https://ludodulac.github.io/espace-jeunesse/`.
 
@@ -39,6 +39,16 @@ Interface inspirée des principes de l'éditeur Célébrations : fond crème, na
 
 Les feuilles CSS des pages publiques et de l'administration proviennent **directement des modules canoniques** de `ludodulac/Celebrations`, sans reproduire les couleurs à l'approximation. Les gabarits utilisent les mêmes structures : `site-menu-bar`, `general-navigation`, `site-paper`, `footer-pages`, `shell stage-editor`, `rail`, `canvas-wrap`, `canvas`, `block`, `tools` et `ed`. Le champ visuel permet de modifier directement les textes, de déplacer, dupliquer et supprimer des blocs, et d'insérer entre les blocs.
 
-Le **moteur métier** reste volontairement limité aux pages : aucune célébration, compte de membre, catégorie ou outil de traduction n'est repris. La médiathèque est privée et les médias ne figurent publiquement que lorsqu'ils sont placés dans une page.
+Le **moteur métier** reste volontairement limité aux pages : aucune célébration, compte de membre, catégorie ou outil de traduction n'est repris. Le catalogue de la médiathèque reste réservé à l’administration, mais chaque fichier possède une URL publique directe, même hors des pages et après leur suppression. Un fichier non référencé affiche « N’apparaît nulle part ». Les pages liées sont indiquées en vert (publiée), orange (brouillon) ou gris (masquée). Les MP3 proposés à Ludodio sont liés sans nouvelle copie R2 et sans mélanger les sons privés du Studio.
 
 Aucune donnée, ressource Cloudflare ou identifiant de Célébrations n'est copié. La sauvegarde commune via Cloudflare reste à activer séparément.
+
+
+## Médiathèque et Ludodio — novembre 2026
+
+- L’inventaire D1/R2 est indépendant des pages. Les fichiers restent listés après masquage, passage en brouillon ou suppression d’une page.
+- Chaque image, PDF ou audio possède un lien direct `https://espace-jeunesse-api.rondes.workers.dev/media/<uuid>` ouvrable sans connexion : **ne pas y placer de données confidentielles**.
+- Les badges de page mènent au site pour les pages publiées et à l’administration pour les brouillons/pages masquées.
+- « Proposer à Ludodio » place uniquement l’ID dans `ludodio_links`; l’administration Ludodio peut alors choisir ce fichier pour un conte sans le dupliquer. Les sons/effets/projets du Studio restent entièrement indépendants.
+- « Supprimer » demande une confirmation simple, enlève les références dans les pages et les sélections Ludodio, puis supprime le fichier du R2. Une histoire Ludodio liée à ce fichier devra alors être réassociée.
+- Les anciennes données et les ressources Célébrations ne sont ni migrées ni modifiées.

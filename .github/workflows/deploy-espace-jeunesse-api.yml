@@ -1,0 +1,50 @@
+name: Déployer les évolutions Espace Jeunesse (sans rotation des secrets)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/src/index.js'
+      - 'worker/schema.sql'
+      - '.github/workflows/deploy-espace-jeunesse-api.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: espace-jeunesse-api-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Vérifier les identifiants du projet indépendant
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          grep -q 'name = "espace-jeunesse-api"' worker/wrangler.toml
+          grep -q 'database_name = "espace-jeunesse-db"' worker/wrangler.toml
+          grep -q 'bucket_name = "espace-jeunesse-media"' worker/wrangler.toml
+          sed 's/REPLACE_WITH_NEW_D1_DATABASE_ID/1ccf87df-2e24-48ab-88cd-3fca0560d76b/' worker/wrangler.toml > worker/wrangler-ci.toml
+          node --check worker/src/index.js
+      - name: Appliquer seulement les tables additives du projet Espace Jeunesse
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file=worker/schema.sql --config=worker/wrangler-ci.toml
+      - name: Déployer le code sans remplacer secrets ni variables existantes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4 deploy --config=worker/wrangler-ci.toml --keep-vars --strict
+      - name: Vérifier la lecture du catalogue public
+        run: |
+          set -euo pipefail
+          curl -fsS --retry 4 --retry-delay 3 'https://espace-jeunesse-api.rondes.workers.dev/api/ludodio/catalog' | python3 -c "import sys,json; assert isinstance(json.load(sys.stdin)['audios'],list)"

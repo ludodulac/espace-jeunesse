@@ -160,22 +160,104 @@ async function saveState(req,env){
 function getMime(name){
  const ext=String(name).toLowerCase().split(".").pop();return mimeMap[ext]||"";
 }
+// The canonical D1 media list outlives pages, drafts, hidden blocks and their deletion.
+// Only an explicit owner action deletes a file; status is informational, not an ACL.
+function mediaIdFromReference(value){
+ const text=String(value||"");
+ const match=text.match(/(?:^|\/)media\/([0-9a-f-]{36})(?:[?#]|$)/i);
+ return match?.[1]||"";
+}
+function visitMediaBlocks(blocks,found){
+ for(const b of blocks||[]){
+  if(!b||typeof b!=="object")continue;
+  if(b.type==="section"){for(const column of b.columns||[])visitMediaBlocks(column,found);continue}
+  if(b.mediaId&&/^[0-9a-f-]{36}$/i.test(b.mediaId))found.add(b.mediaId);
+  for(const prop of ["url","href","src","cover"]) {
+   const id=mediaIdFromReference(b[prop]);if(id)found.add(id);
+  }
+ }
+}
+function mediaReferences(state){
+ const uses=new Map();
+ for(const page of state.pages||[]){
+  const found=new Set();visitMediaBlocks(page.blocks,found);
+  for(const mediaId of found){
+   if(!uses.has(mediaId))uses.set(mediaId,[]);
+   uses.get(mediaId).push({id:page.id,title:page.title,slug:page.slug,
+    status:page.status,placement:page.placement});
+  }
+ }
+ return uses;
+}
+async function linkedLudodio(env){
+ const links=await env.DB.prepare("SELECT media_id FROM ludodio_links").all();
+ return new Set((links.results||[]).map(r=>r.media_id));
+}
 async function listMedia(env,req){
- const rows=await env.DB.prepare("SELECT id,name,mime,size,created_at FROM media ORDER BY created_at DESC").all();
- return json(env,req,{media:(rows.results||[]).map(x=>({id:x.id,name:x.name,type:x.mime,size:x.size,createdAt:x.created_at}))});
+ const [rows,site,ludodio]=await Promise.all([
+  env.DB.prepare("SELECT id,name,mime,size,created_at FROM media ORDER BY created_at DESC").all(),
+  currentState(env),linkedLudodio(env)
+ ]);
+ const uses=mediaReferences(site.state);
+ return json(env,req,{media:(rows.results||[]).map(x=>({
+  id:x.id,name:x.name,type:x.mime,size:x.size,createdAt:x.created_at,
+  url:new URL("/media/"+x.id,req.url).href,uses:uses.get(x.id)||[],ludodio:ludodio.has(x.id)
+ }))});
+}
+// Only the owner-approved recordings are discoverable from the Ludodio selector.
+// Ordinary Espace Jeunesse media never leak into a public catalogue.
+async function ludodioCatalogue(env,req){
+ const rows=await env.DB.prepare(
+  "SELECT m.id,m.name,m.size,m.created_at FROM media m JOIN ludodio_links l ON l.media_id=m.id WHERE m.mime IN ('audio/mpeg','audio/wav') ORDER BY l.created_at DESC"
+ ).all();
+ return json(env,req,{audios:(rows.results||[]).map(m=>({
+  id:m.id,title:m.name,size:m.size,url:new URL("/media/"+m.id,req.url).href
+ }))});
+}
+async function setLudodioLink(env,req,id,enabled){
+ const m=await env.DB.prepare("SELECT id,mime FROM media WHERE id=?").bind(id).first();
+ if(!m)return fail(env,req,"Fichier introuvable",404);
+ if(!["audio/mpeg","audio/wav"].includes(m.mime))return fail(env,req,"Sélectionnez un fichier audio.",422);
+ if(enabled)await env.DB.prepare("INSERT OR IGNORE INTO ludodio_links(media_id) VALUES(?)").bind(id).run();
+ else await env.DB.prepare("DELETE FROM ludodio_links WHERE media_id=?").bind(id).run();
+ return json(env,req,{ok:true,ludodio:enabled});
+}
+function removeMediaRefs(blocks,id){
+ let changed=false;
+ for(const b of blocks||[]){
+  if(!b||typeof b!=="object")continue;
+  if(b.type==="section"){for(const column of b.columns||[])if(removeMediaRefs(column,id))changed=true;continue}
+  if(b.mediaId===id){b.mediaId="";changed=true}
+  for(const prop of ["url","href","src","cover"]){
+   if(mediaIdFromReference(b[prop])===id){b[prop]="";changed=true}
+  }
+ }
+ return changed;
 }
 async function deleteMedia(env,req,id){
  const row=await env.DB.prepare("SELECT id,r2_key FROM media WHERE id=?").bind(id).first();
  if(!row)return fail(env,req,"Fichier introuvable",404);
+ // Explicit deletion is allowed even for a used file. Clear references without
+ // removing page blocks; CAS prevents overwriting concurrent editing.
  const site=await currentState(env);
- if(JSON.stringify(site.state).includes(id))return fail(env,req,"Fichier encore utilisé dans une page, y compris en brouillon.",409);
+ const clone=structuredClone(site.state);
+ let changed=false;
+ for(const page of clone.pages||[])if(removeMediaRefs(page.blocks,id))changed=true;
+ if(changed){
+  const write=await env.DB.prepare("UPDATE site_state SET version=version+1,data=?,updated_at=CURRENT_TIMESTAMP WHERE id=1 AND version=?")
+   .bind(JSON.stringify(clone),site.version).run();
+  if(!write.meta?.changes)return fail(env,req,"Les pages ont changé. Rechargez et recommencez.",409);
+ }
  await env.MEDIA.delete(row.r2_key);
- await env.DB.prepare("DELETE FROM media WHERE id=?").bind(id).run();
+ await env.DB.batch([
+  env.DB.prepare("DELETE FROM ludodio_links WHERE media_id=?").bind(id),
+  env.DB.prepare("DELETE FROM media WHERE id=?").bind(id)
+ ]);
  return json(env,req,{ok:true});
 }
 async function uploadInit(env,req){
  let input;try{input=await bodyJson(req,5000)}catch{return fail(env,req,"Métadonnées manquantes")}
- const name=String(input.name||"").replace(/[\\/\r\n]/g,"_").trim().slice(0,160);
+ const name=String(input.name||"").replace(/[\/\r\n]/g,"_").trim().slice(0,160);
  const size=Number(input.size),mime=getMime(name);
  if(!name||!mime||!Number.isSafeInteger(size)||size<1||size>MAX_MEDIA)return fail(env,req,"Format ou taille refusé (maximum 200 Mio).");
  const id=crypto.randomUUID(),key="media/"+id;
@@ -242,6 +324,7 @@ export default {
    if(!env.DB||!env.MEDIA)return fail(env,req,"Bindings D1/R2 manquants",503);
    if(req.method!=="GET"&&req.method!=="HEAD"&&req.headers.has("Origin")&&!cors(env,req))return fail(env,req,"Origine non autorisée",403);
    if(req.method==="GET"&&path==="/api/site"){const s=await currentState(env);return json(env,req,publicProjection(s.state))}
+    if(req.method==="GET"&&path==="/api/ludodio/catalog")return ludodioCatalogue(env,req);
    if((req.method==="GET"||req.method==="HEAD")&&/^\/media\/[0-9a-f-]{36}$/.test(path))return serveMedia(env,req,path.slice(7));
    if(req.method==="POST"&&path==="/api/auth/login"){
      if(!env.ADMIN_PASSWORD||!env.SESSION_SECRET)return fail(env,req,"Administration non configurée",503);
@@ -252,6 +335,9 @@ export default {
    if(req.method==="GET"&&path==="/api/admin/state"){return json(env,req,await currentState(env))}
    if(req.method==="PUT"&&path==="/api/admin/state")return saveState(req,env);
    if(req.method==="GET"&&path==="/api/admin/media")return listMedia(env,req);
+    const ludodioPath=path.match(/^\/api\/admin\/ludodio\/([0-9a-f-]{36})$/);
+    if(ludodioPath&&(req.method==="PUT"||req.method==="DELETE"))
+      return setLudodioLink(env,req,ludodioPath[1],req.method==="PUT");
    if(req.method==="DELETE"&&/^\/api\/admin\/media\/[0-9a-f-]{36}$/.test(path))return deleteMedia(env,req,path.slice("/api/admin/media/".length));
    if(req.method==="POST"&&path==="/api/admin/uploads/init")return uploadInit(env,req);
    const partPath=path.match(/^\/api\/admin\/uploads\/([0-9a-f-]{36})\/part$/);

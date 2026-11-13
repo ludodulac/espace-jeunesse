@@ -28,3 +28,10 @@ CREATE TABLE IF NOT EXISTS login_limits (
   attempts INTEGER NOT NULL DEFAULT 0,
   bucket INTEGER NOT NULL
 );
+
+-- Sélections explicites d'audios Espace Jeunesse à proposer dans Ludodio.
+-- Aucune copie audio : les URL publiques pointent toujours vers le même objet R2.
+CREATE TABLE IF NOT EXISTS ludodio_links (
+  media_id TEXT PRIMARY KEY REFERENCES media(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
