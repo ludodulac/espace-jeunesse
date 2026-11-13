@@ -2924,6 +2924,11 @@ let db=localEditorState.db;
 const {stageTab,stageActive}=localEditorState;
 let tab=STAGE_SEED?stageTab:'pages',id=stageActive?.id||'home',
  dirty=false,preview=false,target=null,imageCoverTarget=false,selectedBlockId=null,mediaCategory='images';
+if(window.__EJ_PAGES_ONLY__){
+ const requestedPage=new URLSearchParams(location.search).get("editPage");
+ const actual=(db.pages||[]).find(p=>p.group==="page"&&p.id===requestedPage);
+ if(actual){id=actual.id;tab=actual.placement==="footer"?"footer":"pages";}
+}
 
 const LIVE_MEDIA_UPLOAD_HOST=(location.hostname==='ronde-des-archanges-universelle.eu'||location.hostname==='www.ronde-des-archanges-universelle.eu'||location.hostname==='celebrations-m016-admin-preprod.rondes.workers.dev');
 const IS_STAGE=!!STAGE_SEED,SHARED_KEY='ej-original-shared-pages-v1',PLANS_KEY='celebrations-demo-planned-v1';
@@ -6090,6 +6095,18 @@ function libraryPreview(card,name,src,category){
 }
 let mediaSearch='';
 function media(){
+ if(window.__EJ_PAGES_ONLY__&&window.EJMediaLibrary){
+  window.EJMediaLibrary.render({
+   host:w,category:mediaCategory,
+   onCategory:key=>{mediaCategory=key;render()},
+   selectAudio:chosenBlock?.kind==="audio"?(item)=>{
+    chosenBlock.src=item.url;delete chosenBlock.remoteKey;
+    if(!chosenBlock.text||chosenBlock.text==="MP3 à choisir")chosenBlock.text=String(item.name||"Enregistrement audio").slice(0,180);
+    chosenBlock=null;selectedBlockId=null;mark();tab=mediaReturnTab;render();
+   }:null
+  });
+  return;
+ }
  if((IS_STAGE||window.EJBridge?.remote)&&!remoteMediaLoading&&!globalMediaLoaded)void refreshGlobalMedia();
  if(!globalFilesLoading)
   loadGlobalFiles().then(()=>{if(tab==='media'&&!document.querySelector('.audio-import-section[open]'))render()});
