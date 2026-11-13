@@ -1,2 +1,2 @@
-/* URL du NOUVEAU Worker Espace Jeunesse. Jamais celui de Célébrations. */
-window.ESPACE_JEUNESSE_CONFIG = { apiBase: "" };
+/* API de stockage privée, projet indépendant Espace Jeunesse. */
+window.ESPACE_JEUNESSE_CONFIG = { apiBase: "https://espace-jeunesse-api.rondes.workers.dev" };
