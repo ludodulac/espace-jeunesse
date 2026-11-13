@@ -8,8 +8,19 @@ const old="if(IS_STAGE&&!privateEdit&&!preview&&['page','celebration'].includes(
 if(source.split(old).length!==2)throw Error("Les réglages de pages du moteur source ont changé.");
 const ui=`
  if(window.__EJ_PAGES_ONLY__&&!preview&&p.group==='page'){
-  const row=n('div','editor-language-row m020-settings');
-  row.append(n('strong','','Réglages de la page'));
+  // Ce bandeau conserve l'éditeur Célébrations d'origine et accueille ses
+  // trois VRAIS boutons d'action, déplacés par render() sans les cloner.
+  const row=n('div','editor-language-row m020-settings ej-page-settings');
+  row.setAttribute('aria-label','Réglages de la page et actions d’édition');
+  const head=n('div','ej-page-settings-head');
+  head.append(n('strong','ej-settings-heading','Réglages de la page'));
+  head.append(n('div','ej-page-toolbar-slot'));
+  row.append(head);
+  const details=n('details','ej-page-settings-details');
+  details.open=window.__EJ_SETTINGS_EXPANDED__??window.matchMedia('(min-width:701px)').matches;
+  details.addEventListener('toggle',()=>{window.__EJ_SETTINGS_EXPANDED__=details.open});
+  details.append(n('summary','','Nom, visibilité et emplacement'));
+  const fields=n('div','ej-page-settings-fields');
   const nameField=n('label','editor-language-choice m024-page-name','Nom de la page');
   const nameInput=n('input');nameInput.type='text';nameInput.maxLength=95;nameInput.value=p.name;
   nameInput.setAttribute('aria-label','Renommer cette page');
@@ -18,15 +29,15 @@ const ui=`
    if(!name){nameInput.value=p.name;return}
    p.name=name;mark();render();
   };
-  nameField.append(nameInput);row.append(nameField);
+  nameField.append(nameInput);fields.append(nameField);
   const visLabel=n('label','editor-language-choice','Visibilité');
   const vis=n('select');vis.setAttribute('aria-label','Visibilité de la page');
   for(const [value,label] of [['draft','Brouillon'],['published','Publiée'],['hidden','Masquée']]){
    const o=n('option','',label);o.value=value;vis.append(o);
   }
-  vis.value=['draft','hidden','published'].includes(p.visibility)?p.visibility:'published';
+  vis.value=['draft','hidden','published'].includes(p.visibility)?p.visibility:'draft';
   vis.onchange=()=>{p.visibility=vis.value;mark();render()};
-  visLabel.append(vis);row.append(visLabel);
+  visLabel.append(vis);fields.append(visLabel);
   const placeLabel=n('label','editor-language-choice','Emplacement');
   const place=n('select');place.setAttribute('aria-label','Emplacement de la page');
   for(const [value,label] of [['menu','Menu principal'],['footer','Bas de page'],['none','Hors menu']]){
@@ -34,21 +45,8 @@ const ui=`
   }
   place.value=['menu','footer','none'].includes(p.placement)?p.placement:'menu';
   place.onchange=()=>{p.placement=place.value;mark();render()};
-  placeLabel.append(place);row.append(placeLabel);
-  row.append(b('↑',()=>{const position=db.pages.indexOf(p);if(position>0){db.pages.splice(position,1);db.pages.splice(position-1,0,p);mark();render()}},'sm'));
-  row.append(b('↓',()=>{const position=db.pages.indexOf(p);if(position<db.pages.length-1){db.pages.splice(position,1);db.pages.splice(position+1,0,p);mark();render()}},'sm'));
-  if(p.id!==db.siteHomeId)row.append(b('Définir comme accueil',()=>{db.siteHomeId=p.id;mark();render()},'sm'));
-  row.append(b('Dupliquer',()=>{
-   const copy=clone(p);copy.id='neutral-'+crypto.randomUUID();
-   copy.name=p.name+' (copie)';copy.visibility='draft';copy.blocks=clone(p.blocks||[]);
-   db.pages.splice(db.pages.indexOf(p)+1,0,copy);id=copy.id;mark();render();
-  },'sm'));
-  if(p.id!==db.siteHomeId)row.append(b('Supprimer',async ()=>{
-   if(!(await siteConfirm('Supprimer cette page ?')))return;
-   const position=db.pages.indexOf(p);
-   if(position>=0)db.pages.splice(position,1);
-   id=db.pages.find(q=>q.group==='page')?.id||'accueil';mark();render();
-  },'sm danger'));
+  placeLabel.append(place);fields.append(placeLabel);
+  details.append(fields);row.append(details);
   right.append(row);
  }
 `;
@@ -73,6 +71,15 @@ source=source.replace(listAppend,listAppend+"\n  "+legend);
 const desktopFlyoutAnchor="    actions.append(summary,menu);row.append(actions);";
 if(source.split(desktopFlyoutAnchor).length!==2)throw Error("Menu des pages d'origine modifié : impossible d'ouvrir le panneau flottant.");
 source=source.replace(desktopFlyoutAnchor,"\n    // Sur ordinateur, la liste peut défiler sans jamais couper le menu.\n    // L'API Popover affiche les actions au premier plan, hors du panneau.\n    if(window.matchMedia('(min-width:1051px)').matches&&typeof menu.showPopover==='function'){\n     menu.classList.add('ej-page-flyout');\n     menu.setAttribute('popover','auto');\n     menu.setAttribute('role','group');\n     menu.setAttribute('aria-label','Actions pour la page '+q.name);\n     actions.addEventListener('toggle',()=>{\n      if(!actions.open){\n       if(menu.matches(':popover-open'))menu.hidePopover();\n       return;\n      }\n      document.querySelectorAll('.ej-page-flyout:popover-open').forEach(open=>{\n       if(open!==menu)open.hidePopover();\n      });\n      menu.showPopover();\n      const anchor=summary.getBoundingClientRect();\n      const bounds=menu.getBoundingClientRect();\n      const left=Math.max(12,Math.min(anchor.right+12,innerWidth-bounds.width-12));\n      const top=Math.max(12,Math.min(anchor.top-14,innerHeight-bounds.height-12));\n      menu.style.setProperty('left',left+'px','important');\n      menu.style.setProperty('top',top+'px','important');\n     });\n     menu.addEventListener('toggle',event=>{\n      if(event.newState==='closed'&&actions.open)actions.open=false;\n     });\n    }\n"+desktopFlyoutAnchor);
+
+// La barre d'outils d'origine doit survivre à chaque render() : le composant
+// réglages de page est reconstruit à chaque changement de page.
+const ejRenderAnchor="function render(){\n if(!adminMembersEnabled";
+if(source.split(ejRenderAnchor).length!==2)throw Error("Le moteur source a changé dans render().");
+source=source.replace(ejRenderAnchor,"function render(){\n const ejToolbar=document.querySelector('#ej-original-shell .topbar');\n const ejContent=document.querySelector('#ej-original-shell .content');\n // Sauver la barre du DOM avant que le moteur ne remplace #workspace :\n // conserver les boutons, leurs onclick et la pile Undo du client original.\n if(ejToolbar&&ejContent&&ejToolbar.parentElement!==ejContent)ejContent.prepend(ejToolbar);\n if(!adminMembersEnabled");
+const ejRenderTail=" for(const key of ['save-btn','preview-btn','undo-btn','status']){";
+if(source.split(ejRenderTail).length!==2)throw Error("La fin de render() a changé.");
+source=source.replace(ejRenderTail," if(window.__EJ_PAGES_ONLY__&&!preview&&['pages','footer'].includes(tab)){\n  const slot=document.querySelector('#workspace .ej-page-settings .ej-page-toolbar-slot');\n  if(slot&&ejToolbar)slot.append(ejToolbar);\n }\n for(const key of ['save-btn','preview-btn','undo-btn','status']){");
 
 writeFileSync(path,source);
 console.log("Extension pages seules appliquée au véritable pageWorkspace.");
