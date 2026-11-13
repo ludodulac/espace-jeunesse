@@ -56,15 +56,16 @@ console.log("Conformité visuelle au site source et séparation des projets : OK
 const newHtml=read("admin.html"),newCss=read("assets/ej-admin-layout.css"),
   newBridge=read("assets/ej-original-bridge.js"),
   patch=read("scripts/patch-page-controls.mjs");
-assert.match(newHtml,/data-ej-ui-version="2026-11-13-compact"/);
-assert.match(newHtml,/assets\/ej-admin-layout\.css\?v=ej-20261113-compact/);
-assert.match(newHtml,/<a id="view-site-btn" class="navbtn ej-site-link"/);
+assert.match(newHtml,/data-ej-ui-version="2026-11-13-navigation2"/);
+assert.match(newHtml,/assets\/ej-admin-layout\.css\?v=ej-20261113-navigation2/);
+assert.match(newHtml,/class="mark ej-site-mark-link" href="index.html"/);
+assert.doesNotMatch(newHtml,/id="view-site-btn"/);
 assert.match(newHtml,/aria-label="Commandes de la page"/);
 assert.doesNotMatch(newHtml,/<header class="topbar"/);
 assert.match(newCss,/position:sticky!important/);
 assert.match(newCss,/\.ej-page-settings-head/);
 assert.match(newCss,/#ej-original-shell \.topbar\{\n position:sticky!important/);
-assert.match(newBridge,/celebrations-editor-verbatim\.js\?v=ej-20261113-compact/);
+assert.match(newBridge,/celebrations-editor-verbatim\.js\?v=ej-20261113-navigation2/);
 assert.match(patch,/ej-page-toolbar-slot/);
 assert.match(patch,/const ejToolbar=document\.querySelector/);
 
@@ -74,7 +75,20 @@ const hover=read("assets/ej-hover-menu.js");
 assert.match(newHtml,/class="ej-admin-home-link" href="admin.html"/);
 assert.match(patch,/details\.open=window\.__EJ_SETTINGS_EXPANDED__===true/);
 assert.match(newCss,/bandeau compact/);
-assert.match(index,/assets\/ej-hover-menu\.js\?v=ej-20261113-compact/);
+assert.match(index,/assets\/ej-hover-menu\.js\?v=ej-20261113-navigation2/);
 assert.match(hover,/pointerenter/);
 assert.match(hover,/pointerleave/);
 assert.match(patch,/const ejHoverAnchor/);
+
+/* Les réglages se ferment en dehors, le titre visiteurs revient à l'accueil,
+   et le formulaire de connexion permet d'afficher/masquer le code. */
+const adminUi=read("assets/ej-admin-ui.js"),
+  bridge=read("assets/ej-original-bridge.js"),
+  authCss=read("assets/ej-auth.css");
+assert.match(newHtml,/assets\/ej-admin-ui\.js\?v=ej-20261113-navigation2/);
+assert.match(adminUi,/pointerdown/);
+assert.match(adminUi,/__EJ_SETTINGS_EXPANDED__=false/);
+assert.match(index,/<a id="site-title"[^>]*href="index.html"/);
+assert.match(bridge,/aria-controls/);
+assert.match(bridge,/Masquer le mot de passe/);
+assert.match(authCss,/\.ej-password-eye/);
