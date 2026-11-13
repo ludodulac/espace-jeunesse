@@ -104,7 +104,7 @@ mkdirSync("assets",{recursive:true});
 writeFileSync("assets/celebrations-editor-verbatim.js",client);
 writeFileSync("assets/celebrations-editor-verbatim.css",DEMO_CSS+"\n"+ADMIN_STAGE_LAYOUT);
 const html=`<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#293746"><title>Administration — Espace Jeunesse</title>
 <link rel="stylesheet" href="assets/celebrations-editor-verbatim.css">
 <link rel="stylesheet" href="assets/ej-auth.css">
@@ -121,12 +121,12 @@ const html=`<!doctype html><html lang="fr"><head>
 <button class="navbtn" data-tab="media">▧ Médiathèque (administration)</button>
 <button class="navbtn" data-tab="settings">⚙ Paramètres</button>
 <button class="navbtn" data-tab="guide">ⓘ Mode d’emploi</button>
+<a id="view-site-btn" class="navbtn ej-site-link" href="index.html" target="_blank" rel="noopener noreferrer" aria-label="Voir le site public dans un nouvel onglet">↗ Voir le site</a>
 </nav></aside>
-<div class="content"><header class="topbar"><div></div><div class="actions">
-<button id="preview-btn" class="btn sm" title="Voir la page en brouillon, sans publication">Aperçu du brouillon</button>
+<div class="content"><div class="topbar" role="region" aria-label="Commandes permanentes d'édition"><div class="actions" role="toolbar" aria-label="Modifier et enregistrer">
+<button id="preview-btn" class="btn sm" title="Prévisualiser la page sans la publier">Aperçu du brouillon</button>
 <button id="save-btn" class="btn primary">Enregistrer</button>
-<a id="view-site-btn" class="btn view-site-btn" href="index.html" target="_blank" rel="noopener noreferrer">Voir le site</a>
-</div></header>
+</div></div>
 <main class="main"><div id="ej-storage-notice" role="status"></div><div id="workspace"></div>
 <p class="status" id="status" role="status" aria-live="polite"></p></main></div></div>
 <div id="editor-save-toast" class="editor-save-toast" role="status" aria-live="polite" hidden></div>

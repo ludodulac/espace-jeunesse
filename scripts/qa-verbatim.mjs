@@ -17,6 +17,30 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.ok(await page.locator('[data-tab="pages"]').isVisible());
  assert.ok(await page.locator('[data-tab="footer"]').isVisible());
  assert.ok(await page.locator('[data-tab="media"]').isVisible());
+ // Barre basse permanente : une seule commande Voir le site, placée dans
+ // le rail gauche ; Annuler, Aperçu et Enregistrer restent toujours visibles.
+ assert.equal(await page.locator('#view-site-btn').count(),1);
+ assert.ok(await page.locator('.rail nav #view-site-btn').isVisible(),label+" : Voir le site absent du menu");
+ assert.equal(await page.locator('.topbar #view-site-btn').count(),0);
+ const toolbar=page.locator('#ej-original-shell .topbar');
+ assert.ok(await toolbar.isVisible());
+ assert.ok(await page.locator('.topbar #undo-btn').isVisible());
+ assert.equal(await page.locator('.topbar #undo-btn').getAttribute('aria-label'),'Annuler la dernière action');
+ assert.ok(await page.locator('.topbar #preview-btn').isVisible());
+ assert.ok(await page.locator('.topbar #save-btn').isVisible());
+ await page.evaluate(()=>{document.body.style.minHeight='2200px';window.scrollTo(0,1200)});
+ const footerBox=await toolbar.boundingBox();
+ assert.ok(footerBox.y>height-140&&footerBox.y+footerBox.height<=height+2,
+  label+" : la barre d'actions ne reste pas fixée au bas de l'écran");
+ const pad=await page.locator('.main').evaluate(el=>parseFloat(getComputedStyle(el).paddingBottom));
+ assert.ok(pad>=112,label+" : marge de protection sous le dernier élément absente");
+ await page.locator('#preview-btn').click();
+ assert.match(await page.locator('#preview-btn').innerText(),/Revenir à l’édition/);
+ assert.ok(await page.locator('#save-btn').isVisible());
+ await page.locator('#preview-btn').click();
+ assert.match(await page.locator('#preview-btn').innerText(),/Aperçu du brouillon/);
+ await page.evaluate(()=>{document.body.style.minHeight='';window.scrollTo(0,0)});
+
  // Dot de statut accessible sur chaque page : publié, brouillon, masqué.
  const initialDot=page.locator('.general-pages-list .ej-page-status-row .inline-page-state').first();
  assert.ok(await initialDot.isVisible(),label+" : indicateur de publication absent");
@@ -62,13 +86,29 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
   await threeDots.click();
  }
  const plus=page.locator(".canvas .section-add-blue").first();
- await plus.click({force:true});
+ // Les contrôles bas restent devant : sur mobile, faire défiler la cible
+ // AU-DESSUS de la barre avant de vérifier les vrais clics du compositeur.
+ await plus.scrollIntoViewIfNeeded();
+ await page.evaluate(()=>{
+  const button=document.querySelector(".canvas .section-add-blue");
+  const rect=button.getBoundingClientRect();
+  const safeLimit=window.innerHeight-130;
+  if(rect.bottom>safeLimit)window.scrollBy(0,rect.bottom-safeLimit+35);
+ });
+ await plus.click();
  let palette=hasTouch?page.locator("dialog.editor-insert-dialog[open]"):page.locator(".section-insert-choices:not([hidden])");
  await palette.getByRole("button",{name:"Deux colonnes"}).click();
  await page.locator('.content-section[data-layout="columns"]').first().waitFor();
  assert.equal(await page.locator(".content-section .section-column").count(),2);
  const green=page.locator(".content-section .section-column").first().locator(".section-add-green").first();
- await green.click({force:true});
+ await green.scrollIntoViewIfNeeded();
+ await page.evaluate(()=>{
+  const button=document.querySelector(".content-section .section-column .section-add-green");
+  const rect=button.getBoundingClientRect();
+  const safeLimit=window.innerHeight-130;
+  if(rect.bottom>safeLimit)window.scrollBy(0,rect.bottom-safeLimit+35);
+ });
+ await green.click();
  palette=hasTouch?page.locator("dialog.editor-insert-dialog[open]"):page.locator(".section-element-menu:not([hidden])");
  await palette.getByRole("button",{name:"Titre",exact:true}).click();
  const title=page.locator(".section-column .block .ed").first();
