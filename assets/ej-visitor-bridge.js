@@ -24,7 +24,6 @@ async function init(){
   const fetched=await r.json();
   const withTotems=window.EJTotems?.mergeSite(fetched)||fetched;
   const data=window.EJPartners?.mergeSite(withTotems)||withTotems;
-  document.body.classList.toggle("ej-artisans-page",new URLSearchParams(location.search).get("page")==="artisans-peluches-totem");
   const pages=(data.pages||[]).filter(p=>p.status==="published");
   const list=pages.map(p=>({
    id:p.slug||p.id,name:p.title,group:"page",placement:p.placement||"menu",
