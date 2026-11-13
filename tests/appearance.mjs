@@ -51,13 +51,19 @@ for(const fragment of ["function sectionMenu(","function sectionColumn(","functi
  assert.ok(upstreamEditor.includes(fragment),"composant source conservé : "+fragment);
 console.log("Conformité visuelle au site source et séparation des projets : OK");
 
-/* Régression : les ressources du nouvel éditeur doivent rester versionnées
-   pour éviter que le navigateur conserve l'ancienne barre du haut. */
-const newHtml=read("admin.html"),newCss=read("assets/ej-admin-layout.css");
-assert.match(newHtml,/data-ej-ui-version="2026-11-13-toolbar"/);
-assert.match(newHtml,/assets\/ej-admin-layout\.css\?v=ej-20261113-toolbar/);
+/* Les fichiers sont versionnés afin de ne pas récupérer l'ancienne barre basse ;
+   les VRAIES commandes sont déplacées vers les réglages collants de la page. */
+const newHtml=read("admin.html"),newCss=read("assets/ej-admin-layout.css"),
+  newBridge=read("assets/ej-original-bridge.js"),
+  patch=read("scripts/patch-page-controls.mjs");
+assert.match(newHtml,/data-ej-ui-version="2026-11-13-sticky"/);
+assert.match(newHtml,/assets\/ej-admin-layout\.css\?v=ej-20261113-sticky/);
 assert.match(newHtml,/<a id="view-site-btn" class="navbtn ej-site-link"/);
-assert.match(newHtml,/aria-label="Commandes permanentes d'édition"/);
+assert.match(newHtml,/aria-label="Commandes de la page"/);
 assert.doesNotMatch(newHtml,/<header class="topbar"/);
-assert.match(newCss,/position:fixed!important/);
-assert.match(newCss,/padding-bottom:calc\(128px/);
+assert.match(newCss,/position:sticky!important/);
+assert.match(newCss,/\.ej-page-settings-head/);
+assert.match(newCss,/#ej-original-shell \.topbar\{\n position:sticky!important/);
+assert.match(newBridge,/celebrations-editor-verbatim\.js\?v=ej-20261113-sticky/);
+assert.match(patch,/ej-page-toolbar-slot/);
+assert.match(patch,/const ejToolbar=document\.querySelector/);
