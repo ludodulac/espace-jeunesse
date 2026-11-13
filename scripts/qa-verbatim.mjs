@@ -7,7 +7,7 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  const ctx=await browser.newContext({viewport:{width,height},hasTouch,isMobile:hasTouch});
  const page=await ctx.newPage();
  // Le navigateur de test utilise le mode local, jamais le Worker de production.
- await page.route("**/config.js",route=>route.fulfill({contentType:"application/javascript",body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: \"\"};"}));
+ await page.route("**/config.js*",route=>route.fulfill({contentType:"application/javascript",body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: \"\"};"}));
  page.on("pageerror",err=>{failures.push(label+": "+err.message);console.error("JS ERROR",label,err.stack||err.message)});
  page.on("console",msg=>{if(msg.type()==="error")console.error("CONSOLE",label,msg.text())});
  page.on("requestfailed",req=>console.error("REQ FAILED",req.url(),req.failure()?.errorText));
@@ -128,7 +128,7 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  console.log(label+" : vrai moteur Célébrations, zones, éléments, sauvegarde locale, couleurs OK");
  // Vérifier le vrai moteur PUBLIC, ses titres, son menu et sa galerie absente.
  const visitor=await ctx.newPage();
- await visitor.route("**/config.js",route=>route.fulfill({contentType:"application/javascript",body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: \"\"};"}));
+ await visitor.route("**/config.js*",route=>route.fulfill({contentType:"application/javascript",body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: \"\"};"}));
  visitor.on("pageerror",err=>{failures.push(label+" VISITEUR: "+err.message);console.error("PUBLIC JS ERROR",err.stack||err.message)});
  await visitor.goto("http://127.0.0.1:8899/index.html",{waitUntil:"networkidle"});
  try{await visitor.locator(".trial-heading").first().waitFor({timeout:10000})}
