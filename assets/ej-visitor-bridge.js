@@ -21,7 +21,8 @@ async function init(){
  try{
   const r=await fetch((remote?API+"/api/site":"data/site.json"),{cache:"no-store"});
   if(!r.ok)throw Error("Pages indisponibles : "+r.status);
-  const data=await r.json(),pages=(data.pages||[]).filter(p=>p.status==="published");
+  const fetched=await r.json(),data=window.EJTotems?.mergeSite(fetched)||fetched;
+  const pages=(data.pages||[]).filter(p=>p.status==="published");
   const list=pages.map(p=>({
    id:p.slug||p.id,name:p.title,group:"page",placement:p.placement||"menu",
    visibility:"published",blocks:(p.blocks||[]).map(toOriginalBlock)
