@@ -5743,7 +5743,7 @@ function pageWorkspace(group,mount=w){
   nameInput.onchange=()=>{
    const name=nameInput.value.trim().slice(0,95);
    if(!name){nameInput.value=p.name;return}
-   p.name=name;window.__EJ_SETTINGS_EXPANDED__=true;mark();render();
+   p.name=name;window.__EJ_SETTINGS_EXPANDED__=false;mark();render();
   };
   nameField.append(nameInput);fields.append(nameField);
   const visLabel=n('label','editor-language-choice','Visibilité');
@@ -5752,7 +5752,7 @@ function pageWorkspace(group,mount=w){
    const o=n('option','',label);o.value=value;vis.append(o);
   }
   vis.value=['draft','hidden','published'].includes(p.visibility)?p.visibility:'draft';
-  vis.onchange=()=>{p.visibility=vis.value;window.__EJ_SETTINGS_EXPANDED__=true;mark();render()};
+  vis.onchange=()=>{p.visibility=vis.value;window.__EJ_SETTINGS_EXPANDED__=false;mark();render()};
   visLabel.append(vis);fields.append(visLabel);
   const placeLabel=n('label','editor-language-choice','Emplacement');
   const place=n('select');place.setAttribute('aria-label','Emplacement de la page');
@@ -5760,7 +5760,7 @@ function pageWorkspace(group,mount=w){
    const option=n('option','',label);option.value=value;place.append(option);
   }
   place.value=['menu','footer','none'].includes(p.placement)?p.placement:'menu';
-  place.onchange=()=>{p.placement=place.value;window.__EJ_SETTINGS_EXPANDED__=true;mark();render()};
+  place.onchange=()=>{p.placement=place.value;window.__EJ_SETTINGS_EXPANDED__=false;mark();render()};
   placeLabel.append(place);fields.append(placeLabel);
   details.append(fields);
   right.append(row);
