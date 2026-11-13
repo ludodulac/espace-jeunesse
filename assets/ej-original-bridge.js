@@ -95,7 +95,8 @@ async function prepare(key,seed){
  if(!remote)return;
  const data=await request("/api/admin/state");
  version=Number(data.version||0);
- const st=data.state||seed;
+ const original=data.state||seed;
+ const st=window.EJTotems?.mergeSite(original)||original;
  meta.title=String(st.title||meta.title);meta.tagline=String(st.tagline||meta.tagline);
  const local=localStorage.getItem(key);
  if(local&&local!==JSON.stringify(toOriginal(st))){
