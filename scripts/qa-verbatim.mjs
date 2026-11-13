@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import {chromium} from "playwright";
-const BASE="http://127.0.0.1:8899/admin-identique.html";
+const BASE="http://127.0.0.1:8899/admin.html";
 const browser=await chromium.launch({headless:true});
 let failures=[];
 for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smartphone",390,844,true]]){
  const ctx=await browser.newContext({viewport:{width,height},hasTouch,isMobile:hasTouch});
  const page=await ctx.newPage();
+ // Le navigateur de test utilise le mode local, jamais le Worker de production.
+ await page.route("**/config.js",route=>route.fulfill({contentType:"application/javascript",body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: \"\"};"}));
  page.on("pageerror",err=>{failures.push(label+": "+err.message);console.error("JS ERROR",label,err.stack||err.message)});
  page.on("console",msg=>{if(msg.type()==="error")console.error("CONSOLE",label,msg.text())});
  page.on("requestfailed",req=>console.error("REQ FAILED",req.url(),req.failure()?.errorText));
@@ -15,6 +17,27 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.ok(await page.locator('[data-tab="pages"]').isVisible());
  assert.ok(await page.locator('[data-tab="footer"]').isVisible());
  assert.ok(await page.locator('[data-tab="media"]').isVisible());
+ // Dot de statut accessible sur chaque page : publié, brouillon, masqué.
+ const initialDot=page.locator('.general-pages-list .ej-page-status-row .inline-page-state').first();
+ assert.ok(await initialDot.isVisible(),label+" : indicateur de publication absent");
+ assert.equal(await initialDot.getAttribute("aria-label"),"Publiée sur le site");
+ const selector=page.locator('.editor-language-row select[aria-label="Visibilité de la page"]');
+ await selector.selectOption("draft");
+ assert.equal(await page.locator('.ej-page-status-row .inline-page-state.state-draft').count(),1);
+ await page.locator('.editor-language-row select[aria-label="Visibilité de la page"]').selectOption("hidden");
+ assert.equal(await page.locator('.ej-page-status-row .inline-page-state.state-hidden').count(),1);
+ await page.locator('.editor-language-row select[aria-label="Visibilité de la page"]').selectOption("published");
+ assert.equal(await page.locator('.ej-page-status-row .inline-page-state.state-published').count(),1);
+ const sideBox=await page.locator('#workspace>.layout>aside.panel').boundingBox();
+ const canvasBox=await page.locator('#workspace>.layout .canvas').boundingBox();
+ if(!hasTouch){
+  assert.ok(sideBox.x<300,label+" : le volet pages n'est pas dans la colonne de gauche");
+  assert.ok(canvasBox.x>=300,label+" : le compositeur n'est pas dans la colonne centrale");
+  assert.ok(canvasBox.width>600,label+" : compositeur trop étroit");
+ }else{
+  assert.ok(sideBox.y<canvasBox.y,label+" : liste des pages doit rester au-dessus de l'éditeur");
+ }
+
  const plus=page.locator(".canvas .section-add-blue").first();
  await plus.click({force:true});
  let palette=hasTouch?page.locator("dialog.editor-insert-dialog[open]"):page.locator(".section-insert-choices:not([hidden])");
@@ -42,11 +65,16 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  console.log(label+" : vrai moteur Célébrations, zones, éléments, sauvegarde locale, couleurs OK");
  // Vérifier le vrai moteur PUBLIC, ses titres, son menu et sa galerie absente.
  const visitor=await ctx.newPage();
+ await visitor.route("**/config.js",route=>route.fulfill({contentType:"application/javascript",body:"window.ESPACE_JEUNESSE_CONFIG = {apiBase: \"\"};"}));
  visitor.on("pageerror",err=>{failures.push(label+" VISITEUR: "+err.message);console.error("PUBLIC JS ERROR",err.stack||err.message)});
- await visitor.goto("http://127.0.0.1:8899/index-identique.html",{waitUntil:"networkidle"});
+ await visitor.goto("http://127.0.0.1:8899/index.html",{waitUntil:"networkidle"});
  try{await visitor.locator(".trial-heading").first().waitFor({timeout:10000})}
  catch(error){console.error("PUBLIC DOM",(await visitor.locator("body").innerText()).slice(0,1400));throw error}
  assert.ok((await visitor.locator("#stage-main").innerText()).includes("Bienvenue dans l'Espace Jeunesse"));
+ assert.equal(await visitor.locator('#site-identity').count(),0,label+" : ancien gros en-tête encore visible");
+ assert.ok(await visitor.locator('.site-menu-bar .site-menu-group #site-title').isVisible(),
+  label+" : titre absent de la barre Menu permanente");
+
  await visitor.locator("#menu-toggle").click();
  await visitor.locator("#general-navigation button").first().waitFor();
  const nav=(await visitor.locator("#general-navigation").innerText()).toLowerCase();

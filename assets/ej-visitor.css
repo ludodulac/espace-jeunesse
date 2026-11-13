@@ -3,3 +3,16 @@
 #member-connection,#public-language-control,#stage-navigation,#celebration-shortcuts{display:none!important}
 #site-title{display:inline-block}
 #stage-main:empty{min-height:180px}
+
+/* Identité permanente, à côté de Menu, dans la barre collante d'origine.
+   L'ancien en-tête vertical qui gaspillait l'espace a été supprimé. */
+.site-menu-bar .site-menu-group{display:flex;align-items:center;gap:clamp(9px,1.8vw,18px);min-width:0;max-width:100%;flex:1 1 auto}
+.site-menu-bar .ej-menu-site-title{
+ display:block;min-width:0;max-width:100%;font:600 clamp(16px,2.1vw,22px)/1.25 Georgia,serif;
+ color:#293746;letter-spacing:-.01em;overflow-wrap:anywhere;
+}
+@media(max-width:600px){
+ .site-menu-bar .site-menu-group{gap:10px}
+ .site-menu-bar .ej-menu-site-title{font-size:clamp(15px,4vw,19px)}
+ .site-menu-bar .menu-toggle{flex:none}
+}
