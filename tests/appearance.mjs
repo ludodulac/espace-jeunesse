@@ -56,14 +56,25 @@ console.log("Conformité visuelle au site source et séparation des projets : OK
 const newHtml=read("admin.html"),newCss=read("assets/ej-admin-layout.css"),
   newBridge=read("assets/ej-original-bridge.js"),
   patch=read("scripts/patch-page-controls.mjs");
-assert.match(newHtml,/data-ej-ui-version="2026-11-13-sticky"/);
-assert.match(newHtml,/assets\/ej-admin-layout\.css\?v=ej-20261113-sticky/);
+assert.match(newHtml,/data-ej-ui-version="2026-11-13-compact"/);
+assert.match(newHtml,/assets\/ej-admin-layout\.css\?v=ej-20261113-compact/);
 assert.match(newHtml,/<a id="view-site-btn" class="navbtn ej-site-link"/);
 assert.match(newHtml,/aria-label="Commandes de la page"/);
 assert.doesNotMatch(newHtml,/<header class="topbar"/);
 assert.match(newCss,/position:sticky!important/);
 assert.match(newCss,/\.ej-page-settings-head/);
 assert.match(newCss,/#ej-original-shell \.topbar\{\n position:sticky!important/);
-assert.match(newBridge,/celebrations-editor-verbatim\.js\?v=ej-20261113-sticky/);
+assert.match(newBridge,/celebrations-editor-verbatim\.js\?v=ej-20261113-compact/);
 assert.match(patch,/ej-page-toolbar-slot/);
 assert.match(patch,/const ejToolbar=document\.querySelector/);
+
+/* Le nouveau bandeau n'affiche pas les champs tant qu'on ne clique pas sur
+   l'engrenage, et les deux interfaces conservent leur gestion au survol. */
+const hover=read("assets/ej-hover-menu.js");
+assert.match(newHtml,/class="ej-admin-home-link" href="admin.html"/);
+assert.match(patch,/details\.open=window\.__EJ_SETTINGS_EXPANDED__===true/);
+assert.match(newCss,/bandeau compact/);
+assert.match(index,/assets\/ej-hover-menu\.js\?v=ej-20261113-compact/);
+assert.match(hover,/pointerenter/);
+assert.match(hover,/pointerleave/);
+assert.match(patch,/const ejHoverAnchor/);
