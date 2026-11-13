@@ -53,5 +53,21 @@ const ui=`
  }
 `;
 source=source.replace(old,ui+old);
+
+const pageRowsAnchor="   list.append(row);\n  }\n  attachPagePublicationControls(list,'page');side.append(list);";
+if(source.split(pageRowsAnchor).length!==2)throw Error("Le moteur original a changé dans la liste des pages.");
+source=source.replace(pageRowsAnchor,"   // Espace Jeunesse : statuts visibles pour TOUTES les pages, même hors\n   // de l'environnement de préproduction Célébrations.\n   if(window.__EJ_PAGES_ONLY__&&!preview){\n    row.classList.add('ej-page-status-row');\n    const state=['published','draft','hidden'].includes(q.visibility)?q.visibility:'draft';\n    const labels={published:'Publiée sur le site',draft:'Brouillon, non publié',hidden:'Masquée aux visiteurs'};\n    const badge=n('span','inline-page-state state-'+state);\n    badge.setAttribute('role','img');badge.setAttribute('aria-label',labels[state]);\n    badge.title=labels[state];row.append(badge);\n    const actions=n('details','page-options'),summary=n('summary','','⋯');\n    summary.setAttribute('aria-label','Gérer la page '+q.name);\n    const menu=n('div','page-options-menu');\n    const statusField=n('label','editor-language-choice','Visibilité');\n    const visibility=n('select');\n    visibility.setAttribute('aria-label','Visibilité de '+q.name);\n    for(const [value,label] of [['published','Publiée'],['draft','Brouillon'],['hidden','Masquée']]){\n     const option=n('option','',label);option.value=value;visibility.append(option);\n    }\n    visibility.value=state;\n    visibility.onchange=()=>{q.visibility=visibility.value;mark();render()};\n    statusField.append(visibility);menu.append(statusField);\n    const same=()=>editorPageModel.groupPages(db.pages,group),at=same().findIndex(x=>x.id===q.id);\n    const up=b('↑ Monter',()=>{\n     const current=same(),i=current.findIndex(x=>x.id===q.id);\n     if(i>0){const before=db.pages.indexOf(current[i-1]),pos=db.pages.indexOf(q);\n      db.pages.splice(pos,1);db.pages.splice(before,0,q);mark();render();}\n    },'sm');\n    up.disabled=at===0;menu.append(up);\n    const down=b('↓ Descendre',()=>{\n     const current=same(),i=current.findIndex(x=>x.id===q.id);\n     if(i>=0&&i<current.length-1){const next=db.pages.indexOf(current[i+1]),pos=db.pages.indexOf(q);\n      db.pages.splice(pos,1);db.pages.splice(next,0,q);mark();render();}\n    },'sm');\n    down.disabled=at===same().length-1;menu.append(down);\n    if(q.id!==db.siteHomeId){\n     menu.append(b('Définir comme accueil',()=>{db.siteHomeId=q.id;mark();render()},'sm'));\n    }\n    menu.append(b('Dupliquer',()=>{\n     const copy=clone(q);copy.id='neutral-'+crypto.randomUUID();\n     copy.name=q.name+' (copie)';copy.visibility='draft';\n     copy.blocks=clone(q.blocks||[]);\n     db.pages.splice(db.pages.indexOf(q)+1,0,copy);\n     id=copy.id;mark();render();\n    },'sm'));\n    if(q.id!==db.siteHomeId){\n     menu.append(b('Supprimer la page',async()=>{\n      if(!(await siteConfirm('Supprimer la page « '+q.name+' » ?')))return;\n      db.pages.splice(db.pages.indexOf(q),1);\n      id=db.pages.find(x=>x.group==='page')?.id||'accueil';\n      mark();render();\n     },'sm danger'));\n    }\n    actions.append(summary,menu);row.append(actions);\n   }\n"+pageRowsAnchor);
+const listAppend="attachPagePublicationControls(list,'page');side.append(list);";
+if(source.split(listAppend).length!==2)throw Error("La liste des pages a changé.");
+const legend=`if(window.__EJ_PAGES_ONLY__&&!preview){
+ const legend=n('div','ej-page-status-legend');
+ for(const [name,colour] of [['Publiée','published'],['Brouillon','draft'],['Masquée','hidden']]){
+  const entry=n('span'),dot=n('i','ej-legend-dot state-'+colour);
+  dot.setAttribute('aria-hidden','true');entry.append(dot,document.createTextNode(name));legend.append(entry);
+ }
+ side.append(legend);
+}`;
+source=source.replace(listAppend,listAppend+"\n  "+legend);
+
 writeFileSync(path,source);
 console.log("Extension pages seules appliquée au véritable pageWorkspace.");
