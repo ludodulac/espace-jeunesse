@@ -17,6 +17,30 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.ok(await page.locator('[data-tab="pages"]').isVisible());
  assert.ok(await page.locator('[data-tab="footer"]').isVisible());
  assert.ok(await page.locator('[data-tab="media"]').isVisible());
+ // Barre basse permanente : une seule commande Voir le site, placée dans
+ // le rail gauche ; Annuler, Aperçu et Enregistrer restent toujours visibles.
+ assert.equal(await page.locator('#view-site-btn').count(),1);
+ assert.ok(await page.locator('.rail nav #view-site-btn').isVisible(),label+" : Voir le site absent du menu");
+ assert.equal(await page.locator('.topbar #view-site-btn').count(),0);
+ const toolbar=page.locator('#ej-original-shell .topbar');
+ assert.ok(await toolbar.isVisible());
+ assert.ok(await page.locator('.topbar #undo-btn').isVisible());
+ assert.equal(await page.locator('.topbar #undo-btn').getAttribute('aria-label'),'Annuler la dernière action');
+ assert.ok(await page.locator('.topbar #preview-btn').isVisible());
+ assert.ok(await page.locator('.topbar #save-btn').isVisible());
+ await page.evaluate(()=>{document.body.style.minHeight='2200px';window.scrollTo(0,1200)});
+ const footerBox=await toolbar.boundingBox();
+ assert.ok(footerBox.y>height-140&&footerBox.y+footerBox.height<=height+2,
+  label+" : la barre d'actions ne reste pas fixée au bas de l'écran");
+ const pad=await page.locator('.main').evaluate(el=>parseFloat(getComputedStyle(el).paddingBottom));
+ assert.ok(pad>=112,label+" : marge de protection sous le dernier élément absente");
+ await page.locator('#preview-btn').click();
+ assert.match(await page.locator('#preview-btn').innerText(),/Revenir à l’édition/);
+ assert.ok(await page.locator('#save-btn').isVisible());
+ await page.locator('#preview-btn').click();
+ assert.match(await page.locator('#preview-btn').innerText(),/Aperçu du brouillon/);
+ await page.evaluate(()=>{document.body.style.minHeight='';window.scrollTo(0,0)});
+
  // Dot de statut accessible sur chaque page : publié, brouillon, masqué.
  const initialDot=page.locator('.general-pages-list .ej-page-status-row .inline-page-state').first();
  assert.ok(await initialDot.isVisible(),label+" : indicateur de publication absent");
