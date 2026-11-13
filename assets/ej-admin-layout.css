@@ -368,3 +368,17 @@
   max-height:none!important;overflow:visible!important;
  }
 }
+
+/* Le titre Administration du rail est un lien de retour/actualisation :
+   pas de changement de style ni de perte des protections avant déchargement. */
+#ej-original-shell .brand .ej-admin-home-link{
+ color:inherit!important;text-decoration:none!important;
+ font:inherit;display:inline-block;
+ border-radius:5px;
+}
+#ej-original-shell .brand .ej-admin-home-link:hover{
+ text-decoration:underline!important;text-underline-offset:3px;
+}
+#ej-original-shell .brand .ej-admin-home-link:focus-visible{
+ outline:3px solid #648caa;outline-offset:3px;
+}
