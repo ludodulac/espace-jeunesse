@@ -75,7 +75,7 @@ const hover=read("assets/ej-hover-menu.js");
 assert.match(newHtml,/class="ej-admin-home-link" href="admin.html"/);
 assert.match(patch,/details\.open=window\.__EJ_SETTINGS_EXPANDED__===true/);
 assert.match(newCss,/bandeau compact/);
-assert.match(index,/assets\/ej-hover-menu\.js\?v=ej-20261113-navigation2/);
+assert.match(index,/assets\/ej-hover-menu\.js\?v=ej-20261113-compact/);
 assert.match(hover,/pointerenter/);
 assert.match(hover,/pointerleave/);
 assert.match(patch,/const ejHoverAnchor/);
