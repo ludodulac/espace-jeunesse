@@ -102,3 +102,107 @@
  #ej-original-shell #workspace>.layout>.panel{position:static}
  #ej-original-shell .ej-page-status-row{grid-template-columns:minmax(0,1fr) 14px 37px}
 }
+
+
+/* La commande du visiteur n'est pas une action d'édition : elle est rangée
+   avec les autres destinations dans la navigation latérale. */
+#ej-original-shell .rail nav .ej-site-link{
+ display:flex;align-items:center;text-decoration:none;
+ min-height:44px;color:inherit;
+}
+#ej-original-shell .rail nav .ej-site-link:hover,
+#ej-original-shell .rail nav .ej-site-link:focus-visible{
+ background:#e9edf0;color:#1d2d3a;
+}
+
+/* Barre d'actions fixe, légère, centrée, accessible partout.
+   L'éditeur conserve toute sa largeur et une réserve de défilement au bas
+   des pages : aucune zone ni dernier élément n'est masqué par les boutons. */
+#ej-original-shell .topbar{
+ position:fixed!important;
+ inset:auto 0 env(safe-area-inset-bottom,0px) 0;
+ z-index:110;
+ min-height:0!important;
+ width:auto!important;
+ max-width:none!important;
+ margin:0!important;
+ padding:9px 12px!important;
+ border:0!important;
+ border-top:1px solid #dce3e7!important;
+ border-radius:0!important;
+ background:rgba(255,255,255,.97)!important;
+ box-shadow:0 -4px 18px #29374612!important;
+ backdrop-filter:blur(10px);
+ -webkit-backdrop-filter:blur(10px);
+ display:flex!important;
+ flex-direction:row!important;
+ align-items:center!important;
+ justify-content:center!important;
+}
+#ej-original-shell .topbar .actions{
+ display:flex!important;
+ flex-direction:row!important;
+ justify-content:center!important;
+ align-items:center!important;
+ flex-wrap:nowrap!important;
+ gap:9px!important;
+ width:min(100%,560px)!important;
+ max-width:560px!important;
+ margin:0 auto!important;
+}
+#ej-original-shell .topbar .actions>.btn{
+ display:inline-flex!important;
+ flex:1 1 0;
+ min-width:0!important;
+ max-width:250px;
+ min-height:48px!important;
+ padding:9px 12px!important;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ line-height:1.25;
+ white-space:normal!important;
+ overflow-wrap:normal;
+ font-weight:650;
+ font-size:14px;
+}
+#ej-original-shell .topbar .actions>#undo-btn{
+ flex:0 0 48px!important;
+ width:48px!important;
+ min-width:48px!important;
+ max-width:48px!important;
+ padding:0!important;
+ font-size:25px!important;
+ line-height:1!important;
+ border-radius:10px;
+}
+#ej-original-shell .topbar .actions>#undo-btn:disabled{
+ opacity:.40;cursor:not-allowed;
+}
+#ej-original-shell .main{
+ padding-bottom:calc(128px + env(safe-area-inset-bottom,0px))!important;
+}
+/* À droite du panneau de pages : la barre ne couvre pas le menu. */
+@media(min-width:1051px){
+ #ej-original-shell .topbar{left:300px!important}
+ #ej-original-shell .rail nav{padding-bottom:12px}
+}
+/* La navigation reste en haut sur téléphone, les actions prennent toute
+   la largeur utile, même avec zoom de texte ou petit écran. */
+@media(max-width:1050px){
+ #ej-original-shell .topbar{left:0!important;right:0!important}
+}
+@media(max-width:600px){
+ #ej-original-shell .topbar{padding:8px 9px!important}
+ #ej-original-shell .topbar .actions{gap:7px!important}
+ #ej-original-shell .topbar .actions>.btn{
+  min-height:48px!important;padding:7px 7px!important;
+  font-size:clamp(11px,3.15vw,14px)!important;
+ }
+ #ej-original-shell .topbar .actions>#undo-btn{
+  flex-basis:46px!important;min-width:46px!important;max-width:46px!important;
+ }
+ #ej-original-shell .main{
+  padding-bottom:calc(132px + env(safe-area-inset-bottom,0px))!important;
+ }
+}
