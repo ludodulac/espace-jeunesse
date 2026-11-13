@@ -17,6 +17,9 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.ok(await page.locator('[data-tab="pages"]').isVisible());
  assert.ok(await page.locator('[data-tab="footer"]').isVisible());
  assert.ok(await page.locator('[data-tab="media"]').isVisible());
+ const adminHome=page.locator('#ej-original-shell .brand .ej-admin-home-link');
+ assert.ok(await adminHome.isVisible(),label+" : Administration n'est pas cliquable");
+ assert.equal(await adminHome.getAttribute('href'),'admin.html');
  // Une seule commande Voir le site dans la navigation ;
  // les trois vrais boutons sont DANS le panneau sticky des réglages de page.
  assert.equal(await page.locator('#view-site-btn').count(),1);
@@ -25,6 +28,10 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  const settingsPanel=page.locator('#workspace .ej-page-settings');
  const toolbar=page.locator('#ej-original-shell .topbar');
  assert.equal(await settingsPanel.count(),1,label+" : panneau Réglages de la page manquant");
+ const initialSettingsHeight=(await settingsPanel.boundingBox()).height;
+ assert.ok(initialSettingsHeight<86,label+" : bandeau supérieur encore trop haut ("+initialSettingsHeight+" px)");
+ assert.equal(await settingsPanel.locator('details').evaluate(el=>el.open),false,
+  label+" : champs de réglages doivent être repliés initialement");
  assert.ok(await settingsPanel.locator('.ej-page-toolbar-slot .topbar').isVisible());
  assert.ok(await settingsPanel.locator('.topbar #undo-btn').isVisible());
  assert.equal(await page.locator('.topbar #undo-btn').getAttribute('aria-label'),'Annuler la dernière action');
@@ -32,10 +39,8 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.ok(await settingsPanel.locator('.topbar #save-btn').isVisible());
  assert.equal(await settingsPanel.evaluate(el=>getComputedStyle(el).position),'sticky');
  if(hasTouch){
-  assert.equal(await settingsPanel.locator('details').evaluate(el=>el.open),false,
-   label+" : les champs doivent être repliés par défaut sur téléphone");
   const compact=await settingsPanel.boundingBox();
-  assert.ok(compact.height<150,label+" : bandeau mobile trop haut");
+  assert.ok(compact.height<82,label+" : bandeau mobile trop haut");
  }
  // Une longue page doit défiler sous le bandeau, sans barre en bas.
  await page.evaluate(()=>{
@@ -91,7 +96,8 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  const dotMenu=page.locator('.ej-page-status-row .page-options').first();
  const threeDots=dotMenu.locator('summary');
  const parentScrollBefore=await page.locator('#workspace>.layout>aside.panel').evaluate(el=>el.scrollTop);
- await threeDots.click();
+ if(!hasTouch)await threeDots.hover();
+ else await threeDots.click();
  if(!hasTouch){
   const popup=dotMenu.locator('.ej-page-flyout:popover-open');
   await popup.waitFor();
@@ -102,6 +108,15 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
    label+" : menu des trois points coupé par la colonne gauche ou par l'écran");
   assert.equal(await page.locator('#workspace>.layout>aside.panel').evaluate(el=>el.scrollTop),
    parentScrollBefore,label+" : la colonne de pages défile inutilement");
+  // Survol direct, y compris lors du passage de la souris sur le menu.
+  await popup.hover();
+  assert.ok(await popup.isVisible(),label+" : le menu doit rester ouvert quand on le survole");
+  await page.mouse.move(width-3,height-3);
+  await page.waitForTimeout(320);
+  assert.equal(await page.locator('.ej-page-flyout:popover-open').count(),0,
+   label+" : menu des trois points non refermé après sortie de la souris");
+  await threeDots.hover();
+  await page.locator('.ej-page-flyout:popover-open').waitFor();
   await page.keyboard.press("Escape");
   await page.locator('.ej-page-flyout:popover-open').waitFor({state:'hidden'});
  }else{
@@ -140,6 +155,10 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  await page.reload({waitUntil:"networkidle"});
  await page.locator(".canvas").waitFor();
  assert.equal(await page.getByText("Le vrai moteur original",{exact:true}).count(),1);
+ await page.locator('.brand .ej-admin-home-link').click();
+ await page.locator('.canvas').waitFor();
+ assert.equal(await page.locator('.brand .ej-admin-home-link').count(),1,
+  label+" : rechargement par Administration impossible");
  const colors=await page.evaluate(()=>[
   getComputedStyle(document.querySelector(".section-add-blue")).backgroundColor,
   getComputedStyle(document.querySelector(".section-add-green")).backgroundColor,
@@ -161,6 +180,15 @@ for(const [label,width,height,hasTouch] of [["ordinateur",1280,900,false],["smar
  assert.ok(await visitor.locator('.site-menu-bar .site-menu-group #site-title').isVisible(),
   label+" : titre absent de la barre Menu permanente");
 
+ if(!hasTouch){
+  await visitor.locator("#menu-toggle").hover();
+  await visitor.locator("#general-navigation button").first().waitFor();
+  assert.equal(await visitor.locator("#menu-toggle").getAttribute('aria-expanded'),'true');
+  await visitor.mouse.move(width-3,height-3);
+  await visitor.waitForTimeout(300);
+  assert.equal(await visitor.locator("#general-navigation").isVisible(),false,
+   label+" : le menu public ne se referme pas quand la souris sort");
+ }
  await visitor.locator("#menu-toggle").click();
  await visitor.locator("#general-navigation button").first().waitFor();
  const nav=(await visitor.locator("#general-navigation").innerText()).toLowerCase();
