@@ -69,5 +69,10 @@ const legend=`if(window.__EJ_PAGES_ONLY__&&!preview){
 }`;
 source=source.replace(listAppend,listAppend+"\n  "+legend);
 
+
+const desktopFlyoutAnchor="    actions.append(summary,menu);row.append(actions);";
+if(source.split(desktopFlyoutAnchor).length!==2)throw Error("Menu des pages d'origine modifié : impossible d'ouvrir le panneau flottant.");
+source=source.replace(desktopFlyoutAnchor,"\n    // Sur ordinateur, la liste peut défiler sans jamais couper le menu.\n    // L'API Popover affiche les actions au premier plan, hors du panneau.\n    if(window.matchMedia('(min-width:1051px)').matches&&typeof menu.showPopover==='function'){\n     menu.classList.add('ej-page-flyout');\n     menu.setAttribute('popover','auto');\n     menu.setAttribute('role','group');\n     menu.setAttribute('aria-label','Actions pour la page '+q.name);\n     actions.addEventListener('toggle',()=>{\n      if(!actions.open){\n       if(menu.matches(':popover-open'))menu.hidePopover();\n       return;\n      }\n      document.querySelectorAll('.ej-page-flyout:popover-open').forEach(open=>{\n       if(open!==menu)open.hidePopover();\n      });\n      menu.showPopover();\n      const anchor=summary.getBoundingClientRect();\n      const bounds=menu.getBoundingClientRect();\n      const left=Math.max(12,Math.min(anchor.right+12,innerWidth-bounds.width-12));\n      const top=Math.max(12,Math.min(anchor.top-14,innerHeight-bounds.height-12));\n      menu.style.setProperty('left',left+'px','important');\n      menu.style.setProperty('top',top+'px','important');\n     });\n     menu.addEventListener('toggle',event=>{\n      if(event.newState==='closed'&&actions.open)actions.open=false;\n     });\n    }\n"+desktopFlyoutAnchor);
+
 writeFileSync(path,source);
 console.log("Extension pages seules appliquée au véritable pageWorkspace.");
