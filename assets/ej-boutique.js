@@ -43,47 +43,118 @@ function sourceItems(site){
   };
  });
 }
-function section(item,index){
+
+/* Affichage boutique : 2 fiches par ligne sur grand écran, 1 sur mobile.
+ * Tout est construit avec les blocs NATIFS modifiables depuis l'administration.
+ * Les symboles sont des condensés factuels des résumés Biblaw ci-dessus.
+ */
+const SYMBOLS={"Abeille":"Travail pour la communauté, entraide et offrande.","Agneau":"Donner de la force à la douceur, sans laisser la peur décider.","Aigle":"Sérénité, liberté et regard porté vers les hauteurs.","Biche":"Protection du foyer, solidarité et soutien mutuel.","Canard":"Transmission vivante aux petits.","Cerf":"Noblesse, droiture et protection du troupeau.","Chouette":"Voir dans l’obscurité et discerner ce qui est caché.","Colombe":"Douceur, pureté, paix et maîtrise.","Cygne":"Grâce, pureté, subtilité et douceur.","Dauphin":"Harmonie, innocence, spontanéité et bonne humeur.","Escargot":"Emporter l’essentiel et laisser les fardeaux inutiles.","Flamant rose":"Se tenir sur une patte pour accueillir l’esprit sur la terre.","Fourmi":"Persévérance, solidarité et œuvre commune.","Huître":"Transformer un grain de sable en perle.","Licorne":"Pureté, beauté et harmonie avec la nature.","Oiseau":"Prendre de la hauteur et élargir son regard.","Papillon":"Légèreté, méditation, liberté et transformation.","Phénix":"Renaître de ses cendres par l’éveil du souvenir de l’âme.","Serpent de la sagesse":"Calme, stabilité et clarté à maîtriser.","Tortue":"Savoir se protéger et se préserver.","Vache":"Constance et fidélité à sa fonction."};
+function rowId(n){return "boutique-grille-"+String(n).padStart(2,"0")}
+function refLabel(animal){
+ const first=BIBLAW[normalize(animal)]?.refs?.[0];
+ return first?"Biblaw · Livre "+first.book+", psaume "+first.psalm:"";
+}
+function card(item,index){
  const id="boutique-peluche-"+(index+1);
- const key=normalize(item.name);
- const entry=BIBLAW[key];
- const citations=(entry?.refs||[]).map(r=>
-  "Livre "+r.book+", psaume "+r.psalm+", verset"+(r.verses.length>1?"s ":" ")+r.verses.join(", ")
- ).join(" ; ");
- const left=[block(id+"-photo","image",{
-  url:item.image,mediaId:item.mediaId||"",alt:"Peluche "+item.name+" — "+item.maker,
-  widthPct:100,align:"center"
- })];
- const right=[
-  block(id+"-animal","heading",{text:item.name,level:"h2"}),
-  block(id+"-sens","text",{text:entry?.summary||"Retrouvez cet animal dans le répertoire Biblaw."}),
-  ...(citations?[block(id+"-source","text",{text:"Dans Biblaw : "+citations+"."})]:[]),
-  block(id+"-produit","heading",{text:item.title,level:"h3"}),
-  block(id+"-artisan","text",{text:item.maker}),
-  block(id+"-lien","button",{text:"Voir la peluche ↗",url:item.url})
+ return [
+ block(id+"-photo","image",{url:item.image,mediaId:item.mediaId||"",
+   alt:"Peluche "+item.name+" — "+item.maker,align:"center",widthPct:77}),
+ block(id+"-produit","heading",{text:item.title,level:"h3",bold:true,size:20,align:"center"}),
+ block(id+"-animal","text",{text:"Animal totem : "+item.name,bold:true,size:16,align:"center"}),
+ block(id+"-sens","text",{text:SYMBOLS[item.name]||BIBLAW[normalize(item.name)]?.summary||"",size:14,align:"center"}),
+ block(id+"-source","text",{text:refLabel(item.name),size:14,align:"center"}),
+ block(id+"-artisan","text",{text:item.maker,size:14,align:"center"}),
+ block(id+"-lien","button",{text:"Voir la peluche ↗",url:item.url,align:"center",displayAsButton:true})
  ];
- return {id,type:"section",layout:"columns",presentation:"resource",
-   style:{border:"none",color:"#d7dde5",width:1,shadow:false},
-   columnAlignments:["center","center"],columnButtonLayouts:["stack","stack"],
-   hideOnSite:false,columns:[left,right]};
 }
 function page(site){
- return {id:"boutique-peluches",slug:"boutique-peluches",
-  title:"Boutique peluches",placement:"menu",status:"published",
-  blocks:[
-   block("boutique-title","heading",{text:"Boutique peluches",level:"h1",align:"center"}),
-   block("boutique-intro","text",{text:"21 animaux totems, leur enseignement dans la Bible essénienne et une sélection de peluches à découvrir chez les créateurs. Les achats sont effectués directement auprès des boutiques : aucun paiement n’a lieu sur l’Espace Jeunesse.",align:"center"}),
-   ...sourceItems(site).map(section),
-   block("boutique-biblaw-title","heading",{text:"D’où viennent les enseignements ?",level:"h2"}),
-   block("boutique-biblaw-text","text",{text:"Les présentations des animaux et les références aux psaumes proviennent du répertoire des animaux totems de Biblaw. Dans Biblaw, choisissez « Les animaux dans la Bible », puis « Les animaux totems »."}),
-   block("boutique-biblaw-link","button",{text:"Consulter les animaux totems dans Biblaw ↗",url:BIBLAW_URL}),
-   block("boutique-mention","text",{text:"Les photographies appartiennent à leurs auteurs et restent hébergées sur leurs sites. Les prix, stocks, livraisons et âges recommandés sont à vérifier auprès des vendeurs. Certains modèles sont des articles décoratifs ou des animaux proches du totem, signalés dans leur intitulé."})
+ const items=sourceItems(site),rows=[];
+ for(let i=0;i<items.length;i+=2)rows.push({
+  id:rowId(Math.floor(i/2)+1),type:"section",layout:"columns",presentation:"",
+  style:{border:"round",color:"#e2e3e0",width:1,shadow:false},
+  columnAlignments:["top","top"],columnButtonLayouts:["stack","stack"],
+  hideOnSite:false,columns:[card(items[i],i),items[i+1]?card(items[i+1],i+1):[]]
+ });
+ return {id:"boutique-peluches",slug:"boutique-peluches",title:"Boutique peluches",
+  placement:"menu",status:"published",blocks:[
+   block("boutique-title","heading",{text:"Les peluches des animaux totems",level:"h1",align:"center"}),
+   block("boutique-intro","text",{text:"Découvrez 21 animaux totems et leurs peluches sélectionnées chez des créateurs. Cliquez sur une fiche pour découvrir le produit chez l'artisan.",align:"center"}),
+   block("boutique-collection","heading",{text:"La collection · 21 animaux",level:"h2",align:"center"}),
+   ...rows,
+   block("boutique-biblaw-title","heading",{text:"Le sens des animaux totems",level:"h2"}),
+   block("boutique-biblaw-text","text",{text:"Chaque symbole résume une qualité évoquée dans les psaumes de la Bible essénienne. Références et textes complets : Biblaw → « Les animaux dans la Bible » → « Les animaux totems »."}),
+   block("boutique-biblaw-link","button",{text:"Explorer les animaux dans Biblaw ↗",url:BIBLAW_URL,displayAsButton:true}),
+   block("boutique-mention","text",{text:"Les achats se font sur les sites des vendeurs. Prix, stock, livraison et âge recommandé sont à vérifier auprès d'eux. Certains articles sont décoratifs ou proches de l'animal totem. Les photos restent hébergées chez leurs auteurs.",size:14})
   ]};
+}
+/* Convertit seulement la première version reconnaissable de la boutique,
+ * sans toucher aux pages réorganisées par le propriétaire.
+ */
+function legacy(page){
+ const list=(page?.blocks||[]).filter(b=>/^boutique-peluche-\d+$/.test(b.id||"")&&b.type==="section");
+ return list.length===21 && !(page.blocks||[]).some(b=>String(b.id).startsWith("boutique-grille-"));
+}
+function upgrade(old,site){
+ const fresh=page(site);
+ const initial=sourceItems(site);
+ const generated=Object.values(BIBLAW).map(x=>x.summary);
+ const known=new Set(["photo","animal","sens","source","produit","artisan","lien"]);
+ for(let i=0;i<21;i++){
+  const prefix="boutique-peluche-"+(i+1);
+  const prior=old.blocks.find(b=>b.id===prefix);
+  if(!prior)continue;
+  const oldChildren=(prior.columns||[]).flat();
+  const row=fresh.blocks.find(b=>b.id===rowId(Math.floor(i/2)+1));
+  const newChildren=row.columns[i%2];
+  const was=key=>oldChildren.find(x=>x.id===prefix+"-"+key);
+  const now=key=>newChildren.find(x=>x.id===prefix+"-"+key);
+  const original=initial[i];
+  const previousImage=was("photo"),previousLink=was("lien");
+  // Priorité aux modifications manuelles, sans restaurer une vieille image
+  // remplacée par un correctif de la page source.
+  if(previousImage?.url&&previousImage.url!==original.image&&
+     !window.EJPartners?.repairs?.some(r=>r.old===previousImage.url))
+   {now("photo").url=previousImage.url;now("photo").mediaId=previousImage.mediaId||""}
+  if(previousLink?.url&&previousLink.url!==original.url &&
+     previousLink.url!==original.link &&
+     !window.EJPartners?.repairs?.some(r=>r.link===previousLink.url))
+   now("lien").url=previousLink.url;
+  if(was("produit")?.text&&was("produit").text!==original.title)
+   now("produit").text=was("produit").text;
+  if(was("artisan")?.text&&was("artisan").text!==original.maker)
+   now("artisan").text=was("artisan").text;
+  if(was("sens")?.text&&!generated.includes(was("sens").text))
+   now("sens").text=was("sens").text;
+  newChildren.push(...oldChildren.filter(x=>!known.has(String(x.id||"").slice(prefix.length+1))));
+ }
+ // Conserver d'éventuels blocs personnels extérieurs aux anciennes fiches.
+ const oldIds=new Set(Array.from({length:21},(_,i)=>"boutique-peluche-"+(i+1)));
+ const newIds=new Set(fresh.blocks.map(b=>b.id));
+ for(const extra of old.blocks){
+  if(!oldIds.has(extra.id)&&!newIds.has(extra.id))fresh.blocks.push(extra);
+ }
+ const earlier={
+  "boutique-title":"Boutique peluches",
+  "boutique-intro":"21 animaux totems, leur enseignement",
+  "boutique-biblaw-text":"Les présentations des animaux",
+  "boutique-biblaw-title":"D’où viennent les enseignements ?"
+ };
+ for(const [id,standard] of Object.entries(earlier)){
+  const before=old.blocks.find(b=>b.id===id);
+  const after=fresh.blocks.find(b=>b.id===id);
+  if(before?.text&&after&&!(id==="boutique-title"?before.text===standard:before.text.startsWith(standard)))
+   after.text=before.text;
+ }
+ return {...fresh,title:old.title||fresh.title,placement:old.placement||fresh.placement,status:old.status||fresh.status};
 }
 function mergeSite(raw){
  if(!raw||!Array.isArray(raw.pages))return raw;
- if(raw.pages.some(p=>p.id==="boutique-peluches"||p.slug==="boutique-peluches"))return raw;
- return {...raw,pages:[...raw.pages,page(raw)]};
+ const idx=raw.pages.findIndex(p=>p.id==="boutique-peluches"||p.slug==="boutique-peluches");
+ if(idx===-1)return {...raw,pages:[...raw.pages,page(raw)]};
+ if(!legacy(raw.pages[idx]))return raw;
+ const pages=raw.pages.slice();
+ pages[idx]=upgrade(pages[idx],raw);
+ return {...raw,pages};
 }
 window.EJBoutique=Object.freeze({mergeSite,sourceItems});
 })();
