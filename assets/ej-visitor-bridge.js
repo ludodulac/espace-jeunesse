@@ -37,7 +37,8 @@ async function init(){
   const withPartners=window.EJPartners?.mergeSite(withTotems)||withTotems;
   const withBoutique=window.EJBoutique?.mergeSite(withPartners)||withPartners;
   const withExercises=window.EJExercises?.mergeSite(withBoutique)||withBoutique;
-  const withLiterature=window.EJLiterature?.mergeSite(withExercises)||withExercises;
+  const withMichael=window.EJMichael2026?.mergeSite(withExercises)||withExercises;
+  const withLiterature=window.EJLiterature?.mergeSite(withMichael)||withMichael;
   const data=window.EJNames?.mergeSite(withLiterature)||withLiterature;
   // Les anciennes présentations des peluches contiennent encore des liens vers
   // le corpus éditorial. Elles restent conservées dans l’admin, mais ne sont
