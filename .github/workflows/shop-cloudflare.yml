@@ -53,6 +53,8 @@ jobs:
         run: node scripts/seed-shop.mjs
       - name: Amorcer la boutique si elle est vide
         run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-seed-shop.sql --config worker/wrangler-ci.toml
+      - name: Mettre cinq artisans contactés en tête sans effacer les autres
+        run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-feature-five.sql --config worker/wrangler-ci.toml
       - name: Préparer le retrait des références bibliques dans la boutique D1
         run: node scripts/neutralize-shop.mjs
       - name: Retirer les champs historiques sans écraser les produits

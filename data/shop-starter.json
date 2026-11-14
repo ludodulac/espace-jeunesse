@@ -198,6 +198,16 @@
       "location": "",
       "partner": false,
       "approvedImages": false
+    },
+    {
+      "id": "atelier-hell-of-persephone",
+      "name": "Hell of Persephone",
+      "description": "Atelier breton de peluches et créations au crochet. Aucun partenariat commercial conclu à ce jour.",
+      "website": "https://www.hellofpersephone-crochet.com/",
+      "email": "hellofpersephone@gmail.com",
+      "location": "Bretagne, France",
+      "partner": false,
+      "approvedImages": false
     }
   ],
   "products": [
@@ -216,7 +226,7 @@
       "affiliate": false,
       "status": "published",
       "featured": true,
-      "sort": 1
+      "sort": 101
     },
     {
       "id": "peluche-02",
@@ -233,7 +243,7 @@
       "affiliate": false,
       "status": "published",
       "featured": true,
-      "sort": 2
+      "sort": 102
     },
     {
       "id": "peluche-03",
@@ -250,14 +260,14 @@
       "affiliate": false,
       "status": "published",
       "featured": true,
-      "sort": 3
+      "sort": 103
     },
     {
       "id": "peluche-04",
       "slug": "biche",
       "name": "Biche au crochet",
       "animal": "Biche",
-      "description": "",
+      "description": "La biche nous inspire douceur et délicatesse.",
       "collectionId": "animaux-totems",
       "artisanId": "atelier-04",
       "imageUrl": "https://douceuraucrochet.fr/cdn/shop/files/image_123650291_2_ff.jpg?v=1728827609&width=1066",
@@ -267,7 +277,7 @@
       "affiliate": false,
       "status": "published",
       "featured": true,
-      "sort": 4
+      "sort": 2
     },
     {
       "id": "peluche-05",
@@ -284,7 +294,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 5
+      "sort": 105
     },
     {
       "id": "peluche-06",
@@ -301,14 +311,14 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 6
+      "sort": 106
     },
     {
       "id": "peluche-07",
       "slug": "chouette",
       "name": "Ginette la chouette",
       "animal": "Chouette",
-      "description": "",
+      "description": "La chouette rappelle l'observation et la sagesse.",
       "collectionId": "animaux-totems",
       "artisanId": "atelier-02",
       "imageUrl": "https://www.pamplemoussepeluches.com/cdn/shop/files/Sans_titre_1536_x_1920_px_1536_x_1920_px_1536_x_1920_px_046828a5-c2d1-4fef-8050-f0fa1e86c8dc.jpg?crop=center&height=1200&v=1773676179&width=1200",
@@ -317,8 +327,8 @@
       "priceLabel": "",
       "affiliate": false,
       "status": "published",
-      "featured": false,
-      "sort": 7
+      "featured": true,
+      "sort": 5
     },
     {
       "id": "peluche-08",
@@ -335,7 +345,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 8
+      "sort": 108
     },
     {
       "id": "peluche-09",
@@ -352,7 +362,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 9
+      "sort": 109
     },
     {
       "id": "peluche-10",
@@ -369,7 +379,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 10
+      "sort": 110
     },
     {
       "id": "peluche-11",
@@ -386,7 +396,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 11
+      "sort": 111
     },
     {
       "id": "peluche-12",
@@ -403,7 +413,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 12
+      "sort": 112
     },
     {
       "id": "peluche-13",
@@ -420,7 +430,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 13
+      "sort": 113
     },
     {
       "id": "peluche-14",
@@ -437,7 +447,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 14
+      "sort": 114
     },
     {
       "id": "peluche-15",
@@ -454,7 +464,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 15
+      "sort": 115
     },
     {
       "id": "peluche-16",
@@ -471,7 +481,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 16
+      "sort": 116
     },
     {
       "id": "peluche-17",
@@ -488,7 +498,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 17
+      "sort": 117
     },
     {
       "id": "peluche-18",
@@ -505,7 +515,7 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 18
+      "sort": 118
     },
     {
       "id": "peluche-19",
@@ -522,14 +532,14 @@
       "affiliate": false,
       "status": "published",
       "featured": false,
-      "sort": 19
+      "sort": 119
     },
     {
       "id": "peluche-20",
       "slug": "tortue",
       "name": "Peluche tortue au crochet",
       "animal": "Tortue",
-      "description": "",
+      "description": "La tortue évoque patience et persévérance.",
       "collectionId": "animaux-totems",
       "artisanId": "atelier-13",
       "imageUrl": "https://lemondedegurumi.com/cdn/shop/files/Peluches_tortues_dessus_635d8fd3-1623-4dd4-8eb3-6c1becab3f56.jpg?v=1759156047&width=1946",
@@ -538,15 +548,15 @@
       "priceLabel": "",
       "affiliate": false,
       "status": "published",
-      "featured": false,
-      "sort": 20
+      "featured": true,
+      "sort": 1
     },
     {
       "id": "peluche-21",
       "slug": "vache",
       "name": "Peluches vaches Margot et Scraboutch (collection de l’atelier)",
       "animal": "Vache",
-      "description": "",
+      "description": "Ces petites vaches évoquent tendresse et curiosité.",
       "collectionId": "animaux-totems",
       "artisanId": "atelier-17",
       "imageUrl": "https://assets.zyrosite.com/cdn-cgi/image/format%3Dauto%2Cw%3D768%2Ch%3D510%2Cfit%3Dcrop/YBgyPZq0xntl42NX/peluches-vaches-margot-et-scraboutch-TPUT4wuwofT0lBMA.jpg",
@@ -555,8 +565,25 @@
       "priceLabel": "",
       "affiliate": false,
       "status": "published",
-      "featured": false,
-      "sort": 21
+      "featured": true,
+      "sort": 4
+    },
+    {
+      "id": "peluche-persephone-oiseau",
+      "slug": "oiseau-hell-of-persephone",
+      "name": "Peluche oiseau au crochet — modèle au choix",
+      "animal": "Oiseau",
+      "description": "L'oiseau inspire liberté et imagination. Objet de collection : ne convient pas aux moins de 14 ans.",
+      "collectionId": "animaux-totems",
+      "artisanId": "atelier-hell-of-persephone",
+      "imageUrl": "https://www.hellofpersephone-crochet.com/cdn/shop/files/IMG_9947.jpg?v=1718797731&width=1200",
+      "additionalImages": [],
+      "productUrl": "https://www.hellofpersephone-crochet.com/products/peluche-oiseau-au-crochet",
+      "priceLabel": "",
+      "affiliate": false,
+      "status": "published",
+      "featured": true,
+      "sort": 3
     }
   ]
 }

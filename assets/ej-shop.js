@@ -30,7 +30,7 @@ function home(){
  const col=collections().find(x=>x.slug===chosen);
  const hero=el("section","shop-hero");
  hero.append(el("span","shop-kicker","La boutique des découvertes"),el("h1","","Des créations qui racontent des histoires"),
-  el("p","","Peluches, contes et merveilles artisanales : une sélection de créations à découvrir directement auprès des artisans."));
+  el("p","","Boutique provisoire : exemples de créations repérées chez de vrais artisans, sans partenariat conclu à ce jour. Les achats se font chez leurs créateurs."));
  root.append(hero,el("h2","shop-title",col?.name||"Explorer nos collections"));
  const filters=el("nav","shop-filters");filters.setAttribute("aria-label","Collections");
  filters.append(a("Toute la boutique","boutique.html","shop-pill"+(!col?" active":"")));
@@ -67,6 +67,24 @@ function detail(p){
  article.append(right);root.append(article);
 
 }
+
+/* Vitrine : cinq artisans récemment contactés en tête, sans déclarer d'affiliation.
+ * La source officielle reste D1 ; ceci maintient une vitrine cohérente
+ * pendant la mise à jour du catalogue distant.
+ */
+function spotlightFiveArtisans(){
+ const bird={"id":"peluche-persephone-oiseau","slug":"oiseau-hell-of-persephone","name":"Peluche oiseau au crochet — modèle au choix","animal":"Oiseau","description":"L'oiseau inspire liberté et imagination. Objet de collection : ne convient pas aux moins de 14 ans.","collectionId":"animaux-totems","artisanId":"atelier-hell-of-persephone","imageUrl":"https://www.hellofpersephone-crochet.com/cdn/shop/files/IMG_9947.jpg?v=1718797731&width=1200","additionalImages":[],"productUrl":"https://www.hellofpersephone-crochet.com/products/peluche-oiseau-au-crochet","priceLabel":"","affiliate":false,"status":"published","featured":true,"sort":3};
+ const maker={"id":"atelier-hell-of-persephone","name":"Hell of Persephone","description":"Atelier breton de peluches et créations au crochet. Aucun partenariat commercial conclu à ce jour.","website":"https://www.hellofpersephone-crochet.com/","email":"hellofpersephone@gmail.com","location":"Bretagne, France","partner":false,"approvedImages":false};
+ const priority=[{"id":"peluche-20","sort":1,"description":"La tortue évoque patience et persévérance."},{"id":"peluche-04","sort":2,"description":"La biche nous inspire douceur et délicatesse."},{"id":"peluche-persephone-oiseau","sort":3,"description":"L'oiseau inspire liberté et imagination. Objet de collection : ne convient pas aux moins de 14 ans."},{"id":"peluche-21","sort":4,"description":"Ces petites vaches évoquent tendresse et curiosité."},{"id":"peluche-07","sort":5,"description":"La chouette rappelle l'observation et la sagesse."}];
+ if(!data.artisans.some(a=>a.id===maker.id))data.artisans.push(maker);
+ if(!data.products.some(p=>p.id===bird.id))data.products.push(bird);
+ for(const p of data.products){
+  const hit=priority.find(x=>x.id===p.id);
+  if(hit){p.sort=hit.sort;if(!p.description)p.description=hit.description}
+  else p.sort=100+Math.max(0,Number(p.sort)||0);
+ }
+}
+
 (async()=>{
  try{
   let fallback=false;
@@ -77,6 +95,7 @@ function detail(p){
   }
   if(!r.ok)throw Error("Catalogue indisponible ("+r.status+")");
   data=await r.json();if(!Array.isArray(data.products))throw Error("Catalogue invalide");
+  spotlightFiveArtisans();
   root.replaceChildren();const slug=new URLSearchParams(location.search).get("produit");
   if(slug){const p=products().find(x=>x.slug===slug);if(p)detail(p);else root.append(el("p","shop-empty","Ce produit n'est plus publié."))}
   else home();
