@@ -4,6 +4,10 @@
 "use strict";
 const API=String(window.ESPACE_JEUNESSE_CONFIG?.apiBase||"").replace(/\/$/,"");
 const remote=/^https:\/\/[a-z0-9.-]+$/i.test(API);
+// Une connexion/déconnexion dans un autre onglet met à jour la vue visiteur.
+window.addEventListener("storage",event=>{
+ if(event.key==="ej-admin-session-v1")location.reload();
+});
 
 /* Entrée Boutique distincte des pages classiques : l'éditeur ne la pilote pas. */
 const nav=document.getElementById("general-navigation");
