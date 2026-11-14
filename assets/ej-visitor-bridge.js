@@ -24,7 +24,8 @@ async function init(){
   const fetched=await r.json();
   const withTotems=window.EJTotems?.mergeSite(fetched)||fetched;
   const withPartners=window.EJPartners?.mergeSite(withTotems)||withTotems;
-  const data=window.EJBoutique?.mergeSite(withPartners)||withPartners;
+  const withBoutique=window.EJBoutique?.mergeSite(withPartners)||withPartners;
+  const data=window.EJExercises?.mergeSite(withBoutique)||withBoutique;
   const pages=(data.pages||[]).filter(p=>p.status==="published");
   const list=pages.map(p=>({
    id:p.slug||p.id,name:p.title,group:"page",placement:p.placement||"menu",
