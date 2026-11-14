@@ -42,7 +42,7 @@ function updateIndex(){
  hint.textContent="Touchez un prénom pour aller directement à sa fiche.";
  const links=document.createElement("div");
  links.className="ej-prenoms-index-links";
- for(const {id,name} of rows){
+ for(const {id,name} of rows.slice().sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base"}))){
   const a=document.createElement("a");
   a.href="#"+id;
   a.textContent=name;
