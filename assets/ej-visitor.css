@@ -23,3 +23,16 @@
 }
 .site-menu-bar a.ej-site-home-link:hover{text-decoration:underline;text-underline-offset:4px}
 .site-menu-bar a.ej-site-home-link:focus-visible{outline:3px solid #39789f;outline-offset:3px;border-radius:4px}
+
+/* Liens de lecture Biblaw : liens discrets, insérés via un bloc Lien standard et modifiables dans l’éditeur. */
+#stage-main a.trial-button[href*="ludodulac.github.io/Biblaw/?psaume="]{
+  display:inline-flex!important;align-items:center;justify-content:flex-start;
+  width:auto;max-width:100%;font-size:12px!important;line-height:1.4;
+  padding:2px 0!important;margin:0!important;
+  background:transparent!important;border:0!important;border-radius:0!important;
+  color:#607080!important;box-shadow:none!important;text-decoration:underline;
+  text-underline-offset:3px;overflow-wrap:anywhere;
+}
+#stage-main a.trial-button[href*="ludodulac.github.io/Biblaw/?psaume="]:hover{
+  color:#364d68!important;text-decoration-thickness:2px;
+}
