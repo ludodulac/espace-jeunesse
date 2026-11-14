@@ -1,0 +1,72 @@
+name: Activer API Ludodio isolée et vérifier R2 et D1
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/ludodio-api-activate.yml]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Installer Wrangler et lecteur HTTP
+        run: |
+          npm install --global wrangler@4
+          python3 -m pip install --quiet requests
+      - name: Charger le backend Ludodio non fusionné
+        run: |
+          git clone --depth 1 --branch feat/ludodio-cloudflare-pin-simple-20261113 \
+            https://github.com/ludodulac/La-foret-enchantee.git ludodio
+      - name: Déployer le Worker neuf (le site public reste inchangé)
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          cd ludodio
+          cat > wrangler.ludodio-ci.toml <<'TOML'
+          name = "ludodio-api"
+          main = "cloudflare/ludodio-api-worker.js"
+          compatibility_date = "2026-11-13"
+          [vars]
+          ALLOWED_ORIGIN = "https://ludodulac.github.io"
+          [[d1_databases]]
+          binding = "LUDODIO_DB"
+          database_name = "ludodio"
+          database_id = "2af9d3e1-4b5c-4f05-a817-cb75c6653f62"
+          [[r2_buckets]]
+          binding = "LUDODIO_MEDIA"
+          bucket_name = "ludodio-media"
+          TOML
+          wrangler deploy --config wrangler.ludodio-ci.toml --keep-vars
+          # Strong server-side session key. ADMIN_PIN not invented or revealed in public CI logs.
+          openssl rand -hex 48 | wrangler secret put SESSION_SECRET --config wrangler.ludodio-ci.toml
+          echo "Worker public deployed. Owner-chosen ADMIN_PIN is required before switching the administrator."
+      - name: Vérifier D1 et SHA-256 de chaque image copiée
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from concurrent.futures import ThreadPoolExecutor
+          import hashlib,requests
+          root=Path('ludodio/assets/illustrations/admin-library')
+          files=sorted(root.glob('*.webp'))
+          assert len(files)==252, f'Only {len(files)} images'
+          url='https://ludodio-api.rondes.workers.dev'
+          def check(f):
+              r=requests.get(url+'/media/images/admin-library/'+f.name,timeout=45)
+              r.raise_for_status()
+              assert hashlib.sha256(r.content).digest()==hashlib.sha256(f.read_bytes()).digest(),f.name
+          with ThreadPoolExecutor(max_workers=6) as pool:list(pool.map(check,files))
+          for table in ['audios','articles','categories','subcategories','blog_categories']:
+              r=requests.post(url+'/api/data',headers={'Origin':'https://ludodulac.github.io'},
+                              json={'table':table,'op':'select'},timeout=30)
+              r.raise_for_status();data=r.json()
+              assert len(data.get('data') or [])==2,(table,data)
+          print('CONFIRMÉ : 252 images R2 identiques + 10 lignes publiques D1 lisibles.')
+          print('Ne pas basculer GitHub Pages : six fichiers de Supabase restent inaccessibles (402).')
+          PY
