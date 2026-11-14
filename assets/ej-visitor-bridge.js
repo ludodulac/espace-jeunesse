@@ -39,7 +39,11 @@ async function init(){
   const withExercises=window.EJExercises?.mergeSite(withBoutique)||withBoutique;
   const withLiterature=window.EJLiterature?.mergeSite(withExercises)||withExercises;
   const data=window.EJNames?.mergeSite(withLiterature)||withLiterature;
-  const pages=(data.pages||[]).filter(p=>p.status==="published");
+  // Les anciennes présentations des peluches contiennent encore des liens vers
+  // le corpus éditorial. Elles restent conservées dans l’admin, mais ne sont
+  // plus publiées : seule la boutique autonome présente ces produits.
+  const archived=new Set(["boutique-peluches","peluches-totem"]);
+  const pages=(data.pages||[]).filter(p=>p.status==="published"&&!archived.has(p.slug||p.id));
   const list=pages.map(p=>({
    id:p.slug||p.id,name:p.title,group:"page",placement:(p.slug==="boutique-peluches"&&p.title==="Boutique peluches")?"none":p.placement||"menu",
    visibility:"published",blocks:(p.blocks||[]).map(toOriginalBlock)

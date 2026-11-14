@@ -92,7 +92,7 @@ function render(){
  root.append(node("p","sh-note","Les produits en brouillon ou masqués ne sont pas visibles dans la boutique publique. Les photos restent hébergées chez leurs auteurs."));
 }
 function makeField(form,name,label,value,type="text",opts){
- const wrap=node("label",["description","symbolism","additionalImages"].includes(name)?"sh-span":"");
+ const wrap=node("label",["description","additionalImages"].includes(name)?"sh-span":"");
  wrap.append(document.createTextNode(label));
  let input;
  if(type==="select"){
@@ -134,8 +134,6 @@ function form(){
  }else{
   makeField(fields,"animal","Animal ou sous-titre",prev.animal||"");
   makeField(fields,"description","Description du produit",prev.description||"","textarea");
-  makeField(fields,"symbolism","Sens symbolique (facultatif)",prev.symbolism||"","textarea");
-  makeField(fields,"biblawRef","Référence Biblaw (facultatif)",prev.biblawRef||"");
   makeField(fields,"collectionId","Collection",prev.collectionId||state.catalog.collections[0]?.id||"","select",
    state.catalog.collections.map(c=>[c.id,c.name]));
   makeField(fields,"artisanId","Artisan",prev.artisanId||state.catalog.artisans[0]?.id||"","select",
@@ -165,6 +163,7 @@ function form(){
   if(values.additionalImages!==undefined)values.additionalImages=values.additionalImages.split(String.fromCharCode(10)).map(s=>s.trim()).filter(Boolean);
   if(values.sort!==undefined)values.sort=Math.max(0,Number(values.sort)||0);
   const obj={...prev,...values};
+  if(tab==="products"){delete obj.symbolism;delete obj.biblawRef;}
   if(editing.index===-1){obj.id=nextId(values.name,next[tab]);obj.slug=obj.id;next[tab].push(obj)}
   else next[tab][editing.index]=obj;
   saveBtn.disabled=true;await save(next);saveBtn.disabled=false;

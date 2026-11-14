@@ -7,6 +7,7 @@ on:
       - 'worker/schema.sql'
       - 'data/shop-starter.json'
       - 'scripts/seed-shop.mjs'
+      - 'scripts/neutralize-shop.mjs'
       - '.github/workflows/shop-cloudflare.yml'
   workflow_dispatch:
 
@@ -52,6 +53,10 @@ jobs:
         run: node scripts/seed-shop.mjs
       - name: Amorcer la boutique si elle est vide
         run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-seed-shop.sql --config worker/wrangler-ci.toml
+      - name: Préparer le retrait des références bibliques dans la boutique D1
+        run: node scripts/neutralize-shop.mjs
+      - name: Retirer les champs historiques sans écraser les produits
+        run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-shop-cleanup.sql --config worker/wrangler-ci.toml
       - name: Publier le Worker existant sans toucher aux secrets
         run: npx --yes wrangler@4 deploy --config worker/wrangler-ci.toml
       - name: Tester la boutique et les pages existantes
@@ -67,6 +72,10 @@ jobs:
             if(shop.ok&&site.ok){
               const a=await shop.json(),b=await site.json();
               if(Array.isArray(a.products)&&a.products.length>=21&&Array.isArray(b.pages)){
+                if(a.products.some(p=>'symbolism' in p||'biblawRef' in p))
+                  throw Error('Champs Biblaw encore exposés par l’API publique');
+                if(a.collections.some(c=>/Bible|psaume|essénien|totem/i.test(c.name+' '+c.description)))
+                  throw Error('Référence éditoriale subsistante dans la collection');
                 console.log('Boutique publiée : '+a.products.length+' produits ; pages conservées : '+b.pages.length);
                 ok=true;break;
               }

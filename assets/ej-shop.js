@@ -21,7 +21,7 @@ const artisan=p=>data.artisans.find(x=>x.id===p.artisanId);
 function card(p){
  const n=a("","boutique.html?produit="+encodeURIComponent(p.slug),"shop-card");n.append(image(p));
  const body=el("div","shop-card-body");body.append(el("span","shop-animal",p.animal||"Création"));
- body.append(el("h2","",p.name));if(p.symbolism)body.append(el("p","shop-symbol",p.symbolism));
+ body.append(el("h2","",p.name));if(p.description)body.append(el("p","shop-symbol",p.description));
  const who=artisan(p);if(who)body.append(el("p","shop-maker","Par "+who.name));
  body.append(el("span","shop-button","Découvrir la fiche →"));n.append(body);return n;
 }
@@ -42,7 +42,7 @@ function home(){
  const grid=el("div","shop-grid");root.append(grid);
  function update(){
   const q=clean(search.value),arr=products().filter(p=>(!col||p.collectionId===col.id)&&
-   (!q||clean([p.name,p.animal,p.symbolism,artisan(p)?.name].join(" ")).includes(q)));
+   (!q||clean([p.name,p.animal,p.description,artisan(p)?.name].join(" ")).includes(q)));
   counter.textContent=arr.length+" création"+(arr.length>1?"s":"")+" à découvrir";
   grid.replaceChildren();if(!arr.length)grid.append(el("p","shop-empty","Aucun produit trouvé."));
   else for(const p of arr)grid.append(card(p));
@@ -54,10 +54,8 @@ function detail(p){
  const article=el("article","shop-detail");article.append(image(p));
  const right=el("div","");
  right.append(el("span","shop-kicker","Sélection Espace Jeunesse"),el("h1","",p.name));
- if(p.animal)right.append(el("h3","shop-animal","Animal totem : "+p.animal));
- if(p.symbolism)right.append(el("p","shop-symbol",p.symbolism));
+ if(p.animal)right.append(el("h3","shop-animal",p.animal));
  if(p.description)right.append(el("p","",p.description));
- if(p.biblawRef)right.append(el("p","shop-note",p.biblawRef));
  const by=artisan(p);if(by){
   right.append(el("p","","Création proposée par "+by.name));
   if(by.location)right.append(el("p","shop-note",by.location));
@@ -67,11 +65,7 @@ function detail(p){
  if(p.affiliate)cta.rel="sponsored noopener noreferrer";right.append(cta);
  right.append(el("p","shop-note",p.affiliate?"Lien d'affiliation : l'Espace Jeunesse peut recevoir une commission sur une vente.":"Le bouton ouvre le site de l'artisan. Aucun paiement n'est effectué ici."));
  article.append(right);root.append(article);
- if(p.symbolism||p.biblawRef){const note=el("aside","shop-note-box");
- note.append(el("h2","","Le symbole de "+(p.animal||"cet animal")));
- if(p.symbolism)note.append(el("p","",p.symbolism));
- if(p.biblawRef)note.append(el("p","",p.biblawRef));
- note.append(a("Consulter Biblaw ↗","https://ludodulac.github.io/Biblaw/","shop-button",true));root.append(note)}
+
 }
 (async()=>{
  try{

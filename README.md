@@ -68,3 +68,10 @@ Aucune donnée, ressource Cloudflare ou identifiant de Célébrations n'est copi
 - API publique : `GET /api/shop`. API administrateur : `GET/PUT /api/admin/shop` avec le même jeton que les pages.
 - La première collection reprend 21 liens de peluches ; ce sont des sélections éditoriales, pas des partenariats rémunérés acquis.
 - La page historique « Boutique peluches » reste accessible directement, mais son lien automatique est retiré du menu pour éviter deux boutiques.
+
+## Présentation neutre de la boutique aux créateurs (14 novembre 2026)
+
+- La vitrine et les fiches produits ne contiennent plus de lien vers Biblaw, de références aux psaumes, ni d'explications religieuses ou symboliques.
+- La collection initiale s'intitule « Peluches artisanales ». Son identifiant interne est inchangé pour préserver les liens entre produits et collections ; son URL publique porte désormais `peluches-artisanales`.
+- Les anciennes pages de présentation « Peluches totem » et « Boutique peluches » sont archivées côté visiteur, sans suppression de leurs contenus enregistrés dans l'administration.
+- Le catalogue D1 est nettoyé de ses champs `symbolism` et `biblawRef` par une migration ciblée, avec contrôle de version : les noms, images, liens et fiches créateurs restent intacts.

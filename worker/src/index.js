@@ -351,7 +351,6 @@ function cleanShop(input){
  const products=input.products.map(x=>({
   id:safeSlug(x.id),slug:safeSlug(x.slug||x.id),name:small(x.name,140),
   animal:small(x.animal,90),description:small(x.description,1800),
-  symbolism:small(x.symbolism,900),biblawRef:small(x.biblawRef,160),
   collectionId:safeSlug(x.collectionId),artisanId:safeSlug(x.artisanId),
   imageUrl:httpsLink(x.imageUrl),additionalImages:(Array.isArray(x.additionalImages)?x.additionalImages:[]).slice(0,5).map(httpsLink).filter(Boolean),
   productUrl:httpsLink(x.productUrl),priceLabel:small(x.priceLabel,80),
@@ -368,11 +367,18 @@ function cleanShop(input){
  return {collections,artisans,products};
 }
 function shopPublic(catalog){
- const collections=catalog.collections.filter(x=>x.status==="published").map(x=>({...x}));
+ const collections=catalog.collections.filter(x=>x.status==="published").map(x=>{
+  const c={...x};
+  // Protection immédiate pendant la migration des anciennes fiches.
+  if(c.id==="animaux-totems"&&c.name==="Peluches des animaux totems")c.name="Peluches artisanales";
+  if(c.id==="animaux-totems"&&/Bible|psaume|totem/i.test(c.description))c.description="Une sélection de peluches à découvrir chez leurs créateurs.";
+  if(c.id==="animaux-totems"&&c.slug==="animaux-totems")c.slug="peluches-artisanales";
+  return c;
+ });
  const allowed=new Set(collections.map(x=>x.id));
  const artisans=catalog.artisans.map(({id,name,description,website,location,partner})=>({id,name,description,website,location,partner}));
  const products=catalog.products.filter(x=>x.status==="published"&&allowed.has(x.collectionId))
-  .map(p=>({...p}));
+  .map(({symbolism,biblawRef,...p})=>p);
  return {collections,artisans,products};
 }
 async function getShop(env){
