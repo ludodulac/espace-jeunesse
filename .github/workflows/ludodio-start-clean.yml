@@ -1,0 +1,71 @@
+name: Remettre Ludodio à zéro (D1 + ancien catalogue R2 uniquement)
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/ludodio-start-clean.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ludodio-reset-20261114
+  cancel-in-progress: false
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Installer Wrangler
+        run: npm install --global wrangler@4
+      - name: Supprimer seulement les anciens fichiers Ludodio et vider D1
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,urllib.request,urllib.error,json,concurrent.futures,subprocess
+          account=os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+          token=os.environ.get("CLOUDFLARE_API_TOKEN")
+          if not account or not token:raise SystemExit("Secrets absents, aucune modification")
+          db="2af9d3e1-4b5c-4f05-a817-cb75c6653f62"
+          base=f"https://api.cloudflare.com/client/v4/accounts/{account}"
+          def api(method,path,body=None):
+            request=urllib.request.Request("https://api.cloudflare.com/client/v4"+path,
+              data=json.dumps(body).encode() if body is not None else None,method=method,
+              headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"})
+            with urllib.request.urlopen(request,timeout=40) as r: j=json.load(r)
+            if not j.get("success"):raise RuntimeError(str(j.get("errors"))[:400])
+            return j["result"]
+          def sql(query):
+            data=api("POST",f"/accounts/{account}/d1/database/{db}/query",{"sql":query})
+            return data[0]["results"]
+          names=["audios","articles","categories","subcategories","blog_categories"]
+          counts={name:sql(f'SELECT COUNT(*) AS count FROM "{name}"')[0]["count"] for name in names}
+          print("Ludodio D1 avant nettoyage:",counts,flush=True)
+          if any(counts[name]!=2 for name in names):
+            raise RuntimeError("Inventaire différent des 10 lignes d'origine : suppression annulée.")
+          if sql('SELECT COUNT(*) AS count FROM studio_sound_library')[0]['count']!=0:raise RuntimeError("Studio sound library non vide : ne pas effacer")
+          if sql('SELECT COUNT(*) AS count FROM studio_projects')[0]['count']!=0:raise RuntimeError("Studio projects non vides : ne pas effacer")
+          objs=api("GET",f"/accounts/{account}/r2/buckets/ludodio-media/objects?per_page=1000")
+          assert isinstance(objs,list),"Format R2 inattendu"
+          keys=[o["key"] for o in objs]
+          if len(keys)!=252 or len(set(keys))!=252 or any(not k.startswith("images/admin-library/s") or not k.endswith(".webp") for k in keys):
+            raise RuntimeError("R2 contient des objets inattendus : suppression annulée.")
+          print("252 anciennes images seulement, suppression autorisée par le propriétaire",flush=True)
+          def remove(k):
+            p=subprocess.run(["wrangler","r2","object","delete","ludodio-media/"+k,"--remote","--force"],
+                            stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=50)
+            if p.returncode:raise RuntimeError("Echec suppression "+k+": "+p.stdout[-300:])
+          with concurrent.futures.ThreadPoolExecutor(max_workers=6) as workers:list(workers.map(remove,keys))
+          remain=api("GET",f"/accounts/{account}/r2/buckets/ludodio-media/objects?per_page=1000")
+          if len(remain)!=0:raise RuntimeError(f"R2 pas complètement vide : {len(remain)} objets")
+          print("R2 ludodio-media : 0 image, 0 MP3, 0 fichier",flush=True)
+          for name in ["audios","articles","subcategories","categories","blog_categories"]:
+            api("POST",f"/accounts/{account}/d1/database/{db}/query",
+                {"sql":f'DELETE FROM "{name}"'})
+          after={name:sql(f'SELECT COUNT(*) AS count FROM "{name}"')[0]['count'] for name in names}
+          if any(after.values()):raise RuntimeError("D1 non vide : "+str(after))
+          print("D1 Ludodio : 0 histoire, 0 article, 0 catégorie; schéma et Worker conservés",flush=True)
+          print("AUCUNE suppression dans Espace Jeunesse, Celebrations ou Supabase",flush=True)
+          PY
