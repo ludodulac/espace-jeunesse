@@ -23,7 +23,7 @@ test("La page Prénoms conserve Ludovic et ajoute les 20 nouvelles fiches dans l
  assert.equal(page.placement,"menu");
  const fiches=page.blocks.filter(b=>b.type==="section");
  assert.equal(fiches.length,21);
- assert.deepEqual(fiches.slice(1).map(f=>f.columns[0][0].text),expected);
+ assert.deepEqual(Array.from(fiches.slice(1),f=>f.columns[0][0].text),expected);
  assert.ok(fiches.every(f=>f.style.border==="round"));
  assert.ok(fiches.every(f=>f.columns[0].some(b=>b.type==="image")));
  assert.ok(fiches.every(f=>f.columns[0].some(b=>b.type==="button")));
