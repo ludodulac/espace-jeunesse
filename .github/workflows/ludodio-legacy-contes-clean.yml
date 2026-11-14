@@ -1,0 +1,40 @@
+name: Retirer les anciens MP3 du stockage historique Ludodio
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/ludodio-legacy-contes-clean.yml]
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --global wrangler@4
+      - name: Nettoyer uniquement les trois anciens objets vérifiés
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json,urllib.request,subprocess,os
+          aid=os.environ['CLOUDFLARE_ACCOUNT_ID']
+          token=os.environ['CLOUDFLARE_API_TOKEN']
+          bucket='foret-enchantee-contes'
+          def keys():
+            req=urllib.request.Request(f'https://api.cloudflare.com/client/v4/accounts/{aid}/r2/buckets/{bucket}/objects?per_page=1000',
+                    headers={'Authorization':'Bearer '+token})
+            with urllib.request.urlopen(req,timeout=40) as resp:body=json.load(resp)
+            if not body.get('success'):raise RuntimeError('R2 API failure')
+            return [x['key'] for x in body.get('result',[])]
+          initial=keys()
+          allowed={'69.3 chant - Soyez-comme-les-chevaliers.mp3','contes/test.mp3','contes/'}
+          if len(initial)!=3 or set(initial)!=allowed:
+            raise RuntimeError('R2 legacy differs from reviewed inventory, no deletion')
+          for key in initial:
+            subprocess.run(['wrangler','r2','object','delete',bucket+'/'+key,'--remote','--force'],check=True)
+          assert keys()==[], 'Old story storage is not empty'
+          print('Ancien stockage de contes : 0 objet. Nouvel espace Ludodio et autres sites inchangés.')
+          PY
