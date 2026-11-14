@@ -19,53 +19,59 @@ const collections=()=>data.collections.filter(x=>x.status==="published").sort((a
 const products=()=>data.products.filter(x=>x.status==="published").sort((a,b)=>a.sort-b.sort);
 const artisan=p=>data.artisans.find(x=>x.id===p.artisanId);
 function card(p){
- const n=a("","boutique.html?produit="+encodeURIComponent(p.slug),"shop-card");n.append(image(p));
- const body=el("div","shop-card-body");body.append(el("span","shop-animal",p.animal||"Création"));
- body.append(el("h2","",p.name));if(p.description)body.append(el("p","shop-symbol",p.description));
- const who=artisan(p);if(who)body.append(el("p","shop-maker","Par "+who.name));
- body.append(el("span","shop-button","Découvrir la fiche →"));n.append(body);return n;
+ const n=a("","boutique.html?produit="+encodeURIComponent(p.slug),"shop-card");
+ n.append(image(p));
+ const body=el("div","shop-card-body");
+ body.append(el("h2","shop-product-title",p.name));
+ const maker=artisan(p);
+ if(maker)body.append(el("p","shop-maker",maker.name));
+ n.append(body);return n;
 }
+
 function home(){
  const params=new URLSearchParams(location.search),chosen=params.get("collection")||"";
  const col=collections().find(x=>x.slug===chosen);
- const hero=el("section","shop-hero");
- hero.append(el("span","shop-kicker","La boutique des découvertes"),el("h1","","Des créations qui racontent des histoires"),
-  el("p","","Boutique provisoire : exemples de créations repérées chez de vrais artisans, sans partenariat conclu à ce jour. Les achats se font chez leurs créateurs."));
- root.append(hero,el("h2","shop-title",col?.name||"Explorer nos collections"));
- const filters=el("nav","shop-filters");filters.setAttribute("aria-label","Collections");
- filters.append(a("Toute la boutique","boutique.html","shop-pill"+(!col?" active":"")));
- for(const c of collections())filters.append(a(c.name,"boutique.html?collection="+encodeURIComponent(c.slug),"shop-pill"+(col?.id===c.id?" active":"")));
- root.append(filters);
- const bar=el("div","shop-toolbar"),counter=el("span","","");
- const search=el("input","shop-search");search.type="search";search.placeholder="Rechercher une peluche…";search.setAttribute("aria-label","Rechercher un produit");
- bar.append(counter,search);root.append(bar);
+ const heading=el("header","shop-intro");
+ heading.append(el("h1","","Peluches & créations"),el("p","","Une sélection d'artisans et de créateurs."));
+ root.append(heading);
+ const visibleCollections=collections();
+ if(visibleCollections.length>1){
+  const filters=el("nav","shop-filters");filters.setAttribute("aria-label","Collections");
+  filters.append(a("Tout voir","boutique.html","shop-pill"+(!col?" active":"")));
+  for(const c of visibleCollections)filters.append(a(c.name,"boutique.html?collection="+encodeURIComponent(c.slug),"shop-pill"+(col?.id===c.id?" active":"")));
+  root.append(filters);
+ }
+ const bar=el("div","shop-toolbar"),counter=el("span","shop-count","");
+ const search=el("input","shop-search");
+ search.type="search";search.placeholder="Rechercher un produit";
+ search.setAttribute("aria-label","Rechercher un produit");
+ bar.append(search,counter);root.append(bar);
  const grid=el("div","shop-grid");root.append(grid);
  function update(){
   const q=clean(search.value),arr=products().filter(p=>(!col||p.collectionId===col.id)&&
    (!q||clean([p.name,p.animal,p.description,artisan(p)?.name].join(" ")).includes(q)));
-  counter.textContent=arr.length+" création"+(arr.length>1?"s":"")+" à découvrir";
-  grid.replaceChildren();if(!arr.length)grid.append(el("p","shop-empty","Aucun produit trouvé."));
+  counter.textContent=arr.length+" produit"+(arr.length>1?"s":"");
+  grid.replaceChildren();
+  if(!arr.length)grid.append(el("p","shop-empty","Aucun produit trouvé."));
   else for(const p of arr)grid.append(card(p));
  }
- search.addEventListener("input",update);update();root.append(el("p","shop-note","Les produits sont vendus par leurs créateurs, jamais par l'Espace Jeunesse. Les prix et disponibilités sont à vérifier chez eux."));
+ search.addEventListener("input",update);update();
 }
-function detail(p){
- root.append(a("← Retour à la boutique","boutique.html","shop-back"));
- const article=el("article","shop-detail");article.append(image(p));
- const right=el("div","");
- right.append(el("span","shop-kicker","Sélection Espace Jeunesse"),el("h1","",p.name));
- if(p.animal)right.append(el("h3","shop-animal",p.animal));
- if(p.description)right.append(el("p","",p.description));
- const by=artisan(p);if(by){
-  right.append(el("p","","Création proposée par "+by.name));
-  if(by.location)right.append(el("p","shop-note",by.location));
- }
- if(p.priceLabel)right.append(el("p","",p.priceLabel));
- const cta=a("Voir le produit chez le créateur ↗",p.productUrl,"shop-button",true);
- if(p.affiliate)cta.rel="sponsored noopener noreferrer";right.append(cta);
- right.append(el("p","shop-note",p.affiliate?"Lien d'affiliation : l'Espace Jeunesse peut recevoir une commission sur une vente.":"Le bouton ouvre le site de l'artisan. Aucun paiement n'est effectué ici."));
- article.append(right);root.append(article);
 
+function detail(p){
+ root.append(a("← Boutique","boutique.html","shop-back"));
+ const article=el("article","shop-detail");article.append(image(p));
+ const right=el("div","shop-detail-info");
+ const maker=artisan(p);
+ if(maker)right.append(el("p","shop-detail-maker",maker.name));
+ right.append(el("h1","",p.name));
+ if(p.priceLabel)right.append(el("p","shop-price",p.priceLabel));
+ const cta=a("Voir chez l'artisan ↗",p.productUrl,"shop-button",true);
+ if(p.affiliate)cta.rel="sponsored noopener noreferrer";
+ right.append(cta);
+ right.append(el("p","shop-availability","Prix et disponibilité chez l'artisan."));
+ if(p.affiliate)right.append(el("p","shop-affiliation","Lien affilié : une commission peut être perçue."));
+ article.append(right);root.append(article);
 }
 
 /* Vitrine : cinq artisans récemment contactés en tête, sans déclarer d'affiliation.
