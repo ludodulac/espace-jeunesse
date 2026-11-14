@@ -6,7 +6,7 @@
 const API=String(window.ESPACE_JEUNESSE_CONFIG?.apiBase||"").replace(/\/$/,"");
 const remote=/^https:\/\/[a-z0-9.-]+$/i.test(API);
 const TOKEN_KEY="ej-admin-session-v1";
-let token=sessionStorage.getItem(TOKEN_KEY)||"",version=0,selected="",queued=null,sending=false,halted=false,alertMode=false;
+let token=localStorage.getItem(TOKEN_KEY)||sessionStorage.getItem(TOKEN_KEY)||"",version=0,selected="",queued=null,sending=false,halted=false,alertMode=false;
 const meta={title:"Espace Jeunesse",tagline:"Découvrir, créer et partager"};
 const make=(tag,text,css)=>{const el=document.createElement(tag);if(css)el.className=css;if(text!==undefined)el.textContent=text;return el};
 const notice=(message,error=false)=>{
@@ -71,7 +71,7 @@ function toSite(db){
   id:String(p.id),slug:normalizeSlug(p.slug,p.id),
   title:String(p.name||"Sans titre"),
   placement:["menu","footer","none"].includes(p.placement)?p.placement:"menu",
-  status:["published","draft","hidden"].includes(p.visibility)?p.visibility:"draft",
+  status:["published","draft","hidden","private"].includes(p.visibility)?p.visibility:"draft",
   blocks:(p.blocks||[]).map(toSiteBlock)
  }));
  const used=new Set();
@@ -86,7 +86,7 @@ async function request(path,init={}){
    ...(init.body&&!binary?{"Content-Type":"application/json"}:{}),...init.headers};
  const response=await fetch(API+path,{...init,headers,mode:"cors",cache:"no-store"});
  let payload={};try{payload=await response.json()}catch{}
- if(response.status===401){token="";sessionStorage.removeItem(TOKEN_KEY);halted=true;
+ if(response.status===401){token="";sessionStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_KEY);halted=true;
   throw Error("Session expirée. Rechargez pour vous reconnecter.")}
  if(!response.ok)throw Error(payload.error||"Erreur serveur "+response.status);
  return payload;
@@ -161,6 +161,15 @@ async function importFiles(files){
 function mount(){
  document.getElementById("ej-original-shell").hidden=false;
  const head=document.getElementById("ej-auth-screen");head.hidden=true;head.replaceChildren();
+ // La déconnexion enlève également le droit de consulter les pages privées.
+ if(remote){
+  const nav=document.querySelector("#ej-original-shell .rail nav");
+  if(nav&&!nav.querySelector("[data-ej-logout]")){
+   const logout=make("button","↪ Se déconnecter","navbtn");logout.type="button";logout.dataset.ejLogout="1";
+   logout.onclick=()=>{token="";sessionStorage.removeItem(TOKEN_KEY);localStorage.removeItem(TOKEN_KEY);location.reload()};
+   nav.append(logout);
+  }
+ }
  if(!remote)notice("⚠ Mode d'essai local : ce navigateur ne publie pas sur le site. Activez le NOUVEAU Cloudflare Espace Jeunesse.");
  const src=document.createElement("script");src.src="assets/celebrations-editor-verbatim.js?v=ej-20261113-navigation2";
  src.onerror=()=>notice("Impossible de charger la copie de l'éditeur Célébrations.",true);
@@ -171,10 +180,10 @@ async function boot(){
  if(!remote){mount();return}
  const login=document.getElementById("ej-auth-screen");
  const launch=async()=>{
-  try{await request("/api/admin/state");login.hidden=true;mount()}
-  catch(error){notice(error.message,true);login.hidden=false}
+  try{await request("/api/admin/state");login.hidden=true;mount();return true}
+  catch(error){notice(error.message,true);login.hidden=false;return false}
  };
- if(token){await launch();return}
+ if(token){localStorage.setItem(TOKEN_KEY,token);if(await launch())return}
  login.hidden=false;login.className="ej-login";
  const form=document.createElement("form");form.className="panel";form.style.maxWidth="440px";
  form.append(make("h1","Administration — Espace Jeunesse"));
@@ -202,7 +211,7 @@ async function boot(){
  form.addEventListener("submit",async e=>{
   e.preventDefault();button.disabled=true;
   try{const result=await request("/api/auth/login",{method:"POST",body:JSON.stringify({password:input.value})});
-   token=result.token;sessionStorage.setItem(TOKEN_KEY,token);await launch();
+   token=result.token;sessionStorage.setItem(TOKEN_KEY,token);localStorage.setItem(TOKEN_KEY,token);halted=false;await launch();
   }catch(error){status.textContent="❌ "+error.message}
   finally{button.disabled=false;input.value=""}
  });
