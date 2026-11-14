@@ -1,0 +1,35 @@
+name: Restaurer Ludodio depuis GitHub vers D1 R2 (sans bascule)
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/ludodio-restore-github.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ludodio-image-restoration
+  cancel-in-progress: false
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Préparer les outils
+        run: |
+          npm install --global wrangler@4
+          python3 -m pip install --quiet requests
+      - name: Charger le code et les 252 images du dépôt Ludodio
+        run: |
+          git clone --depth 1 --branch feat/ludodio-cloudflare-pin-simple-20261113 \
+            https://github.com/ludodulac/La-foret-enchantee.git ludodio
+      - name: Restaurer la copie Cloudflare sans changer les sites publics
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          python3 ludodio/scripts/ludodio_restore_github_backup.py
