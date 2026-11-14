@@ -1,0 +1,51 @@
+name: Préparer Cloudflare Ludodio (sans basculer le site)
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/ludodio-bootstrap.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Créer seulement les ressources distinctes Ludodio
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request,urllib.error
+          acc=os.environ.get('CLOUDFLARE_ACCOUNT_ID','')
+          token=os.environ.get('CLOUDFLARE_API_TOKEN','')
+          if not acc or not token: raise SystemExit('Secrets Cloudflare absents : aucune opération')
+          base=f'https://api.cloudflare.com/client/v4/accounts/{acc}'
+          def request(method,path,body=None):
+              raw=json.dumps(body).encode() if body is not None else None
+              req=urllib.request.Request('https://api.cloudflare.com/client/v4'+path,data=raw,method=method,
+                  headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+              try:
+                  with urllib.request.urlopen(req,timeout=25) as f: payload=json.load(f)
+              except urllib.error.HTTPError as e:
+                  detail=e.read().decode(errors='replace')[:450]
+                  raise RuntimeError(f'Cloudflare HTTP {e.code} sur {method} {path}: {detail}') from None
+              if not payload.get('success'):raise RuntimeError(str(payload.get('errors',[]))[:450])
+              return payload.get('result')
+          databases=request('GET',f'/accounts/{acc}/d1/database')
+          if not isinstance(databases,list):databases=databases.get('databases',[])
+          current=next((x for x in databases if x.get('name')=='ludodio'),None)
+          if not current:
+              current=request('POST',f'/accounts/{acc}/d1/database',{'name':'ludodio','jurisdiction':'eu'})
+              print('D1 Ludodio créée en juridiction EU')
+          else:print('D1 Ludodio existe déjà')
+          buckets=request('GET',f'/accounts/{acc}/r2/buckets')
+          found=any(x['name']=='ludodio-media' for x in buckets.get('buckets',[]))
+          if not found:
+              request('POST',f'/accounts/{acc}/r2/buckets',{'name':'ludodio-media','storageClass':'Standard'})
+              print('R2 ludodio-media créé')
+          else:print('R2 ludodio-media existe déjà')
+          print('Ressources prêtes, ID D1:',current['uuid'])
+          print('Aucune donnée Supabase, Célébrations ou Espace Jeunesse modifiée')
+          PY
