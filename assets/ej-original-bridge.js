@@ -100,7 +100,8 @@ async function prepare(key,seed){
  const withPartners=window.EJPartners?.mergeSite(withTotems)||withTotems;
  const withBoutique=window.EJBoutique?.mergeSite(withPartners)||withPartners;
  const withExercises=window.EJExercises?.mergeSite(withBoutique)||withBoutique;
- const st=window.EJLiterature?.mergeSite(withExercises)||withExercises;
+ const withLiterature=window.EJLiterature?.mergeSite(withExercises)||withExercises;
+ const st=window.EJNames?.mergeSite(withLiterature)||withLiterature;
  meta.title=String(st.title||meta.title);meta.tagline=String(st.tagline||meta.tagline);
  const local=localStorage.getItem(key);
  if(local&&local!==JSON.stringify(toOriginal(st))){
