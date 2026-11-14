@@ -313,6 +313,91 @@ async function serveMedia(env,req,id){
  }else headers.set("Content-Length",String(object.size));
  return new Response(req.method==="HEAD"?null:object.body,{status,headers});
 }
+
+/* Boutique indépendante des pages et des médias : une seule ligne versionnée
+ * en D1, contrôlée par la session administrateur existante.
+ * Les coordonnées des artisans restent exclusivement côté administration.
+ */
+function httpsLink(raw){
+ const s=String(raw||"").trim().slice(0,1200);
+ if(!s)return "";
+ try {const u=new URL(s);return u.protocol==="https:"?u.href:""}
+ catch{return ""}
+}
+function small(v,max=200){return String(v||"").trim().slice(0,max)}
+function safeSlug(v){
+ return small(v,100).normalize("NFD").replace(/\p{M}/gu,"").toLowerCase()
+  .replace(/[^a-z0-9-]/g,"-").replace(/^-+|-+$/g,"").slice(0,80);
+}
+function cleanShop(input){
+ if(!input||typeof input!=="object")throw Error("Catalogue manquant");
+ const lists=["collections","artisans","products"];
+ for(const k of lists)if(!Array.isArray(input[k])||input[k].length>250)throw Error("Liste "+k+" invalide");
+ const unique=(list,label)=>{const ids=new Set();for(const r of list){
+  if(!r.id||ids.has(r.id))throw Error("ID "+label+" absent ou dupliqué");ids.add(r.id);
+ }};
+ const collections=input.collections.map(x=>({
+  id:safeSlug(x.id),slug:safeSlug(x.slug||x.id),name:small(x.name,90),
+  description:small(x.description,700),imageUrl:httpsLink(x.imageUrl),
+  status:["published","draft","hidden"].includes(x.status)?x.status:"draft",
+  sort:Math.max(0,Math.min(9999,Number(x.sort)||0))
+ }));
+ const artisans=input.artisans.map(x=>({
+  id:safeSlug(x.id),name:small(x.name,120),description:small(x.description,900),
+  website:httpsLink(x.website),email:small(x.email,200),
+  location:small(x.location,120),partner:x.partner===true,
+  approvedImages:x.approvedImages===true
+ }));
+ const products=input.products.map(x=>({
+  id:safeSlug(x.id),slug:safeSlug(x.slug||x.id),name:small(x.name,140),
+  animal:small(x.animal,90),description:small(x.description,1800),
+  symbolism:small(x.symbolism,900),biblawRef:small(x.biblawRef,160),
+  collectionId:safeSlug(x.collectionId),artisanId:safeSlug(x.artisanId),
+  imageUrl:httpsLink(x.imageUrl),additionalImages:(Array.isArray(x.additionalImages)?x.additionalImages:[]).slice(0,5).map(httpsLink).filter(Boolean),
+  productUrl:httpsLink(x.productUrl),priceLabel:small(x.priceLabel,80),
+  affiliate:x.affiliate===true,status:["published","draft","hidden"].includes(x.status)?x.status:"draft",
+  featured:x.featured===true,sort:Math.max(0,Math.min(9999,Number(x.sort)||0))
+ }));
+ for(const [list,name] of [[collections,"collection"],[artisans,"artisan"],[products,"produit"]])unique(list,name);
+ const collIds=new Set(collections.map(x=>x.id)),artIds=new Set(artisans.map(x=>x.id));
+ for(const p of products){
+  if(!p.name||!p.slug||!p.productUrl||!p.imageUrl)throw Error("Produit incomplet : "+p.id);
+  if(!collIds.has(p.collectionId)||!artIds.has(p.artisanId))throw Error("Collection ou artisan absent pour "+p.id);
+ }
+ const slugs=new Set();for(const p of products){if(slugs.has(p.slug))throw Error("Nom de fiche dupliqué");slugs.add(p.slug)}
+ return {collections,artisans,products};
+}
+function shopPublic(catalog){
+ const collections=catalog.collections.filter(x=>x.status==="published").map(x=>({...x}));
+ const allowed=new Set(collections.map(x=>x.id));
+ const artisans=catalog.artisans.map(({id,name,description,website,location,partner})=>({id,name,description,website,location,partner}));
+ const products=catalog.products.filter(x=>x.status==="published"&&allowed.has(x.collectionId))
+  .map(p=>({...p}));
+ return {collections,artisans,products};
+}
+async function getShop(env){
+ const row=await env.DB.prepare("SELECT version,data FROM shop_state WHERE id=1").first();
+ return row?{version:Number(row.version),catalog:JSON.parse(row.data)}:
+   {version:0,catalog:{collections:[],artisans:[],products:[]}};
+}
+async function saveShop(env,req){
+ let body;try{body=await bodyJson(req,450000)}catch{return fail(env,req,"Catalogue JSON invalide")}
+ const version=Number(body.version);
+ if(!Number.isSafeInteger(version)||version<0)return fail(env,req,"Version invalide",422);
+ let catalog;try{catalog=cleanShop(body.catalog)}catch(e){return fail(env,req,e.message,422)}
+ const serialized=JSON.stringify(catalog);
+ if(serialized.length>360000)return fail(env,req,"Catalogue trop volumineux",413);
+ if(version===0){
+  const result=await env.DB.prepare("INSERT OR IGNORE INTO shop_state(id,version,data) VALUES(1,1,?)").bind(serialized).run();
+  if(!result.meta?.changes)return fail(env,req,"Catalogue modifié. Rechargez.",409);
+  return json(env,req,{ok:true,version:1});
+ }
+ const result=await env.DB.prepare("UPDATE shop_state SET version=version+1,data=?,updated_at=CURRENT_TIMESTAMP WHERE id=1 AND version=?")
+ .bind(serialized,version).run();
+ if(!result.meta?.changes)return fail(env,req,"Catalogue modifié. Rechargez.",409);
+ return json(env,req,{ok:true,version:version+1});
+}
+
 export default {
  async fetch(req,env){
   try{
@@ -324,6 +409,9 @@ export default {
    if(!env.DB||!env.MEDIA)return fail(env,req,"Bindings D1/R2 manquants",503);
    if(req.method!=="GET"&&req.method!=="HEAD"&&req.headers.has("Origin")&&!cors(env,req))return fail(env,req,"Origine non autorisée",403);
    if(req.method==="GET"&&path==="/api/site"){const s=await currentState(env);return json(env,req,publicProjection(s.state))}
+   if(req.method==="GET"&&path==="/api/shop"){
+    const s=await getShop(env);return json(env,req,shopPublic(s.catalog));
+   }
     if(req.method==="GET"&&path==="/api/ludodio/catalog")return ludodioCatalogue(env,req);
    if((req.method==="GET"||req.method==="HEAD")&&/^\/media\/[0-9a-f-]{36}$/.test(path))return serveMedia(env,req,path.slice(7));
    if(req.method==="POST"&&path==="/api/auth/login"){
@@ -333,6 +421,8 @@ export default {
    if(!path.startsWith("/api/admin/"))return fail(env,req,"Chemin introuvable",404);
    if(!await isAdmin(env,req))return fail(env,req,"Authentification requise",401);
    if(req.method==="GET"&&path==="/api/admin/state"){return json(env,req,await currentState(env))}
+   if(req.method==="GET"&&path==="/api/admin/shop")return json(env,req,await getShop(env));
+   if(req.method==="PUT"&&path==="/api/admin/shop")return saveShop(env,req);
    if(req.method==="PUT"&&path==="/api/admin/state")return saveState(req,env);
    if(req.method==="GET"&&path==="/api/admin/media")return listMedia(env,req);
     const ludodioPath=path.match(/^\/api\/admin\/ludodio\/([0-9a-f-]{36})$/);
