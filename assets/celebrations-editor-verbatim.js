@@ -2464,7 +2464,7 @@ function createEditorMediaCommands(){
 }
 
 function createPageModel(){
- const visibilityLabels={draft:'Brouillon',published:'Publiée',hidden:'Masquée'};
+ const visibilityLabels={draft:'Brouillon',published:'Publiée',hidden:'Masquée',private:'Privée — moi seul'};
  const fixedStages=['accueil-celebration','preparation','mercredi','jeudi','vendredi',
   'samedi','dimanche','apres-celebration'];
  const plannedPattern=/^plan-(michael|gabriel|raphael|ouriel)-\d{4}-\d{2}-\d{2}$/;
@@ -5605,8 +5605,8 @@ function pageWorkspace(group,mount=w){
    // de l'environnement de préproduction Célébrations.
    if(window.__EJ_PAGES_ONLY__&&!preview){
     row.classList.add('ej-page-status-row');
-    const state=['published','draft','hidden'].includes(q.visibility)?q.visibility:'draft';
-    const labels={published:'Publiée sur le site',draft:'Brouillon, non publié',hidden:'Masquée aux visiteurs'};
+    const state=['published','draft','hidden','private'].includes(q.visibility)?q.visibility:'draft';
+    const labels={published:'Publiée sur le site',draft:'Brouillon, non publié',hidden:'Masquée aux visiteurs',private:'Privée — administrateur uniquement'};
     const badge=n('span','inline-page-state state-'+state);
     badge.setAttribute('role','img');badge.setAttribute('aria-label',labels[state]);
     badge.title=labels[state];row.append(badge);
@@ -5616,7 +5616,7 @@ function pageWorkspace(group,mount=w){
     const statusField=n('label','editor-language-choice','Visibilité');
     const visibility=n('select');
     visibility.setAttribute('aria-label','Visibilité de '+q.name);
-    for(const [value,label] of [['published','Publiée'],['draft','Brouillon'],['hidden','Masquée']]){
+    for(const [value,label] of [['published','Publiée'],['draft','Brouillon'],['hidden','Masquée'],['private','Privée — moi seul']]){
      const option=n('option','',label);option.value=value;visibility.append(option);
     }
     visibility.value=state;
@@ -5710,7 +5710,7 @@ function pageWorkspace(group,mount=w){
   attachPagePublicationControls(list,'page');side.append(list);
   if(window.__EJ_PAGES_ONLY__&&!preview){
    const legend=n('div','ej-page-status-legend');
-   for(const [name,colour] of [['Publiée','published'],['Brouillon','draft'],['Masquée','hidden']]){
+   for(const [name,colour] of [['Publiée','published'],['Brouillon','draft'],['Masquée','hidden'],['Privée (moi seul)','private']]){
     const entry=n('span'),dot=n('i','ej-legend-dot state-'+colour);
     dot.setAttribute('aria-hidden','true');entry.append(dot,document.createTextNode(name));legend.append(entry);
    }
@@ -5753,10 +5753,10 @@ function pageWorkspace(group,mount=w){
   nameField.append(nameInput);fields.append(nameField);
   const visLabel=n('label','editor-language-choice','Visibilité');
   const vis=n('select');vis.setAttribute('aria-label','Visibilité de la page');
-  for(const [value,label] of [['draft','Brouillon'],['published','Publiée'],['hidden','Masquée']]){
+  for(const [value,label] of [['draft','Brouillon'],['published','Publiée'],['hidden','Masquée'],['private','Privée — moi seul']]){
    const o=n('option','',label);o.value=value;vis.append(o);
   }
-  vis.value=['draft','hidden','published'].includes(p.visibility)?p.visibility:'draft';
+  vis.value=['draft','hidden','published','private'].includes(p.visibility)?p.visibility:'draft';
   vis.onchange=()=>{p.visibility=vis.value;window.__EJ_SETTINGS_EXPANDED__=false;mark();render()};
   visLabel.append(vis);fields.append(visLabel);
   const placeLabel=n('label','editor-language-choice','Emplacement');

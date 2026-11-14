@@ -60,13 +60,15 @@ function visibleBlock(b){
  if(b.type!=="section")return b;
  return {...b,columns:(b.columns||[[],[]]).map(items=>(items||[]).map(visibleBlock).filter(Boolean))};
 }
-function publicProjection(s){
- const pages=(s.pages||[]).filter(p=>p.status==="published").map(p=>({
+function visitorProjection(s,includePrivate=false){
+ // Ne jamais renvoyer une page privée à un visiteur non authentifié.
+ const pages=(s.pages||[]).filter(p=>p.status==="published"||(includePrivate&&p.status==="private")).map(p=>({
   id:p.id,slug:p.slug,title:p.title,placement:p.placement,status:p.status,
   blocks:(p.blocks||[]).map(visibleBlock).filter(Boolean)
  }));
  return {title:s.title,tagline:s.tagline,homeId:s.homeId,pages};
 }
+function publicProjection(s){return visitorProjection(s,false)}
 function cleanBlock(b,i,depth){
  if(!b||typeof b!=="object"||!allowedTypes.has(b.type))throw Error("Type de bloc inconnu");
  const id=String(b.id||i).slice(0,100);
@@ -119,7 +121,7 @@ function cleanState(raw){
   const id=String(p.id||"").slice(0,100),slug=String(p.slug||""),name=String(p.title||"").trim().slice(0,120);
   if(!id||!name||!/^[a-z0-9-]{1,80}$/.test(slug)||ids.has(id)||slugs.has(slug))throw Error("Identifiant ou URL de page invalide / doublon");
   ids.add(id);slugs.add(slug);
-  if(!["published","draft","hidden"].includes(p.status)||!["menu","footer","none"].includes(p.placement))throw Error("Visibilité ou emplacement invalide");
+  if(!["published","draft","hidden","private"].includes(p.status)||!["menu","footer","none"].includes(p.placement))throw Error("Visibilité ou emplacement invalide");
   if(!Array.isArray(p.blocks)||p.blocks.length>300)throw Error("Nombre de blocs invalide");
   const blocks=p.blocks.map((b,i)=>cleanBlock(b,i,0));
   return {id,slug,title:name,placement:p.placement,status:p.status,blocks};
@@ -426,6 +428,10 @@ export default {
    }
    if(!path.startsWith("/api/admin/"))return fail(env,req,"Chemin introuvable",404);
    if(!await isAdmin(env,req))return fail(env,req,"Authentification requise",401);
+   if(req.method==="GET"&&path==="/api/admin/visitor-site"){
+    const s=await currentState(env);
+    return json(env,req,visitorProjection(s.state,true));
+   }
    if(req.method==="GET"&&path==="/api/admin/state"){return json(env,req,await currentState(env))}
    if(req.method==="GET"&&path==="/api/admin/shop")return json(env,req,await getShop(env));
    if(req.method==="PUT"&&path==="/api/admin/shop")return saveShop(env,req);

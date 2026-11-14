@@ -4,6 +4,10 @@
 "use strict";
 const API=String(window.ESPACE_JEUNESSE_CONFIG?.apiBase||"").replace(/\/$/,"");
 const remote=/^https:\/\/[a-z0-9.-]+$/i.test(API);
+// Une connexion/déconnexion dans un autre onglet met à jour la vue visiteur.
+window.addEventListener("storage",event=>{
+ if(event.key==="ej-admin-session-v1")location.reload();
+});
 
 /* Entrée Boutique distincte des pages classiques : l'éditeur ne la pilote pas. */
 const nav=document.getElementById("general-navigation");
@@ -30,9 +34,27 @@ function toOriginalBlock(b){
 }
 async function init(){
  try{
-  const r=await fetch((remote?API+"/api/site":"data/site.json"),{cache:"no-store"});
-  if(!r.ok)throw Error("Pages indisponibles : "+r.status);
-  const fetched=await r.json();
+  // Une session administrateur vérifiée par le Worker autorise la visite des
+  // pages privées ; aucun contenu privé ne vient de l'API publique.
+  let fetched=null,privateAuthorized=false;
+  const sessionToken=localStorage.getItem("ej-admin-session-v1")||sessionStorage.getItem("ej-admin-session-v1")||"";
+  if(remote&&sessionToken){
+   try{
+    const authorized=await fetch(API+"/api/admin/visitor-site",{
+     headers:{Authorization:"Bearer "+sessionToken},cache:"no-store"
+    });
+    if(authorized.ok){fetched=await authorized.json();privateAuthorized=true}
+    else if(authorized.status===401){
+     localStorage.removeItem("ej-admin-session-v1");
+     sessionStorage.removeItem("ej-admin-session-v1");
+    }
+   }catch{/* La consultation publique doit rester possible hors connexion. */}
+  }
+  if(!fetched){
+   const r=await fetch((remote?API+"/api/site":"data/site.json"),{cache:"no-store"});
+   if(!r.ok)throw Error("Pages indisponibles : "+r.status);
+   fetched=await r.json();
+  }
   const withTotems=window.EJTotems?.mergeSite(fetched)||fetched;
   const withPartners=window.EJPartners?.mergeSite(withTotems)||withTotems;
   const withBoutique=window.EJBoutique?.mergeSite(withPartners)||withPartners;
@@ -44,9 +66,9 @@ async function init(){
   // le corpus éditorial. Elles restent conservées dans l’admin, mais ne sont
   // plus publiées : seule la boutique autonome présente ces produits.
   const archived=new Set(["boutique-peluches","peluches-totem"]);
-  const pages=(data.pages||[]).filter(p=>p.status==="published"&&!archived.has(p.slug||p.id));
+  const pages=(data.pages||[]).filter(p=>(p.status==="published"||(remote&&privateAuthorized&&p.status==="private"))&&!archived.has(p.slug||p.id));
   const list=pages.map(p=>({
-   id:p.slug||p.id,name:p.title,group:"page",placement:(p.slug==="boutique-peluches"&&p.title==="Boutique peluches")?"none":p.placement||"menu",
+   id:p.slug||p.id,name:p.title+(p.status==="private"?" 🔒":""),group:"page",placement:(p.slug==="boutique-peluches"&&p.title==="Boutique peluches")?"none":p.placement||"menu",
    visibility:"published",blocks:(p.blocks||[]).map(toOriginalBlock)
   }));
   const homePage=pages.find(p=>p.id===data.homeId),homeId=homePage?.slug||list[0]?.id||"accueil";

@@ -75,3 +75,39 @@ Aucune donnée, ressource Cloudflare ou identifiant de Célébrations n'est copi
 - La collection initiale s'intitule « Peluches artisanales ». Son identifiant interne est inchangé pour préserver les liens entre produits et collections ; son URL publique porte désormais `peluches-artisanales`.
 - Les anciennes pages de présentation « Peluches totem » et « Boutique peluches » sont archivées côté visiteur, sans suppression de leurs contenus enregistrés dans l'administration.
 - Le catalogue D1 est nettoyé de ses champs `symbolism` et `biblawRef` par une migration ciblée, avec contrôle de version : les noms, images, liens et fiches créateurs restent intacts.
+
+## Pages réservées à l'administrateur (14 novembre 2026)
+
+Dans l'administration existante, le menu « Visibilité » d'une page propose
+désormais quatre choix : **Publiée**, **Brouillon**, **Masquée** et
+**Privée — moi seul** (pastille violette).
+
+- Une page **Publiée** est consultable par tous. **Brouillon** et **Masquée**
+  ne sont pas visibles sur le site visiteur.
+- Une page **Privée — moi seul** est consultable dans le site visiteur uniquement
+  après une authentification administrateur validée par le Worker
+  `espace-jeunesse-api`. Elle figure alors dans le menu ou en bas de page
+  selon son emplacement, avec un cadenas. Sans cette session, ni son titre
+  ni son contenu ne sont renvoyés dans `GET /api/site`.
+- `GET /api/admin/visitor-site` renvoie seulement les pages publiques et
+  privées (pas les brouillons), uniquement après validation du jeton
+  administrateur. Cela évite de se fier à un simple masquage HTML.
+- La connexion dans l'administration est réutilisée dans les autres onglets
+  **du même navigateur et du même profil**. Le jeton reste en stockage local
+  jusqu'à sa déconnexion ou à son expiration (12 heures au maximum).
+  Sur un autre navigateur ou appareil, il faut se connecter séparément.
+- Le nouveau bouton « Se déconnecter » efface le jeton dans ce navigateur.
+  Une page déjà ouverte doit être rechargée pour refléter une déconnexion.
+- La fonctionnalité nécessite **aussi le déploiement de la nouvelle version
+  de `worker/src/index.js`** : publier les fichiers statiques seuls ne suffit pas.
+  Aucun changement de base D1 n'est nécessaire.
+
+**Attention aux fichiers joints :** la médiathèque conserve la règle décidée
+auparavant : chaque URL `/media/<uuid>` reste accessible publiquement à
+quiconque la connaît. La protection concerne le texte et l'accès à la page,
+mais ne rend pas ses images, PDF ou MP3 confidentiels. Pour des documents
+sensibles, il faudra une autorisation sur l'accès aux médias également.
+
+Les pages de contenu codées en dur dans les fichiers JavaScript publics de
+GitHub Pages restent publiquement inspectables. La confidentialité ne couvre
+que les pages dont le contenu est enregistré dans D1 et servi par le Worker.

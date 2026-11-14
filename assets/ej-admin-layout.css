@@ -16,6 +16,7 @@
 #ej-original-shell .ej-page-status-row>.inline-page-state.state-published{background:#29a568!important}
 #ej-original-shell .ej-page-status-row>.inline-page-state.state-draft{background:#e7a348!important}
 #ej-original-shell .ej-page-status-row>.inline-page-state.state-hidden{background:#99a3ae!important}
+#ej-original-shell .ej-page-status-row>.inline-page-state.state-private{background:#7550ad!important}
 #ej-original-shell .ej-page-status-row>.page-options{width:37px;min-width:37px}
 #ej-original-shell .ej-page-status-legend{
  display:flex;flex-wrap:wrap;gap:8px 12px;margin:10px 12px 14px;
@@ -28,6 +29,7 @@
 #ej-original-shell .ej-legend-dot.state-published{background:#29a568}
 #ej-original-shell .ej-legend-dot.state-draft{background:#e7a348}
 #ej-original-shell .ej-legend-dot.state-hidden{background:#99a3ae}
+#ej-original-shell .ej-legend-dot.state-private{background:#7550ad}
 
 @media(min-width:1051px){
  /* Un seul panneau à gauche pour la navigation ET la liste de pages ;
