@@ -52,3 +52,19 @@ Aucune donnée, ressource Cloudflare ou identifiant de Célébrations n'est copi
 - « Proposer à Ludodio » place uniquement l’ID dans `ludodio_links`; l’administration Ludodio peut alors choisir ce fichier pour un conte sans le dupliquer. Les sons/effets/projets du Studio restent entièrement indépendants.
 - « Supprimer » demande une confirmation simple, enlève les références dans les pages et les sélections Ludodio, puis supprime le fichier du R2. Une histoire Ludodio liée à ce fichier devra alors être réassociée.
 - Les anciennes données et les ressources Célébrations ne sont ni migrées ni modifiées.
+
+## Boutique — vitrine affiliée indépendante (novembre 2026)
+
+- Adresse publique : `boutique.html`, accessible depuis le menu de l'Espace Jeunesse.
+- Dans l'administration existante : `admin.html?shop=1`, entrée « Boutique » dans le menu de gauche.
+- Trois listes éditables : produits, collections, artisans ; chaque produit a une fiche automatique distincte des pages ordinaires.
+- Visibilité `published` / `draft` / `hidden` ; les produits cachés et leurs catégories masquées ne sortent jamais de l'API publique.
+- Aucun panier, aucun paiement, aucune vente enregistrée sur l'Espace Jeunesse.
+- Le lien produit peut être une URL d'affiliation ; cocher « Lien d'affiliation » seulement après convention. Les visiteurs en sont informés sur la fiche.
+- Les fiches fournisseurs ne prétendent pas qu'un partenariat existe sans preuve ; le champ « Partenariat conclu » est explicite.
+- L'adresse e-mail des artisans est stockée dans D1, mais jamais renvoyée par `GET /api/shop`.
+- Les images peuvent être choisies dans la médiathèque existante ; si des photos de vendeurs tiers sont utilisées, vérifier leurs droits de reproduction.
+- Catalogue stocké dans une table D1 `shop_state` isolée des pages ; mises à jour avec version pour éviter l'écrasement concurrent.
+- API publique : `GET /api/shop`. API administrateur : `GET/PUT /api/admin/shop` avec le même jeton que les pages.
+- La première collection reprend 21 liens de peluches ; ce sont des sélections éditoriales, pas des partenariats rémunérés acquis.
+- La page historique « Boutique peluches » reste accessible directement, mais son lien automatique est retiré du menu pour éviter deux boutiques.

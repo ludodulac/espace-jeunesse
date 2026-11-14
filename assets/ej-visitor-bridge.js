@@ -4,6 +4,17 @@
 "use strict";
 const API=String(window.ESPACE_JEUNESSE_CONFIG?.apiBase||"").replace(/\/$/,"");
 const remote=/^https:\/\/[a-z0-9.-]+$/i.test(API);
+
+/* Entrée Boutique distincte des pages classiques : l'éditeur ne la pilote pas. */
+const nav=document.getElementById("general-navigation");
+function shopEntry(){
+ if(!nav||nav.querySelector("[data-ej-shop-link]"))return;
+ const a=document.createElement("a");
+ a.className="general-tab";a.href="boutique.html";
+ a.textContent="🛍 Boutique";a.dataset.ejShopLink="1";
+ nav.append(a);
+}
+if(nav){new MutationObserver(shopEntry).observe(nav,{childList:true});shopEntry()}
 function toOriginalBlock(b){
  if(b.type==="section")return {...b,kind:"section",columns:(b.columns||[[],[]]).map(items=>items.map(toOriginalBlock))};
  const type=b.type==="document"?"button":b.type==="columns"?"text":b.type;
@@ -24,11 +35,10 @@ async function init(){
   const fetched=await r.json();
   const withTotems=window.EJTotems?.mergeSite(fetched)||fetched;
   const withPartners=window.EJPartners?.mergeSite(withTotems)||withTotems;
-  const withBoutique=window.EJBoutique?.mergeSite(withPartners)||withPartners;
-  const data=window.EJExercises?.mergeSite(withBoutique)||withBoutique;
+  const data=window.EJBoutique?.mergeSite(withPartners)||withPartners;
   const pages=(data.pages||[]).filter(p=>p.status==="published");
   const list=pages.map(p=>({
-   id:p.slug||p.id,name:p.title,group:"page",placement:p.placement||"menu",
+   id:p.slug||p.id,name:p.title,group:"page",placement:(p.slug==="boutique-peluches"&&p.title==="Boutique peluches")?"none":p.placement||"menu",
    visibility:"published",blocks:(p.blocks||[]).map(toOriginalBlock)
   }));
   const homePage=pages.find(p=>p.id===data.homeId),homeId=homePage?.slug||list[0]?.id||"accueil";

@@ -1,0 +1,33 @@
+/* Module Boutique D1 : intégré dans l'administration actuelle, sans second compte. */
+body.ej-shop-mode .content>.topbar,body.ej-shop-mode .content>.main{display:none!important}
+.ej-shop-nav{display:block;text-decoration:none;padding:12px;color:inherit}
+body.ej-shop-mode .ej-shop-nav{background:#293746;color:#fff;border-radius:8px}
+.ej-shop-admin{max-width:1100px;width:100%;margin:0 auto;padding:24px clamp(12px,3vw,30px) 60px;color:#2d3943;font:14px/1.55 system-ui,sans-serif}
+.ej-shop-admin *{box-sizing:border-box}.ej-shop-admin .sh-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #ddd;padding-bottom:20px;margin-bottom:20px}
+.ej-shop-admin h1{font:400 clamp(26px,3vw,35px) Georgia,serif;margin:0 0 5px}
+.ej-shop-admin h2{font:400 25px Georgia,serif;margin:18px 0}
+.ej-shop-admin p{margin:4px 0 11px;color:#64727a}
+.ej-shop-admin .sh-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+.ej-shop-admin button,.ej-shop-admin .sh-link{cursor:pointer;border:1px solid #c5cbd0;background:#fff;color:#293746;padding:10px 15px;border-radius:9px;min-height:40px;text-decoration:none;font-weight:650}
+.ej-shop-admin button:hover,.ej-shop-admin .sh-link:hover{border-color:#956449}
+.ej-shop-admin .sh-primary{background:#94674e;color:#fff;border-color:#94674e}
+.ej-shop-admin .sh-selected{background:#293746;color:#fff;border-color:#293746}
+.ej-shop-admin .sh-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.ej-shop-admin .sh-card{background:#fff;border:1px solid #dfe1e1;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px}
+.ej-shop-admin .sh-card img{width:100%;height:145px;object-fit:contain;background:#f3f1ed;border-radius:8px}
+.ej-shop-admin .sh-card h3{font-size:17px;margin:0}.ej-shop-admin .sh-card p{margin:0}
+.ej-shop-admin .sh-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto}.ej-shop-admin .sh-actions button{font-size:12px;min-height:34px;padding:8px}
+.ej-shop-admin .sh-status{font-size:12px;border-radius:12px;padding:3px 9px;background:#eef1ee;color:#42624b;display:inline-block;width:max-content}
+.ej-shop-admin .sh-status[data-status="draft"]{background:#fff0d5;color:#895522}.ej-shop-admin .sh-status[data-status="hidden"]{background:#e4e4e4;color:#535353}
+.ej-shop-admin .sh-alert{padding:11px 15px;background:#f4eee3;border:1px solid #d9c5ac;border-radius:9px;color:#765d3e;margin:12px 0}.ej-shop-admin .sh-alert.error{background:#fae9e7;border-color:#dba8a2;color:#873c30}
+.ej-shop-admin .sh-form{background:#fff;border:1px solid #dadfdf;border-radius:15px;padding:clamp(14px,3vw,30px);max-width:830px}
+.ej-shop-admin .sh-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.ej-shop-admin label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.ej-shop-admin input,.ej-shop-admin textarea,.ej-shop-admin select{border:1px solid #c9cdd0;border-radius:8px;padding:10px;background:#fff;width:100%;color:#26323a;font:inherit;min-height:42px}
+.ej-shop-admin textarea{min-height:86px;resize:vertical}
+.ej-shop-admin .sh-span{grid-column:1/-1}.ej-shop-admin .sh-check{display:flex;align-items:center;gap:9px;flex-direction:row}
+.ej-shop-admin .sh-check input{width:18px;min-height:18px;height:18px}.ej-shop-admin .sh-note{color:#7a6550;font-size:12px}
+.ej-shop-admin .sh-form-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.ej-shop-admin .sh-media-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin:12px 0}
+.ej-shop-admin .sh-media-list button{padding:4px}.ej-shop-admin .sh-media-list img{height:95px;width:100%;object-fit:contain}
+@media(max-width:670px){.ej-shop-admin .sh-fields{grid-template-columns:1fr}.ej-shop-admin{padding:12px}.ej-shop-admin .sh-card img{height:180px}}

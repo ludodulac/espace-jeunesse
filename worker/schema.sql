@@ -35,3 +35,12 @@ CREATE TABLE IF NOT EXISTS ludodio_links (
   media_id TEXT PRIMARY KEY REFERENCES media(id) ON DELETE CASCADE,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Vitrine d'affiliation : données séparées des pages et versionnement CAS.
+-- Création non destructive, aucune table Célébrations impliquée.
+CREATE TABLE IF NOT EXISTS shop_state (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  version INTEGER NOT NULL DEFAULT 1,
+  data TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
