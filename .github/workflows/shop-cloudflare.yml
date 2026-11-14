@@ -1,0 +1,77 @@
+name: Déployer la boutique Espace Jeunesse sur Cloudflare
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/src/index.js'
+      - 'worker/schema.sql'
+      - 'data/shop-starter.json'
+      - 'scripts/seed-shop.mjs'
+      - '.github/workflows/shop-cloudflare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: ej-shop-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Vérifier le périmètre (Espace Jeunesse uniquement)
+        run: |
+          test "$GITHUB_REPOSITORY" = "ludodulac/espace-jeunesse"
+          test "$CLOUDFLARE_ACCOUNT_ID" = "60a7b17758a93fe6681ce998e72ddff0"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -f data/shop-starter.json
+      - name: Préparer Wrangler sans remplacer les secrets existants
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path='worker/wrangler.toml';
+          const source=fs.readFileSync(path,'utf8');
+          if(!source.includes('REPLACE_WITH_NEW_D1_DATABASE_ID') ||
+             !source.includes('name = "espace-jeunesse-api"') ||
+             !source.includes('database_name = "espace-jeunesse-db"'))throw Error('Configuration inattendue');
+          fs.writeFileSync('worker/wrangler-ci.toml',
+            source.replace('REPLACE_WITH_NEW_D1_DATABASE_ID','1ccf87df-2e24-48ab-88cd-3fca0560d76b'));
+          NODE
+      - name: Créer la table uniquement dans D1 Espace Jeunesse
+        run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file worker/schema.sql --config worker/wrangler-ci.toml
+      - name: Préparer les 21 fiches sans remplacer les données existantes
+        run: node scripts/seed-shop.mjs
+      - name: Amorcer la boutique si elle est vide
+        run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-seed-shop.sql --config worker/wrangler-ci.toml
+      - name: Publier le Worker existant sans toucher aux secrets
+        run: npx --yes wrangler@4 deploy --config worker/wrangler-ci.toml
+      - name: Tester la boutique et les pages existantes
+        run: |
+          node --input-type=module - <<'NODE'
+          const base='https://espace-jeunesse-api.rondes.workers.dev';
+          let ok=false;
+          for(let attempt=0;attempt<5;attempt++){
+            const [shop,site]=await Promise.all([
+              fetch(base+'/api/shop',{cache:'no-store'}),
+              fetch(base+'/api/site',{cache:'no-store'})
+            ]);
+            if(shop.ok&&site.ok){
+              const a=await shop.json(),b=await site.json();
+              if(Array.isArray(a.products)&&a.products.length>=21&&Array.isArray(b.pages)){
+                console.log('Boutique publiée : '+a.products.length+' produits ; pages conservées : '+b.pages.length);
+                ok=true;break;
+              }
+            }
+            await new Promise(r=>setTimeout(r,1300));
+          }
+          if(!ok)throw Error('Vérification publique du catalogue ou des pages échouée.');
+          NODE

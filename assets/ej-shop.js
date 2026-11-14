@@ -75,12 +75,18 @@ function detail(p){
 }
 (async()=>{
  try{
-  const r=await fetch(api?api+"/api/shop":"data/shop-starter.json",{cache:"no-store"});
+  let fallback=false;
+  let r=await fetch(api?api+"/api/shop":"data/shop-starter.json",{cache:"no-store"}).catch(()=>null);
+  if(!r||!r.ok){
+   fallback=true;
+   r=await fetch("data/shop-starter.json",{cache:"no-store"});
+  }
   if(!r.ok)throw Error("Catalogue indisponible ("+r.status+")");
   data=await r.json();if(!Array.isArray(data.products))throw Error("Catalogue invalide");
   root.replaceChildren();const slug=new URLSearchParams(location.search).get("produit");
   if(slug){const p=products().find(x=>x.slug===slug);if(p)detail(p);else root.append(el("p","shop-empty","Ce produit n'est plus publié."))}
   else home();
+  if(fallback)root.prepend(el("p","shop-note","Sélection de démonstration : la synchronisation du catalogue est momentanément indisponible."));
  }catch(e){root.replaceChildren(el("p","shop-empty","Impossible de charger la boutique. "+e.message))}
 })();
 })();
