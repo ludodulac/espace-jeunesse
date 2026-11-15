@@ -57,7 +57,7 @@ const PAGE={
       "Cette vision donne une grande importance à la responsabilité personnelle. Il ne suffit pas de prononcer de belles paroles : il faut pouvoir les confirmer par son comportement. Apprendre à parler avec justesse, à observer ses sentiments et à prendre soin de ses gestes fait donc partie de l’éducation magique."
     ],[
       ["Lire le psaume · Ouriel 26, v. 7, 9, 12 et 15","08","026","7,9,12,15"],
-      ["Lire le psaume · Gabriel 219, v. 5","33","219","5"],
+      ["Lire le psaume · Michaël 219, v. 5","33","219","5"],
     ]),
     card("la-magie-vertus","Mettre les vertus en action",[
       "La magie est définie comme une force qui <strong>met les vertus de la Lumière en action</strong>. Elle ne se limite pas à savoir ou à imaginer : elle doit prendre corps dans la manière de vivre. Une vertu n’est pas seulement un mot que l’on admire ; elle demande à être portée, nourrie et rendue visible par les actes.",
@@ -70,7 +70,7 @@ const PAGE={
       "Développer une <strong>« vision magique de la vie »</strong>, c’est apprendre à regarder les éléments avec attention et respect. Le texte précise que cette vision n’est pas censée être de la superstition : elle est présentée comme <strong>une sagesse, une sensibilité et une qualité de vie</strong>."
     ],[
       ["Lire le psaume · Gabriel 160, v. 10 et 11","22","160","10,11"],
-      ["Lire le psaume · Ouriel 40, v. 7","07","040","7"],
+      ["Lire le psaume · Raphaël 40, v. 7","07","040","7"],
     ]),
     card("la-magie-rites","Les bénédictions, les rites et les œuvres",[
       "La bénédiction est présentée comme un <strong>acte de haute magie</strong>. Bénir ne consiste pas seulement à adresser une parole agréable : dans le langage du corpus, c’est chercher à relier ce que l’on bénit à une vertu, à une fonction sacrée et à la Lumière.",
@@ -118,7 +118,10 @@ function checkPage(){
     }else if(!["text","heading"].includes(item.type))throw Error("Type non natif");
   };
   PAGE.blocks.forEach(walk);
-  if(sources!==15||JSON.stringify(PAGE).length>=40000)throw Error("Sources ou taille invalides");
+  if(sources!==14||JSON.stringify(PAGE).length>=40000)throw Error("Sources ou taille invalides");
+  const textBlocks=PAGE.blocks.filter(b=>b.type==="section").flatMap(b=>b.columns[0]).filter(b=>b.type==="text");
+  if(textBlocks.length!==16||textBlocks.filter(b=>b.rich.includes("<strong>")).length<14)
+    throw Error("La dissertation doit comprendre 16 paragraphes et des mots en gras");
   return {slug:PAGE.slug,title:PAGE.title,blocks:PAGE.blocks.length,cards:8,sources,rich:PAGE.blocks.filter(x=>x.type==="section").flatMap(x=>x.columns[0]).filter(x=>x.type==="text"&&x.rich.includes("<strong>")).length};
 }
 async function query(sql,params=[]){
