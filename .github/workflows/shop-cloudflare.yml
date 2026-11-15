@@ -7,6 +7,7 @@ on:
       - 'worker/schema.sql'
       - 'data/shop-starter.json'
       - 'scripts/seed-shop.mjs'
+      - 'scripts/seed-books.mjs'
       - 'scripts/neutralize-shop.mjs'
       - '.github/workflows/shop-cloudflare.yml'
   workflow_dispatch:
@@ -59,6 +60,10 @@ jobs:
         run: node scripts/neutralize-shop.mjs
       - name: Retirer les champs historiques sans écraser les produits
         run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-shop-cleanup.sql --config worker/wrangler-ci.toml
+      - name: Préparer les livres et maisons d'édition pour la collection Livres & contes
+        run: node scripts/seed-books.mjs
+      - name: Ajouter les livres dans la base Espace Jeunesse sans écraser les fiches existantes
+        run: npx --yes wrangler@4 d1 execute espace-jeunesse-db --remote --file /tmp/espace-jeunesse-books.sql --config worker/wrangler-ci.toml
       - name: Publier le Worker existant sans toucher aux secrets
         run: npx --yes wrangler@4 deploy --config worker/wrangler-ci.toml
       - name: Tester la boutique et les pages existantes
@@ -74,6 +79,10 @@ jobs:
             if(shop.ok&&site.ok){
               const a=await shop.json(),b=await site.json();
               if(Array.isArray(a.products)&&a.products.length>=21&&Array.isArray(b.pages)){
+                const livres=a.collections.find(c=>c.id==='livres-et-contes'&&c.status==='published');
+                const bibliotheque=a.products.filter(p=>p.collectionId==='livres-et-contes');
+                if(!livres||bibliotheque.length<18)throw Error('La collection Livres & contes ou ses ouvrages ne sont pas publics.');
+                if(bibliotheque.some(p=>p.affiliate===true))throw Error('Lien affilié déclaré sans convention.');
                 if(a.products.some(p=>'symbolism' in p||'biblawRef' in p))
                   throw Error('Champs Biblaw encore exposés par l’API publique');
                 if(a.collections.some(c=>/Bible|psaume|essénien|totem/i.test(c.name+' '+c.description)))
