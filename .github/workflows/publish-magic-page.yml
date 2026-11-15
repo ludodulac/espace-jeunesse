@@ -1,0 +1,69 @@
+name: Publier la page « La magie » dans Espace Jeunesse
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/publish-magic-page.mjs'
+      - '.github/workflows/publish-magic-page.yml'
+  pull_request:
+    paths:
+      - 'scripts/publish-magic-page.mjs'
+      - '.github/workflows/publish-magic-page.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: espace-jeunesse-page-magie
+  cancel-in-progress: false
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Vérifier les blocs natifs et les références aux psaumes
+        run: |
+          test "$GITHUB_REPOSITORY" = "ludodulac/espace-jeunesse"
+          node --check scripts/publish-magic-page.mjs
+          node scripts/publish-magic-page.mjs --check
+
+  publish:
+    needs: validate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.EJ_CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.EJ_CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ajouter uniquement la page La magie dans la D1 Espace Jeunesse
+        run: |
+          test "$GITHUB_REPOSITORY" = "ludodulac/espace-jeunesse"
+          test "$CLOUDFLARE_ACCOUNT_ID" = "60a7b17758a93fe6681ce998e72ddff0"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          node scripts/publish-magic-page.mjs
+      - name: Vérifier la page publique du Worker sans cache
+        run: |
+          node --input-type=module - <<'NODE'
+          const url='https://espace-jeunesse-api.rondes.workers.dev/api/site';
+          let found=false;
+          for(let i=0;i<5;i++){
+            const r=await fetch(url,{cache:'no-store'});
+            if(r.ok){
+              const data=await r.json();
+              const p=data.pages?.find(p=>p.slug==='la-magie');
+              if(p?.title==='La magie'&&p.status==='published'&&p.blocks?.length===12){
+                found=true;console.log('MAGIE LIVE : page publique, 12 blocs natifs');break;
+              }
+            }
+            await new Promise(resolve=>setTimeout(resolve,1500));
+          }
+          if(!found)throw Error('La magie est absente du site public');
+          NODE
