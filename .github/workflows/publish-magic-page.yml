@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Ajouter uniquement la page La magie dans la D1 Espace Jeunesse
+      - name: Actualiser uniquement la dissertation La magie dans la D1 Espace Jeunesse
         run: |
           test "$GITHUB_REPOSITORY" = "ludodulac/espace-jeunesse"
           test "$CLOUDFLARE_ACCOUNT_ID" = "60a7b17758a93fe6681ce998e72ddff0"
@@ -59,8 +59,8 @@ jobs:
             if(r.ok){
               const data=await r.json();
               const p=data.pages?.find(p=>p.slug==='la-magie');
-              if(p?.title==='La magie'&&p.status==='published'&&p.blocks?.length===12){
-                found=true;console.log('MAGIE LIVE : page publique, 12 blocs natifs');break;
+              if(p?.title==='La magie'&&p.status==='published'&&p.blocks?.length===13&&p.blocks?.[2]?.columns?.[0]?.some(b=>b.type==='text'&&b.rich?.includes('<strong>'))){
+                found=true;console.log('MAGIE LIVE : dissertation publiée, 8 chapitres et 16 paragraphes enrichis');break;
               }
             }
             await new Promise(resolve=>setTimeout(resolve,1500));
