@@ -12,7 +12,7 @@ function a(text,href,cls,external=false){
  if(external){n.target="_blank";n.rel="noopener noreferrer"}return n;
 }
 function image(p){
- const box=el("div","shop-picture"),img=el("img");img.src=url(p.imageUrl);img.alt="Peluche "+(p.animal||p.name);
+ const box=el("div","shop-picture"),img=el("img");img.src=url(p.imageUrl);img.alt="Couverture ou photographie de "+p.name;
  img.loading="lazy";img.onerror=()=>box.replaceChildren(el("span","","Image indisponible"));box.append(img);return box;
 }
 const collections=()=>data.collections.filter(x=>x.status==="published").sort((a,b)=>a.sort-b.sort);
@@ -30,11 +30,11 @@ function card(p){
 
 function home(){
  const params=new URLSearchParams(location.search),chosen=params.get("collection")||"";
- const col=collections().find(x=>x.slug===chosen);
+ const visibleCollections=collections(),col=visibleCollections.find(x=>x.slug===chosen);
  const heading=el("header","shop-intro");
- heading.append(el("h1","","Peluches & créations"),el("p","","Une sélection d'artisans et de créateurs."));
+ heading.append(el("h1","","Boutique des découvertes"),
+  el("p","","Livres illustrés, mythologies, contes et créations à découvrir."));
  root.append(heading);
- const visibleCollections=collections();
  if(visibleCollections.length>1){
   const filters=el("nav","shop-filters");filters.setAttribute("aria-label","Collections");
   filters.append(a("Tout voir","boutique.html","shop-pill"+(!col?" active":"")));
@@ -43,33 +43,48 @@ function home(){
  }
  const bar=el("div","shop-toolbar"),counter=el("span","shop-count","");
  const search=el("input","shop-search");
- search.type="search";search.placeholder="Rechercher un produit";
- search.setAttribute("aria-label","Rechercher un produit");
+ search.type="search";search.placeholder="Rechercher dans la boutique";
+ search.setAttribute("aria-label","Rechercher dans la boutique");
  bar.append(search,counter);root.append(bar);
- const grid=el("div","shop-grid");root.append(grid);
+ const results=el("div","shop-results");root.append(results);
  function update(){
   const q=clean(search.value),arr=products().filter(p=>(!col||p.collectionId===col.id)&&
    (!q||clean([p.name,p.animal,p.description,artisan(p)?.name].join(" ")).includes(q)));
-  counter.textContent=arr.length+" produit"+(arr.length>1?"s":"");
-  grid.replaceChildren();
-  if(!arr.length)grid.append(el("p","shop-empty","Aucun produit trouvé."));
-  else for(const p of arr)grid.append(card(p));
+  counter.textContent=arr.length+" référence"+(arr.length>1?"s":"");
+  results.replaceChildren();
+  if(!arr.length){results.append(el("p","shop-empty","Aucune référence trouvée."));return}
+  // Une vraie rubrique par famille, plutôt qu'un mélange de peluches et de livres.
+  for(const collection of (col?[col]:visibleCollections)){
+   const group=arr.filter(p=>p.collectionId===collection.id);
+   if(!group.length)continue;
+   const section=el("section","shop-section");
+   const head=el("div","shop-section-header");
+   head.append(el("h2","shop-section-title",collection.name));
+   if(collection.description)head.append(el("p","shop-section-intro",collection.description));
+   section.append(head);
+   const grid=el("div","shop-grid");
+   for(const p of group)grid.append(card(p));
+   section.append(grid);results.append(section);
+  }
  }
  search.addEventListener("input",update);update();
 }
 
 function detail(p){
- root.append(a("← Boutique","boutique.html","shop-back"));
+ const isBook=p.collectionId==="livres-et-contes";
+ const parent=collections().find(c=>c.id===p.collectionId);
+ root.append(a("← "+(parent?.name||"Boutique"),parent?"boutique.html?collection="+encodeURIComponent(parent.slug):"boutique.html","shop-back"));
  const article=el("article","shop-detail");article.append(image(p));
  const right=el("div","shop-detail-info");
  const maker=artisan(p);
  if(maker)right.append(el("p","shop-detail-maker",maker.name));
  right.append(el("h1","",p.name));
+ if(p.description)right.append(el("p","shop-description",p.description));
  if(p.priceLabel)right.append(el("p","shop-price",p.priceLabel));
- const cta=a("Voir chez l'artisan ↗",p.productUrl,"shop-button",true);
+ const cta=a(isBook?"Voir le livre ↗":"Voir chez le créateur ↗",p.productUrl,"shop-button",true);
  if(p.affiliate)cta.rel="sponsored noopener noreferrer";
  right.append(cta);
- right.append(el("p","shop-availability","Prix et disponibilité chez l'artisan."));
+ right.append(el("p","shop-availability",isBook?"Prix et disponibilité sur le site de la librairie ou de l'éditeur.":"Prix et disponibilité chez le créateur."));
  if(p.affiliate)right.append(el("p","shop-affiliation","Lien affilié : une commission peut être perçue."));
  article.append(right);root.append(article);
 }
