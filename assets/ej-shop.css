@@ -128,3 +128,13 @@ body{background:radial-gradient(ellipse at 50% 0%,#263d56 0%,#121f33 42%,#0d1625
 .shop-button{background:#c7a66a;color:#142136}
 .shop-button:hover{background:#e1c58e}
 @media(max-width:640px){.shop-intro{padding:42px 17px}.shop-intro:before,.shop-intro:after{font-size:45px;top:10px}.shop-intro h1{font-size:35px}.shop-intro p:not(.shop-eyebrow){font-size:14px}.shop-cover-placeholder{font-size:16px;padding:10px}}
+
+/* La boutique conserve son titre et sa structure ; ambiance discrète seulement. */
+.shop-intro{padding:30px 24px;margin-bottom:24px;border-radius:14px;background:linear-gradient(115deg,#1c2e45,#263c53);text-align:left}
+.shop-intro:before,.shop-intro:after{display:none}
+.shop-intro h1{font-size:clamp(30px,3.5vw,43px);margin:0 0 8px}
+.shop-intro p:not(.shop-eyebrow){font-size:14px;margin:0;max-width:750px}
+.shop-card-description{font-size:12px;line-height:1.55;color:#c7cad5;margin:9px 0 0}
+.shop-card-body{display:flex;flex-direction:column}
+.shop-card .shop-picture{aspect-ratio:3 / 3.5}
+@media(max-width:640px){.shop-intro{padding:23px 16px}.shop-intro h1{font-size:30px}.shop-card-description{font-size:11px}}
