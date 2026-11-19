@@ -97,3 +97,34 @@ button,input{font:inherit}
  .shop-grid{gap:9px}
  .shop-card-body{padding:10px 9px 12px}
 }
+
+/* Univers merveilleux — extension visuelle de la boutique existante */
+:root{--ink:#eee6d5;--muted:#b6b7c6;--bg:#101a2b;--accent:#d6b879;--line:#36445c}
+body{background:radial-gradient(ellipse at 50% 0%,#263d56 0%,#121f33 42%,#0d1625 100%);color:var(--ink)}
+.shop-header,.shop-footer{background:#0d1727;border-color:#3b4960}
+.shop-header nav a,.shop-footer{color:#c9c5bd}
+.shop-header .brand span{color:#e8c982}
+.shop-main{max-width:1200px}
+.shop-intro{position:relative;text-align:center;padding:62px 24px 56px;margin:0 0 28px;border:1px solid #b69a6252;border-radius:22px;background:radial-gradient(circle at 50% 20%,#45527370,transparent 65%),linear-gradient(135deg,#14243a,#253248 55%,#132338);overflow:hidden}
+.shop-intro:before,.shop-intro:after{content:"✧";position:absolute;color:#e0bf7d55;font-size:105px;top:14px}
+.shop-intro:before{left:5%}.shop-intro:after{right:5%}
+.shop-eyebrow{letter-spacing:.24em;font-size:11px!important;color:#e1c68e!important;margin:0 0 17px!important}
+.shop-intro h1{font:400 clamp(34px,5vw,61px)/1.1 Georgia,serif;color:#f4e5c5;max-width:850px;margin:0 auto 17px}
+.shop-intro p:not(.shop-eyebrow){font-size:16px;line-height:1.7;color:#d2d3dd;max-width:640px;margin:auto}
+.shop-pill{background:#1d2a40;border-color:#52617a;color:#f2e5cb}
+.shop-pill:hover,.shop-pill.active{background:#c7a66a;color:#142136;border-color:#c7a66a}
+.shop-search{background:#1c2a40;border-color:#52617a;color:#fff}
+.shop-search::placeholder{color:#c1c3cf}
+.shop-section{padding-top:10px}
+.shop-section-title{color:#e7cc95;font-size:clamp(25px,3vw,37px)}
+.shop-section-intro,.shop-maker,.shop-count,.shop-availability,.shop-affiliation,.shop-back,.shop-description{color:#c0c4d1}
+.shop-card{background:#1b2a3f;border-color:#43506a;border-radius:15px}
+.shop-card:hover{border-color:#d8b978;box-shadow:0 8px 28px #0006;transform:translateY(-2px)}
+.shop-picture{background:linear-gradient(145deg,#30435c,#17253a)}
+.shop-cover-placeholder{white-space:pre-line;text-align:center;font:italic 21px/1.4 Georgia,serif;color:#e6d2a8!important;padding:25px}
+.shop-card-body{padding:17px}
+.shop-product-title{color:#f4e9d5}
+.shop-detail .shop-picture{background:#1b2a3f;border-color:#53627a}
+.shop-button{background:#c7a66a;color:#142136}
+.shop-button:hover{background:#e1c58e}
+@media(max-width:640px){.shop-intro{padding:42px 17px}.shop-intro:before,.shop-intro:after{font-size:45px;top:10px}.shop-intro h1{font-size:35px}.shop-intro p:not(.shop-eyebrow){font-size:14px}.shop-cover-placeholder{font-size:16px;padding:10px}}
