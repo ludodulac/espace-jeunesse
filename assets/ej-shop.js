@@ -99,7 +99,7 @@ function detail(p){
 function addGlenatSelection(){
  const groups=[
   ["glenat-mythes","Mythologies du monde","Déesses, dieux et récits fondateurs des civilisations anciennes."],
-  ["glenat-magie","Magie et merveilleux","Licornes, créatures fantastiques et portes de l'imaginaire."],
+  ["glenat-magie","Magie et créatures fantastiques","Licornes, créatures fantastiques et portes de l'imaginaire."],
   ["glenat-contes","Contes et traditions","Histoires transmises, nature et univers enchanteurs."],
   ["glenat-bd","BD mythologiques","Les grandes légendes racontées en images."]
  ];
@@ -111,7 +111,7 @@ function addGlenatSelection(){
   ["femmes-asgard","Femmes d’Asgard","glenat-mythes","Déesses, géantes et Valkyries de la mythologie nordique.","https://www.glenat.com/glenat-jeunesse/femmes-dasgard-9782344062036/"],
   ["dieux-nordiques","Les dieux de la mythologie nordique","glenat-mythes","Odin, Thor, Loki et les grandes figures des légendes nordiques.","https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-nordique-9782344073926/"],
   ["dieux-egyptiens","Les dieux de la mythologie égyptienne","glenat-mythes","Un atlas illustré pour découvrir Isis, Osiris, Horus, les symboles et les récits de l’Égypte ancienne.","https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-egyptienne-9782344049358/"],
-  ["legende-licornes","La légende des licornes","glenat-magie","Un livre pop-up en carrousel pour découvrir un monde peuplé de licornes et d'animaux merveilleux.","https://www.glenat.com/glenat-jeunesse/la-legende-des-licornes-9791026405153/"],
+  ["legende-licornes","La légende des licornes","glenat-magie","Un livre pop-up en carrousel pour découvrir un monde peuplé de licornes et d'animaux fantastiques.","https://www.glenat.com/glenat-jeunesse/la-legende-des-licornes-9791026405153/"],
   ["creatures-pop-up","Créatures – Pop-up","glenat-magie","Kraken, Yéti et créatures mystérieuses surgissent des pages de ce spectaculaire livre animé.","https://www.glenat.com/glenat-jeunesse/creatures-pop-9791026405122/"],
   ["grande-ronde-renards","La Grande ronde des renards","glenat-contes","Sept contes venus du monde entier mettent en scène le renard, malicieux et fascinant.","https://www.glenat.com/glenat-jeunesse/la-grande-ronde-des-renards-9782344052426/"],
   ["magicienne","La magicienne","glenat-contes","Une jeune fille rencontre un esprit de la forêt, dans un conte sur la magie et la nature.",""],
@@ -152,6 +152,8 @@ function spotlightFiveArtisans(){
   }
   if(!r.ok)throw Error("Catalogue indisponible ("+r.status+")");
   data=await r.json();if(!Array.isArray(data.products))throw Error("Catalogue invalide");
+  if(!Array.isArray(data.collections))data.collections=[];
+  if(!Array.isArray(data.artisans))data.artisans=[];
   spotlightFiveArtisans();
   addGlenatSelection();
   root.replaceChildren();const slug=new URLSearchParams(location.search).get("produit");
