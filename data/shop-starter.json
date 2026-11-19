@@ -26,6 +26,38 @@
       "imageUrl": "",
       "status": "draft",
       "sort": 3
+    },
+    {
+      "id": "glenat-mythes",
+      "slug": "glenat-mythes",
+      "name": "Mythologies du monde",
+      "description": "Sélection de livres Glénat",
+      "status": "published",
+      "sort": 10
+    },
+    {
+      "id": "glenat-magie",
+      "slug": "glenat-magie",
+      "name": "Magie et créatures fantastiques",
+      "description": "Sélection de livres Glénat",
+      "status": "published",
+      "sort": 11
+    },
+    {
+      "id": "glenat-contes",
+      "slug": "glenat-contes",
+      "name": "Contes et traditions",
+      "description": "Sélection de livres Glénat",
+      "status": "published",
+      "sort": 12
+    },
+    {
+      "id": "glenat-bd",
+      "slug": "glenat-bd",
+      "name": "BD mythologiques",
+      "description": "Sélection de livres Glénat",
+      "status": "published",
+      "sort": 13
     }
   ],
   "artisans": [
@@ -748,7 +780,7 @@
       "name": "Femmes d’Asgard",
       "animal": "Livre illustré",
       "description": "Mythologie nordique — Déesses, géantes et Valkyries occupent le devant de la scène. Un beau livre illustré consacré aux grandes figures féminines des légendes du Nord.",
-      "collectionId": "livres-et-contes",
+      "collectionId": "glenat-mythes",
       "artisanId": "editeur-glenat",
       "imageUrl": "https://www.planetebd.com/dynamicImages/album/cover/large/57/80/album-cover-large-57804.jpg",
       "additionalImages": [],
@@ -1030,6 +1062,123 @@
       "status": "published",
       "featured": false,
       "sort": 18
+    },
+    {
+      "id": "selection-dieux-nordiques",
+      "slug": "selection-dieux-nordiques",
+      "name": "Les dieux de la mythologie nordique",
+      "collectionId": "glenat-mythes",
+      "description": "Odin, Thor et Loki : les grandes figures des légendes du Nord.",
+      "productUrl": "https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-nordique-9782344073926/",
+      "imageUrl": "https://apostrophe-epernay.fr/cache/images/product/5f33669afb4bbcc27ed8584ea2ab4473-0338826-couverture1-xcgzbqmbjstc-dxlz46pu9rnrktzrm1t6qe3wzfgxebekote889h7g-cover-full.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-dieux-egyptiens",
+      "slug": "selection-dieux-egyptiens",
+      "name": "Les dieux de la mythologie égyptienne",
+      "collectionId": "glenat-mythes",
+      "description": "Isis, Osiris et Horus : les divinités de l’Égypte ancienne.",
+      "productUrl": "https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-egyptienne-9782344049358/",
+      "imageUrl": "https://covers.openlibrary.org/b/isbn/9782344049358-L.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-legende-licornes",
+      "slug": "selection-legende-licornes",
+      "name": "La légende des licornes",
+      "collectionId": "glenat-magie",
+      "description": "Un livre animé sur les licornes et les créatures fantastiques.",
+      "productUrl": "https://www.glenat.com/glenat-jeunesse/la-legende-des-licornes-9791026405153/",
+      "imageUrl": "https://servimg.eyrolles.com/static/media/5153/9791026405153_internet_h1400.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-creatures-pop-up",
+      "slug": "selection-creatures-pop-up",
+      "name": "Créatures – Pop-up",
+      "collectionId": "glenat-magie",
+      "description": "Kraken, Yéti et autres créatures surgissent des pages.",
+      "productUrl": "https://www.glenat.com/glenat-jeunesse/creatures-pop-9791026405122/",
+      "imageUrl": "https://static.fnac-static.com/multimedia/PE/Images/FR/NR/72/a5/22/19047794/1507-1/tsp20260408085439/Creatures-Pop-up.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-grande-ronde-renards",
+      "slug": "selection-grande-ronde-renards",
+      "name": "La Grande ronde des renards",
+      "collectionId": "glenat-contes",
+      "description": "Sept contes venus du monde entier autour du renard.",
+      "productUrl": "https://www.glenat.com/glenat-jeunesse/la-grande-ronde-des-renards-9782344052426/",
+      "imageUrl": "https://media.hachette.fr/imgArticle/GLENATJEUNESSE/2022/9782344052426-001-X.jpeg?source=web&v=b5cf94492ea2bd46b8bce11291aada84",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-magicienne",
+      "slug": "selection-magicienne",
+      "name": "La magicienne",
+      "collectionId": "glenat-contes",
+      "description": "Un conte illustré sur la magie et la forêt.",
+      "productUrl": "",
+      "imageUrl": "https://www.planetebd.com/dynamicImages/album/cover/large/46/66/album-cover-large-46669.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-loki",
+      "slug": "selection-loki",
+      "name": "Loki – Tome 01",
+      "collectionId": "glenat-bd",
+      "description": "Loki et les dieux nordiques dans une aventure en bande dessinée.",
+      "productUrl": "https://www.glenat.com/glenat-bd/loki-tome-01-9782344069950/",
+      "imageUrl": "https://covers.openlibrary.org/b/isbn/9782344069950-L.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-lancelot",
+      "slug": "selection-lancelot",
+      "name": "Lancelot – Tome 01",
+      "collectionId": "glenat-bd",
+      "description": "Chevalerie et légendes arthuriennes en bande dessinée.",
+      "productUrl": "https://www.glenat.com/glenat-bd/lancelot-tome-01-9782344048849/",
+      "imageUrl": "https://media.hachette.fr/imgArticle/GLENAT/2023/9782344048849-001-X.jpeg?source=web&v=fdc2f892913181589406d07d6264f9f9",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
+    },
+    {
+      "id": "selection-gilgamesh",
+      "slug": "selection-gilgamesh",
+      "name": "Gilgamesh – Tome 01",
+      "collectionId": "glenat-bd",
+      "description": "L'épopée du roi d'Uruk en bande dessinée.",
+      "productUrl": "https://www.bd-tek.com/Album-66981-gilgamesh-tome-1-3-les-freres-ennemis.html",
+      "imageUrl": "https://www.bd-tek.com/images/album/66/66981%2Cgilgamesh-tome-1-3-les-freres-ennemis.jpg",
+      "affiliate": false,
+      "status": "published",
+      "sort": 10,
+      "artisanId": "editeur-glenat"
     }
   ]
 }
