@@ -12,7 +12,7 @@ function a(text,href,cls,external=false){
  if(external){n.target="_blank";n.rel="noopener noreferrer"}return n;
 }
 function image(p){
- const box=el("div","shop-picture"),img=el("img");img.src=url(p.imageUrl);img.alt="Couverture ou photographie de "+p.name;
+ const box=el("div","shop-picture"),img=el("img");if(!p.imageUrl){box.append(el("span","shop-cover-placeholder","✦\n"+p.name));return box;}img.src=url(p.imageUrl);img.alt="Couverture ou photographie de "+p.name;
  img.loading="lazy";img.onerror=()=>box.replaceChildren(el("span","","Image indisponible"));box.append(img);return box;
 }
 const collections=()=>data.collections.filter(x=>x.status==="published").sort((a,b)=>a.sort-b.sort);
@@ -32,8 +32,8 @@ function home(){
  const params=new URLSearchParams(location.search),chosen=params.get("collection")||"";
  const visibleCollections=collections(),col=visibleCollections.find(x=>x.slug===chosen);
  const heading=el("header","shop-intro");
- heading.append(el("h1","","Boutique des découvertes"),
-  el("p","","Livres illustrés, mythologies, contes et créations à découvrir."));
+ heading.append(el("p","shop-eyebrow","✧ UN CABINET DE CURIOSITÉS ✧"),el("h1","","La boutique des mondes merveilleux"),
+  el("p","","Ouvrez les portes des mythes, des légendes et de l’imaginaire. Livres, contes et créations choisies avec soin."));
  root.append(heading);
  if(visibleCollections.length>1){
   const filters=el("nav","shop-filters");filters.setAttribute("aria-label","Collections");
@@ -71,7 +71,7 @@ function home(){
 }
 
 function detail(p){
- const isBook=p.collectionId==="livres-et-contes";
+ const isBook=p.collectionId!=="animaux-totems" && (p.collectionId==="livres-et-contes" || p.collectionId.startsWith("glenat-"));
  const parent=collections().find(c=>c.id===p.collectionId);
  root.append(a("← "+(parent?.name||"Boutique"),parent?"boutique.html?collection="+encodeURIComponent(parent.slug):"boutique.html","shop-back"));
  const article=el("article","shop-detail");article.append(image(p));
@@ -93,6 +93,41 @@ function detail(p){
  * La source officielle reste D1 ; ceci maintient une vitrine cohérente
  * pendant la mise à jour du catalogue distant.
  */
+
+// Sélection éditoriale : fiches sans lien commercial inventé ni affiliation déclarée.
+// Les références restent séparées des produits D1, sans modifier les données administrateur.
+function addGlenatSelection(){
+ const groups=[
+  ["glenat-mythes","Mythologies du monde","Déesses, dieux et récits fondateurs des civilisations anciennes."],
+  ["glenat-magie","Magie et merveilleux","Licornes, créatures fantastiques et portes de l'imaginaire."],
+  ["glenat-contes","Contes et traditions","Histoires transmises, nature et univers enchanteurs."],
+  ["glenat-bd","BD mythologiques","Les grandes légendes racontées en images."]
+ ];
+ for(const [id,name,description] of groups){
+  if(!data.collections.some(c=>c.id===id))data.collections.push({id,slug:id,name,description,status:"published",sort:10+groups.findIndex(g=>g[0]===id)});
+ }
+ const entries=[
+  ["femmes-asgard","Femmes d’Asgard","glenat-mythes","Déesses, géantes et Valkyries de la mythologie nordique.","https://www.glenat.com/glenat-jeunesse/femmes-dasgard-9782344062036/"],
+  ["dieux-nordiques","Les dieux de la mythologie nordique","glenat-mythes","Odin, Thor, Loki et les grandes figures des légendes nordiques.","https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-nordique-9782344073926/"],
+  ["dieux-egyptiens","Les dieux de la mythologie égyptienne","glenat-mythes","Découvrir les divinités et les récits de l’Égypte ancienne.",""],
+  ["legende-licornes","La légende des licornes","glenat-magie","Un voyage dans l’univers des créatures merveilleuses.",""],
+  ["creatures-pop-up","Créatures – Pop-up","glenat-magie","Un livre animé consacré aux êtres fantastiques.",""],
+  ["grande-ronde-renards","La Grande ronde des renards","glenat-contes","Un conte illustré autour du monde animal.",""],
+  ["magicienne","La magicienne","glenat-contes","Une histoire à explorer dans l’univers merveilleux.",""],
+  ["loki","Loki – Tome 01","glenat-bd","Les légendes nordiques en bande dessinée.",""],
+  ["lancelot","Lancelot – Tome 01","glenat-bd","La légende arthurienne en bande dessinée.",""],
+  ["gilgamesh","Gilgamesh","glenat-bd","L’épopée antique racontée en images.",""]
+ ];
+ const known=data.products.find(p=>p.id==="livre-nordique-asgard");
+ if(known){known.collectionId="glenat-mythes";known.sort=1;}
+ for(const [id,name,collectionId,description,productUrl] of entries){
+  if(id==="femmes-asgard" && known)continue;
+  if(data.products.some(p=>p.id==="selection-"+id))continue;
+  data.products.push({id:"selection-"+id,slug:"selection-"+id,name,collectionId,description,productUrl,imageUrl:"",affiliate:false,status:"published",sort:entries.findIndex(e=>e[0]===id)+1,artisanId:"editeur-glenat"});
+ }
+ // Évite de présenter deux fois la même référence dans les deux collections.
+}
+
 function spotlightFiveArtisans(){
  const bird={"id":"peluche-persephone-oiseau","slug":"oiseau-hell-of-persephone","name":"Peluche oiseau au crochet — modèle au choix","animal":"Oiseau","description":"L'oiseau inspire liberté et imagination. Objet de collection : ne convient pas aux moins de 14 ans.","collectionId":"animaux-totems","artisanId":"atelier-hell-of-persephone","imageUrl":"https://www.hellofpersephone-crochet.com/cdn/shop/files/IMG_9947.jpg?v=1718797731&width=1200","additionalImages":[],"productUrl":"https://www.hellofpersephone-crochet.com/products/peluche-oiseau-au-crochet","priceLabel":"","affiliate":false,"status":"published","featured":true,"sort":3};
  const maker={"id":"atelier-hell-of-persephone","name":"Hell of Persephone","description":"Atelier breton de peluches et créations au crochet. Aucun partenariat commercial conclu à ce jour.","website":"https://www.hellofpersephone-crochet.com/","email":"hellofpersephone@gmail.com","location":"Bretagne, France","partner":false,"approvedImages":false};
@@ -117,6 +152,7 @@ function spotlightFiveArtisans(){
   if(!r.ok)throw Error("Catalogue indisponible ("+r.status+")");
   data=await r.json();if(!Array.isArray(data.products))throw Error("Catalogue invalide");
   spotlightFiveArtisans();
+  addGlenatSelection();
   root.replaceChildren();const slug=new URLSearchParams(location.search).get("produit");
   if(slug){const p=products().find(x=>x.slug===slug);if(p)detail(p);else root.append(el("p","shop-empty","Ce produit n'est plus publié."))}
   else home();
