@@ -25,6 +25,7 @@ function card(p){
  body.append(el("h2","shop-product-title",p.name));
  const maker=artisan(p);
  if(maker)body.append(el("p","shop-maker",maker.name));
+ if(p.description)body.append(el("p","shop-card-description",p.description));
  n.append(body);return n;
 }
 
@@ -32,8 +33,7 @@ function home(){
  const params=new URLSearchParams(location.search),chosen=params.get("collection")||"";
  const visibleCollections=collections(),col=visibleCollections.find(x=>x.slug===chosen);
  const heading=el("header","shop-intro");
- heading.append(el("p","shop-eyebrow","✧ UN CABINET DE CURIOSITÉS ✧"),el("h1","","La boutique des mondes merveilleux"),
-  el("p","","Ouvrez les portes des mythes, des légendes et de l’imaginaire. Livres, contes et créations choisies avec soin."));
+ heading.append(el("h1","","Boutique des découvertes"),el("p","","Livres illustrés, mythologies, contes et créations à découvrir."));
  root.append(heading);
  if(visibleCollections.length>1){
   const filters=el("nav","shop-filters");filters.setAttribute("aria-label","Collections");
@@ -106,16 +106,17 @@ function addGlenatSelection(){
  for(const [id,name,description] of groups){
   if(!data.collections.some(c=>c.id===id))data.collections.push({id,slug:id,name,description,status:"published",sort:10+groups.findIndex(g=>g[0]===id)});
  }
+ const coverImages={"dieux-nordiques":"https://apostrophe-epernay.fr/cache/images/product/5f33669afb4bbcc27ed8584ea2ab4473-0338826-couverture1-xcgzbqmbjstc-dxlz46pu9rnrktzrm1t6qe3wzfgxebekote889h7g-cover-full.jpg","legende-licornes":"https://servimg.eyrolles.com/static/media/5153/9791026405153_internet_h1400.jpg","creatures-pop-up":"https://static.fnac-static.com/multimedia/PE/Images/FR/NR/72/a5/22/19047794/1507-1/tsp20260408085439/Creatures-Pop-up.jpg","grande-ronde-renards":"https://media.hachette.fr/imgArticle/GLENATJEUNESSE/2022/9782344052426-001-X.jpeg?source=web&v=b5cf94492ea2bd46b8bce11291aada84","magicienne":"https://www.planetebd.com/dynamicImages/album/cover/large/46/66/album-cover-large-46669.jpg","lancelot":"https://media.hachette.fr/imgArticle/GLENAT/2023/9782344048849-001-X.jpeg?source=web&v=fdc2f892913181589406d07d6264f9f9","gilgamesh":"https://www.bd-tek.com/images/album/66/66981%2Cgilgamesh-tome-1-3-les-freres-ennemis.jpg","loki":"https://covers.openlibrary.org/b/isbn/9782344069950-L.jpg","dieux-egyptiens":"https://covers.openlibrary.org/b/isbn/9782344041451-L.jpg"};
  const entries=[
   ["femmes-asgard","Femmes d’Asgard","glenat-mythes","Déesses, géantes et Valkyries de la mythologie nordique.","https://www.glenat.com/glenat-jeunesse/femmes-dasgard-9782344062036/"],
   ["dieux-nordiques","Les dieux de la mythologie nordique","glenat-mythes","Odin, Thor, Loki et les grandes figures des légendes nordiques.","https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-nordique-9782344073926/"],
   ["dieux-egyptiens","Les dieux de la mythologie égyptienne","glenat-mythes","Découvrir les divinités et les récits de l’Égypte ancienne.",""],
-  ["legende-licornes","La légende des licornes","glenat-magie","Un voyage dans l’univers des créatures merveilleuses.",""],
-  ["creatures-pop-up","Créatures – Pop-up","glenat-magie","Un livre animé consacré aux êtres fantastiques.",""],
-  ["grande-ronde-renards","La Grande ronde des renards","glenat-contes","Un conte illustré autour du monde animal.",""],
-  ["magicienne","La magicienne","glenat-contes","Une histoire à explorer dans l’univers merveilleux.",""],
-  ["loki","Loki – Tome 01","glenat-bd","Les légendes nordiques en bande dessinée.",""],
-  ["lancelot","Lancelot – Tome 01","glenat-bd","La légende arthurienne en bande dessinée.",""],
+  ["legende-licornes","La légende des licornes","glenat-magie","Un livre pop-up en carrousel pour découvrir un monde peuplé de licornes et d'animaux merveilleux.","https://www.glenat.com/glenat-jeunesse/la-legende-des-licornes-9791026405153/"],
+  ["creatures-pop-up","Créatures – Pop-up","glenat-magie","Kraken, Yéti et créatures mystérieuses surgissent des pages de ce spectaculaire livre animé.","https://www.glenat.com/glenat-jeunesse/creatures-pop-9791026405122/"],
+  ["grande-ronde-renards","La Grande ronde des renards","glenat-contes","Sept contes venus du monde entier mettent en scène le renard, malicieux et fascinant.","https://www.glenat.com/glenat-jeunesse/la-grande-ronde-des-renards-9782344052426/"],
+  ["magicienne","La magicienne","glenat-contes","Une jeune fille rencontre un esprit de la forêt, dans un conte sur la magie et la nature.",""],
+  ["loki","Loki – Tome 01","glenat-bd","Loki doit sauver les dieux d'un pacte dangereux avec un bâtisseur de forteresse.","https://www.glenat.com/glenat-bd/loki-tome-01-9782344069950/"],
+  ["lancelot","Lancelot – Tome 01","glenat-bd","Le chevalier de la Charrette : une aventure arthurienne de courage, d'amour et de légendes.","https://www.glenat.com/glenat-bd/lancelot-tome-01-9782344048849/"],
   ["gilgamesh","Gilgamesh","glenat-bd","L’épopée antique racontée en images.",""]
  ];
  const known=data.products.find(p=>p.id==="livre-nordique-asgard");
@@ -123,7 +124,7 @@ function addGlenatSelection(){
  for(const [id,name,collectionId,description,productUrl] of entries){
   if(id==="femmes-asgard" && known)continue;
   if(data.products.some(p=>p.id==="selection-"+id))continue;
-  data.products.push({id:"selection-"+id,slug:"selection-"+id,name,collectionId,description,productUrl,imageUrl:"",affiliate:false,status:"published",sort:entries.findIndex(e=>e[0]===id)+1,artisanId:"editeur-glenat"});
+  data.products.push({id:"selection-"+id,slug:"selection-"+id,name,collectionId,description,productUrl,imageUrl:(coverImages[id]||""),affiliate:false,status:"published",sort:entries.findIndex(e=>e[0]===id)+1,artisanId:"editeur-glenat"});
  }
  // Évite de présenter deux fois la même référence dans les deux collections.
 }
