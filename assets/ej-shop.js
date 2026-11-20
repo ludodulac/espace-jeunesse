@@ -178,6 +178,19 @@ function spotlightFiveArtisans(){
   if(!Array.isArray(data.artisans))data.artisans=[];
   spotlightFiveArtisans();
   addGlenatSelection();
+  // Les images importées et vérifiées dans le dépôt prennent priorité sur les URL externes.
+  // En l'absence du manifeste, la boutique continue d'utiliser ses images existantes.
+  try {
+   const local=await fetch("assets/couvertures/manifest.json",{cache:"no-store"});
+   if(local.ok){
+    const manifest=await local.json();
+    for(const p of data.products){
+     if(Object.prototype.hasOwnProperty.call(manifest,p.id)){
+      p.imageUrl=manifest[p.id];
+     }
+    }
+   }
+  } catch (_) { /* aucun import local disponible */ }
   root.replaceChildren();const slug=new URLSearchParams(location.search).get("produit");
   if(slug){const p=products().find(x=>x.slug===slug);if(p)detail(p);else root.append(el("p","shop-empty","Ce produit n'est plus publié."))}
   else home();
