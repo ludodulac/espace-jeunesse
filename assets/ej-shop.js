@@ -13,7 +13,7 @@ function a(text,href,cls,external=false){
 }
 function image(p){
  const box=el("div","shop-picture"),img=el("img");if(!p.imageUrl){box.append(el("span","shop-cover-placeholder","✦\n"+p.name));return box;}img.src=url(p.imageUrl);img.alt="Couverture ou photographie de "+p.name;
- img.loading="lazy";img.onerror=()=>{
+ img.loading="lazy";img.referrerPolicy="no-referrer";img.onerror=()=>{
   const isbn=(String(p.productUrl||"").match(/(?:97[89])[0-9]{10}/)||String(p.imageUrl||"").match(/(?:97[89])[0-9]{10}/)||[])[0];
   if(isbn&&!img.dataset.coverFallback){img.dataset.coverFallback="1";img.src="https://covers.openlibrary.org/b/isbn/"+isbn+"-L.jpg?default=false";return;}
   box.replaceChildren(el("span","","Couverture indisponible"));
@@ -139,6 +139,9 @@ function addGlenatSelection(){
   ["gilgamesh","Gilgamesh – Tome 01","glenat-bd","Premier tome de l’épopée du roi d’Uruk, entre rivalité, amitié et quête héroïque.","https://www.bd-tek.com/Album-66981-gilgamesh-tome-1-3-les-freres-ennemis.html"]
  ];
  const known=data.products.find(p=>p.id==="livre-nordique-asgard");
+ // Le site PlaneteBD refuse parfois l'affichage depuis un autre domaine.
+ // Source de couverture alternative indexée par ISBN, sans changer le lien éditeur.
+ if(known)known.imageUrl="https://images.leslibraires.ca/books/9782344062036/front/9782344062036_large.jpg";
  if(known){known.collectionId="glenat-mythes";known.sort=1;}
  for(const [id,name,collectionId,description,productUrl] of entries){
   if(id==="femmes-asgard" && known)continue;
