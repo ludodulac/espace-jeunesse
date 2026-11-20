@@ -138,3 +138,25 @@ body{background:radial-gradient(ellipse at 50% 0%,#263d56 0%,#121f33 42%,#0d1625
 .shop-card-body{display:flex;flex-direction:column}
 .shop-card .shop-picture{aspect-ratio:3 / 3.5}
 @media(max-width:640px){.shop-intro{padding:23px 16px}.shop-intro h1{font-size:30px}.shop-card-description{font-size:11px}}
+
+/* Rayons éditoriaux : navigation sobre, hiérarchie claire, sans boutons décoratifs. */
+.shop-intro{background:none;border:0;padding:20px 0 12px;margin:0;text-align:left}
+.shop-intro h1{color:#f1e6d2;font-size:clamp(30px,3.6vw,46px);margin:0}
+.shop-universes{display:flex;gap:clamp(16px,3vw,38px);border-bottom:1px solid #526078;margin:8px 0 24px;overflow-x:auto}
+.shop-universe{color:#bfc4d0;text-decoration:none;white-space:nowrap;padding:12px 0 15px;border-bottom:2px solid transparent;font-size:clamp(14px,1.5vw,17px)}
+.shop-universe.active{color:#f4dfb4;border-bottom-color:#d6b879;font-weight:600}
+.shop-universe:hover{color:#fff}
+.shop-filters{margin:0 0 22px;gap:8px}
+.shop-pill{background:transparent;border:1px solid #526078;color:#c9cbd2;padding:7px 12px;font-size:12px}
+.shop-pill.active{background:#d6b879;border-color:#d6b879;color:#172336}
+.shop-results{gap:42px}
+.shop-section-header{margin-bottom:17px}
+.shop-section-title{font-size:clamp(22px,2.6vw,30px)}
+.shop-card{border-radius:5px;transition:border-color .15s}
+.shop-card:hover{transform:none;box-shadow:none}
+.shop-card .shop-picture{aspect-ratio:3/4;background:#243247}
+.shop-card .shop-picture img{padding:12px;object-fit:contain}
+.shop-card-description{display:none}
+.shop-card-body{padding:13px 12px 16px}
+.shop-product-title{font-weight:500}
+@media(max-width:640px){.shop-intro{padding:8px 0 10px}.shop-universes{gap:21px;margin-bottom:19px}.shop-grid{gap:12px}.shop-card .shop-picture img{padding:7px}}
