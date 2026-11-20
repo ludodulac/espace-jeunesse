@@ -13,7 +13,11 @@ function a(text,href,cls,external=false){
 }
 function image(p){
  const box=el("div","shop-picture"),img=el("img");if(!p.imageUrl){box.append(el("span","shop-cover-placeholder","✦\n"+p.name));return box;}img.src=url(p.imageUrl);img.alt="Couverture ou photographie de "+p.name;
- img.loading="lazy";img.onerror=()=>box.replaceChildren(el("span","","Image indisponible"));box.append(img);return box;
+ img.loading="lazy";img.onerror=()=>{
+  const isbn=(String(p.productUrl||"").match(/(?:97[89])[0-9]{10}/)||String(p.imageUrl||"").match(/(?:97[89])[0-9]{10}/)||[])[0];
+  if(isbn&&!img.dataset.coverFallback){img.dataset.coverFallback="1";img.src="https://covers.openlibrary.org/b/isbn/"+isbn+"-L.jpg?default=false";return;}
+  box.replaceChildren(el("span","","Couverture indisponible"));
+ };box.append(img);return box;
 }
 const collections=()=>data.collections.filter(x=>x.status==="published").sort((a,b)=>a.sort-b.sort);
 const products=()=>data.products.filter(x=>x.status==="published").sort((a,b)=>a.sort-b.sort);
@@ -121,7 +125,7 @@ function addGlenatSelection(){
  for(const [id,name,description] of groups){
   if(!data.collections.some(c=>c.id===id))data.collections.push({id,slug:id,name,description,status:"published",sort:10+groups.findIndex(g=>g[0]===id)});
  }
- const coverImages={"dieux-nordiques":"https://apostrophe-epernay.fr/cache/images/product/5f33669afb4bbcc27ed8584ea2ab4473-0338826-couverture1-xcgzbqmbjstc-dxlz46pu9rnrktzrm1t6qe3wzfgxebekote889h7g-cover-full.jpg","legende-licornes":"https://servimg.eyrolles.com/static/media/5153/9791026405153_internet_h1400.jpg","creatures-pop-up":"https://static.fnac-static.com/multimedia/PE/Images/FR/NR/72/a5/22/19047794/1507-1/tsp20260408085439/Creatures-Pop-up.jpg","grande-ronde-renards":"https://media.hachette.fr/imgArticle/GLENATJEUNESSE/2022/9782344052426-001-X.jpeg?source=web&v=b5cf94492ea2bd46b8bce11291aada84","magicienne":"https://www.planetebd.com/dynamicImages/album/cover/large/46/66/album-cover-large-46669.jpg","lancelot":"https://media.hachette.fr/imgArticle/GLENAT/2023/9782344048849-001-X.jpeg?source=web&v=fdc2f892913181589406d07d6264f9f9","gilgamesh":"https://www.bd-tek.com/images/album/66/66981%2Cgilgamesh-tome-1-3-les-freres-ennemis.jpg","loki":"https://covers.openlibrary.org/b/isbn/9782344069950-L.jpg","dieux-egyptiens":"https://covers.openlibrary.org/b/isbn/9782344049358-L.jpg","magicienne":"https://www.mediatheque-la-tremblade.fr/images/covers/LA-MAGICIENNE_DAHMAN-MYRIAM-9782344048061.jpg"};
+ const coverImages={"dieux-nordiques":"https://apostrophe-epernay.fr/cache/images/product/5f33669afb4bbcc27ed8584ea2ab4473-0338826-couverture1-xcgzbqmbjstc-dxlz46pu9rnrktzrm1t6qe3wzfgxebekote889h7g-cover-full.jpg","legende-licornes":"https://servimg.eyrolles.com/static/media/5153/9791026405153_internet_h1400.jpg","creatures-pop-up":"https://static.fnac-static.com/multimedia/PE/Images/FR/NR/72/a5/22/19047794/1507-1/tsp20260408085439/Creatures-Pop-up.jpg","grande-ronde-renards":"https://media.hachette.fr/imgArticle/GLENATJEUNESSE/2022/9782344052426-001-X.jpeg?source=web&v=b5cf94492ea2bd46b8bce11291aada84","magicienne":"https://www.planetebd.com/dynamicImages/album/cover/large/46/66/album-cover-large-46669.jpg","lancelot":"https://media.hachette.fr/imgArticle/GLENAT/2023/9782344048849-001-X.jpeg?source=web&v=fdc2f892913181589406d07d6264f9f9","gilgamesh":"https://www.bd-tek.com/images/album/66/66981%2Cgilgamesh-tome-1-3-les-freres-ennemis.jpg","loki":"https://cdn.cultura.com/cdn-cgi/image/width%3D830/media/pim/TITELIVE/50_9782344069950_1_75.jpg","dieux-egyptiens":"https://cdn.cultura.com/cdn-cgi/image/width%3D830/media/pim/TITELIVE/75_9782344049358_1_75.jpg","magicienne":"https://www.mediatheque-la-tremblade.fr/images/covers/LA-MAGICIENNE_DAHMAN-MYRIAM-9782344048061.jpg"};
  const entries=[
   ["femmes-asgard","Femmes d’Asgard","glenat-mythes","Déesses, géantes et Valkyries de la mythologie nordique.","https://www.glenat.com/glenat-jeunesse/femmes-dasgard-9782344062036/"],
   ["dieux-nordiques","Les dieux de la mythologie nordique","glenat-mythes","Odin, Thor, Loki et les grandes figures des légendes nordiques.","https://www.glenat.com/glenat-livres/les-dieux-de-la-mythologie-nordique-9782344073926/"],
